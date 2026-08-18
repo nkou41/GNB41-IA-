@@ -1,0 +1,27 @@
+# Environnement / secrets
+backend/.env
+.env
+*.env
+!.env.example
+
+# Python
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+*.pyc
+backend/instance/
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+
+# Logs
+*.log
+backend.log
+frontend.log
+
+# Divers
+.DS_Store
+backend/cookies.txt
+backend/backups/
+backend/backups/backup.log
