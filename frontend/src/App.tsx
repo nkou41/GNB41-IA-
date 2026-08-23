@@ -149,7 +149,6 @@ function App() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const [newWorkspaceName, setNewWorkspaceName] = useState('');
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectPrompt, setNewProjectPrompt] = useState('');
   const [generating, setGenerating] = useState(false);
@@ -1299,13 +1298,6 @@ function App() {
       setChatInput('');
       setAttachedImage(null);
       await runGeneration(messageText, imageToSend);
-    };
-
-    const handleConstruire = async () => {
-      if (pendingInstructions.length === 0) return;
-      const combined = pendingInstructions.join('\n\n');
-      setPendingInstructions([]);
-      await runGeneration(combined, null);
     };
 
     let parsedFiles: any = null;
