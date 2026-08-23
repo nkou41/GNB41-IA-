@@ -44,7 +44,11 @@ def create_app(test_config=None):
 
     db.init_app(app)
     login_manager.init_app(app)
-    CORS(app, supports_credentials=True, origins=['http://localhost:5173'])
+    allowed_origins = ['http://localhost:5173']
+    frontend_url = os.environ.get('FRONTEND_URL')
+    if frontend_url:
+        allowed_origins.append(frontend_url)
+    CORS(app, supports_credentials=True, origins=allowed_origins)
     limiter.init_app(app)
     app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER')
     app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
