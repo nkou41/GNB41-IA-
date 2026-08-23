@@ -1,23 +1,49 @@
 const API_BASE = 'http://localhost:5001/api';
 
+let csrfToken: string | null = null;
+
+async function getCsrfToken(): Promise<string> {
+  if (csrfToken) return csrfToken;
+  const res = await fetch(`${API_BASE}/auth/csrf-token`, { credentials: 'include' });
+  const data = await res.json();
+  csrfToken = data.csrf_token;
+  return csrfToken as string;
+}
+
 async function request(path: string, options: RequestInit = {}) {
+  const method = (options.method || 'GET').toUpperCase();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string> || {}),
+  };
+  if (method !== 'GET') {
+    headers['X-CSRFToken'] = await getCsrfToken();
+  }
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
   });
+  if (res.status === 400) {
+    const cloned = res.clone();
+    try {
+      const errData = await cloned.json();
+      if (errData.error && String(errData.error).toLowerCase().includes('csrf')) {
+        csrfToken = null;
+      }
+    } catch {}
+  }
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Erreur serveur');
   return data;
 }
 
 async function requestForm(path: string, formData: FormData) {
+  const token = await getCsrfToken();
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     credentials: 'include',
+    headers: { 'X-CSRFToken': token },
     body: formData,
   });
   const data = await res.json();
@@ -40,6 +66,11 @@ export const api = {
     request('/auth/reset-password', { method: 'POST', body: JSON.stringify({ token, password }) }),
   confirmEmail: (token: string) =>
     request('/auth/confirm-email', { method: 'POST', body: JSON.stringify({ token }) }),
+
+  createPayment: (plan: string) =>
+    request('/billing/create-payment', { method: 'POST', body: JSON.stringify({ plan }) }),
+  verifyPayment: (transactionId: number) =>
+    request(`/billing/verify-payment/${transactionId}`),
 
   listWorkspaces: () => request('/workspaces'),
   createWorkspace: (nom: string) =>
@@ -75,4 +106,5 @@ export const api = {
   purchaseListing: (listingId: string) => request(`/marketplace/${listingId}/purchase`, { method: 'POST' }),
   updateListing: (listingId: string, data: any) => request(`/marketplace/${listingId}`, { method: 'PUT', body: JSON.stringify(data) }),
   adminDashboard: () => request('/marketplace/admin/dashboard'),
+  verifyPurchase: (purchaseId: string) => request(`/marketplace/purchase/${purchaseId}/verify`),
 };

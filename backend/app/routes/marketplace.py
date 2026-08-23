@@ -1,4 +1,6 @@
 import os
+from app.services.notifications import envoyer_notification
+import requests
 import uuid
 import json
 from urllib.parse import urlparse
@@ -278,6 +280,16 @@ def serve_listing_image(filename):
     return send_from_directory(_images_dir(), filename)
 
 
+def _fedapay_base_url():
+    env = os.environ.get('FEDAPAY_ENVIRONMENT', 'sandbox').strip()
+    return 'https://api.fedapay.com' if env == 'live' else 'https://sandbox-api.fedapay.com'
+
+
+def _fedapay_headers():
+    key = os.environ.get('FEDAPAY_SECRET_KEY', '').strip()
+    return {'Authorization': f'Bearer {key}', 'Content-Type': 'application/json'}
+
+
 @marketplace_bp.route('/<listing_id>/purchase', methods=['POST'])
 @login_required
 def create_purchase(listing_id):
@@ -307,7 +319,85 @@ def create_purchase(listing_id):
     db.session.add(purchase)
     db.session.commit()
 
-    return jsonify(purchase.to_dict()), 201
+    try:
+        montant_xof = max(round(listing.prix_centimes / 100 * 655), 100)
+        response = requests.post(
+            f'{_fedapay_base_url()}/v1/transactions',
+            headers=_fedapay_headers(),
+            json={
+                'description': f'GNB41 IA - {listing.titre}',
+                'amount': montant_xof,
+                'currency': {'iso': 'XOF'},
+                'callback_url': f'http://localhost:5173/marketplace-callback?purchase_id={purchase.id}',
+                'customer': {
+                    'email': current_user.email,
+                    'firstname': current_user.username,
+                    'lastname': '.'
+                }
+            },
+            timeout=30
+        )
+        data = response.json()
+        if 'v1/transaction' not in data:
+            raise ValueError(data.get('message', 'Reponse FedaPay invalide'))
+
+        transaction = data['v1/transaction']
+        purchase.stripe_session_id = str(transaction['id'])
+        db.session.commit()
+
+        return jsonify({
+            'purchase': purchase.to_dict(),
+            'payment_url': transaction['payment_url'],
+            'transaction_id': transaction['id']
+        }), 201
+    except Exception as e:
+        purchase.statut = 'erreur'
+        db.session.commit()
+        return jsonify({'error': f'Erreur lors de la creation du paiement: {str(e)}'}), 500
+
+
+@marketplace_bp.route('/purchase/<purchase_id>/verify', methods=['GET'])
+@login_required
+def verify_purchase(purchase_id):
+    purchase = Purchase.query.get_or_404(purchase_id)
+    if purchase.acheteur_id != current_user.id:
+        return jsonify({'error': 'Non autorise'}), 403
+
+    if purchase.statut == 'complete':
+        return jsonify(purchase.to_dict())
+
+    if not purchase.stripe_session_id:
+        return jsonify({'error': 'Aucune transaction associee'}), 400
+
+    try:
+        response = requests.get(
+            f'{_fedapay_base_url()}/v1/transactions/{purchase.stripe_session_id}',
+            headers=_fedapay_headers(),
+            timeout=30
+        )
+        data = response.json()
+        transaction = data.get('v1/transaction', {})
+        statut_fedapay = transaction.get('status')
+
+        if statut_fedapay == 'approved':
+            purchase.statut = 'complete'
+            db.session.commit()
+            listing_vendu = Listing.query.get(purchase.listing_id)
+            if listing_vendu:
+                envoyer_notification(
+                    user_id=listing_vendu.vendeur_id,
+                    type='vente',
+                    titre='Nouvelle vente !',
+                    message=f'Votre application "{listing_vendu.titre}" vient d\'etre achetee.',
+                    lien=f'/marketplace/mes-ventes'
+                )
+        elif statut_fedapay in ('declined', 'canceled'):
+            purchase.statut = 'echoue'
+            db.session.commit()
+
+        return jsonify(purchase.to_dict())
+    except Exception as e:
+        return jsonify({'error': f'Erreur lors de la verification: {str(e)}'}), 500
 
 
 @marketplace_bp.route('/mine-purchases', methods=['GET'])

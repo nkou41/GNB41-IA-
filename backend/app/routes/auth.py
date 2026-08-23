@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
-from app import db, limiter, mail
+from app import db, limiter, mail, csrf
+from flask_wtf.csrf import generate_csrf
 from app.models.user import User
 import secrets
 from flask_mail import Message
@@ -8,8 +9,14 @@ from flask_mail import Message
 auth_bp = Blueprint('auth', __name__)
 
 
+@auth_bp.route('/csrf-token', methods=['GET'])
+def csrf_token():
+    return jsonify({'csrf_token': generate_csrf()})
+
+
 @auth_bp.route('/register', methods=['POST'])
 @limiter.limit('5 per hour')
+@csrf.exempt
 def register():
     data = request.get_json()
     username = data.get('username')
@@ -60,11 +67,21 @@ def confirm_email():
     user.email_confirmed = True
     user.confirm_token = None
     db.session.commit()
+
+    try:
+        welcome_msg = Message('Bienvenue sur GNB41 IA !', recipients=[user.email])
+        welcome_msg.body = f"Bonjour {user.username},\n\nVotre email est confirme et votre compte GNB41 IA est maintenant actif.\n\nVous pouvez commencer a creer vos applications des maintenant.\n\nA bientot,\nL'equipe GNB41 IA"
+        mail.send(welcome_msg)
+    except Exception as e:
+        from flask import current_app
+        current_app.logger.error(f'Erreur envoi email bienvenue: {str(e)}')
+
     return jsonify({'message': 'Email confirme avec succes'})
 
 
 @auth_bp.route('/login', methods=['POST'])
 @limiter.limit('10 per minute')
+@csrf.exempt
 def login():
     data = request.get_json()
     identifier = data.get('username') or data.get('email')
@@ -83,6 +100,7 @@ def login():
 
 @auth_bp.route('/forgot-password', methods=['POST'])
 @limiter.limit('3 per hour')
+@csrf.exempt
 def forgot_password():
     import secrets
     from datetime import datetime, timedelta
@@ -109,6 +127,7 @@ def forgot_password():
 
 @auth_bp.route('/reset-password', methods=['POST'])
 @limiter.limit('5 per hour')
+@csrf.exempt
 def reset_password():
     from datetime import datetime
     data = request.get_json()

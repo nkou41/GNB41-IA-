@@ -8,6 +8,7 @@ from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_mail import Mail
+from flask_wtf.csrf import CSRFProtect, generate_csrf
 import os
 from logging.handlers import RotatingFileHandler
 import logging
@@ -16,13 +17,22 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 limiter = Limiter(key_func=get_remote_address, default_limits=['2000 per hour'])
 mail = Mail()
+csrf = CSRFProtect()
+from flask_socketio import SocketIO
+socketio = SocketIO(cors_allowed_origins="*")
 
 def create_app(test_config=None):
     app = Flask(__name__)
     basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-change-me')
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'instance', 'tableau_ia.db')
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url:
+        if database_url.startswith('postgresql://'):
+            database_url = database_url.replace('postgresql://', 'postgresql+pg8000://', 1)
+        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'instance', 'tableau_ia.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
@@ -44,6 +54,11 @@ def create_app(test_config=None):
     app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
     mail.init_app(app)
 
+    app.config['WTF_CSRF_TIME_LIMIT'] = None
+    app.config['WTF_CSRF_CHECK_DEFAULT'] = True
+    csrf.init_app(app)
+    socketio.init_app(app, async_mode='eventlet')
+
     if not app.debug:
         os.makedirs(os.path.join(basedir, 'logs'), exist_ok=True)
         file_handler = RotatingFileHandler(
@@ -64,6 +79,7 @@ def create_app(test_config=None):
     from app.models.project_message import ProjectMessage
     from app.models.listing import Listing
     from app.models.purchase import Purchase
+    from app.models.notification import Notification
 
     from app.routes.auth import auth_bp
     from app.routes.workspace import workspace_bp
@@ -74,6 +90,10 @@ def create_app(test_config=None):
     app.register_blueprint(workspace_bp, url_prefix='/api/workspaces')
     app.register_blueprint(project_bp, url_prefix='/api/projects')
     app.register_blueprint(marketplace_bp, url_prefix='/api/marketplace')
+    from app.routes.billing import billing_bp
+    app.register_blueprint(billing_bp, url_prefix='/api/billing')
+    from app.routes.notifications import notifications_bp
+    app.register_blueprint(notifications_bp, url_prefix='/api/notifications')
 
     @app.errorhandler(404)
     def not_found(e):
@@ -100,9 +120,19 @@ def create_app(test_config=None):
         return jsonify({'error': 'Une erreur inattendue est survenue'}), 500
 
     with app.app_context():
-        os.makedirs(os.path.join(basedir, 'instance'), exist_ok=True)
+        if not database_url:
+            os.makedirs(os.path.join(basedir, 'instance'), exist_ok=True)
         db.create_all()
-        db.session.execute(db.text('PRAGMA journal_mode=WAL'))
-        db.session.commit()
+        if not database_url:
+            db.session.execute(db.text('PRAGMA journal_mode=WAL'))
+            db.session.commit()
+
+    from flask_socketio import join_room
+    from flask_login import current_user
+
+    @socketio.on('connect')
+    def handle_connect():
+        if current_user.is_authenticated:
+            join_room(f'user_{current_user.id}')
 
     return app

@@ -1,7 +1,9 @@
+import os
 from waitress import serve
 from app import create_app
 
 app = create_app()
 
 if __name__ == '__main__':
-    serve(app, host='0.0.0.0', port=5001, threads=8)
+    port = int(os.environ.get('PORT', 5001))
+    serve(app, host='0.0.0.0', port=port, threads=8)

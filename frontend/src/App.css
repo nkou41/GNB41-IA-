@@ -571,7 +571,15 @@ main {
   resize: none;
   min-height: 80px;
   max-height: 200px;
+  overflow-y: auto;
   outline: none;
+  box-shadow: none;
+}
+
+.chat-input-form textarea:focus {
+  outline: none;
+  box-shadow: none;
+  border: none;
 }
 
 .chat-input-form textarea::placeholder {
@@ -1055,6 +1063,8 @@ input:focus, textarea:focus, select:focus {
 
 .quickstart-form {
   width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
   background: #ffffff;
   border: 1px solid #ddd6c7;
   border-radius: 22px;
@@ -1074,7 +1084,15 @@ input:focus, textarea:focus, select:focus {
   font-size: 1.05rem;
   resize: none;
   min-height: 60px;
+  max-height: 240px;
+  overflow-y: auto;
   outline: none;
+  box-shadow: none;
+}
+.quickstart-form textarea:focus {
+  outline: none;
+  box-shadow: none;
+  border: none;
 }
 
 .quickstart-form textarea::placeholder {
@@ -1297,7 +1315,15 @@ input:focus, textarea:focus, select:focus {
   font-size: 1rem;
   resize: none;
   min-height: 50px;
+  max-height: 240px;
+  overflow-y: auto;
   outline: none;
+  box-shadow: none;
+}
+.landing-prompt-form textarea:focus {
+  outline: none;
+  box-shadow: none;
+  border: none;
 }
 
 .landing-prompt-form textarea::placeholder {
@@ -1715,4 +1741,23 @@ input:focus, textarea:focus, select:focus {
 .admin-badge-pending {
   background: #fef3c7;
   color: #92400e;
+}
+
+.textarea-wrap { position: relative; }
+.animated-placeholder {
+  position: absolute;
+  top: 0.9rem;
+  left: 1rem;
+  color: #a89a7a;
+  pointer-events: none;
+  font: inherit;
+  white-space: pre-wrap;
+}
+.animated-cursor {
+  display: inline-block;
+  animation: blink-cursor 0.9s step-end infinite;
+}
+@keyframes blink-cursor {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
 }

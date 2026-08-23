@@ -17,6 +17,7 @@ class User(UserMixin, db.Model):
     reset_token_expiry = db.Column(db.DateTime, nullable=True)
     email_confirmed = db.Column(db.Boolean, default=False)
     confirm_token = db.Column(db.String(100), unique=True, nullable=True)
+    plan = db.Column(db.String(20), default='gratuit')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -29,7 +30,8 @@ class User(UserMixin, db.Model):
             'id': self.id,
             'username': self.username,
             'email': self.email,
-            'created_at': self.created_at.isoformat()
+            'created_at': self.created_at.isoformat(),
+            'plan': self.plan or 'gratuit'
         }
 
 

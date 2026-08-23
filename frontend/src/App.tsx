@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import NotificationBell from './components/NotificationBell';
 import { api } from './api';
 import './App.css';
 
@@ -32,11 +33,54 @@ interface Member {
   role: string;
 }
 
+function AnimatedPlaceholder({ text, active }: { text: string; active: boolean }) {
+  const [displayed, setDisplayed] = useState('');
+
+  useEffect(() => {
+    if (!active) { setDisplayed(''); return; }
+    let i = 0;
+    let deleting = false;
+    let cancelled = false;
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+
+    function tick() {
+      if (cancelled) return;
+      if (!deleting) {
+        i++;
+        setDisplayed(text.slice(0, i));
+        if (i >= text.length) {
+          timeout = setTimeout(() => { if (!cancelled) { deleting = true; tick(); } }, 1800);
+          return;
+        }
+        timeout = setTimeout(tick, 45);
+      } else {
+        i--;
+        setDisplayed(text.slice(0, i));
+        if (i <= 0) {
+          deleting = false;
+          timeout = setTimeout(tick, 400);
+          return;
+        }
+        timeout = setTimeout(tick, 20);
+      }
+    }
+    timeout = setTimeout(tick, 300);
+    return () => {
+      cancelled = true;
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [text, active]);
+
+  return <span className="animated-placeholder" style={{ visibility: active ? 'visible' : 'hidden' }}>{displayed}<span className="animated-cursor">|</span></span>;
+}
+
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true); // TODO: nettoyage complet prévu plus tard
   const [resetToken, setResetToken] = useState<string | null>(null);
   const [confirmToken, setConfirmToken] = useState<string | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<'checking' | 'approved' | 'pending' | 'error' | null>(null);
+  const [marketPaymentStatus, setMarketPaymentStatus] = useState<'checking' | 'approved' | 'pending' | 'error' | null>(null);
   const [confirmStatus, setConfirmStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [confirmMessage, setConfirmMessage] = useState('');
   const [resetPassword, setResetPassword] = useState('');
@@ -175,6 +219,35 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const transactionId = params.get('id') || params.get('transaction_id');
+    if (window.location.pathname === '/payment-callback' && transactionId) {
+      setPaymentStatus('checking');
+      api.verifyPayment(Number(transactionId))
+        .then((res) => {
+          if (res.status === 'approved') setPaymentStatus('approved');
+          else setPaymentStatus('pending');
+        })
+        .catch(() => setPaymentStatus('error'));
+    }
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const purchaseId = params.get('purchase_id');
+    if (window.location.pathname === '/marketplace-callback' && purchaseId) {
+      setMarketPaymentStatus('checking');
+      api.verifyPurchase(purchaseId)
+        .then((res) => {
+          if (res.statut === 'complete') setMarketPaymentStatus('approved');
+          else if (res.statut === 'echoue') setMarketPaymentStatus('error');
+          else setMarketPaymentStatus('pending');
+        })
+        .catch(() => setMarketPaymentStatus('error'));
+    }
+  }, []);
+
+  useEffect(() => {
     if (activeWorkspace) {
       api.listProjects(activeWorkspace.id).then(setProjects).catch(() => {});
     }
@@ -252,6 +325,19 @@ function App() {
       alert(`Erreur: ${err.message}`);
     } finally {
       setQuickLoading(false);
+    }
+  };
+
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
+
+  const handleUpgrade = async (plan: string) => {
+    setUpgradeLoading(true);
+    try {
+      const res = await api.createPayment(plan);
+      window.location.href = res.payment_url;
+    } catch (err: any) {
+      alert(err.message || "Erreur lors de la creation du paiement");
+      setUpgradeLoading(false);
     }
   };
 
@@ -336,11 +422,15 @@ function App() {
   const handlePurchase = async (listingId: string) => {
     setPurchaseLoadingId(listingId);
     try {
-      await api.purchaseListing(listingId);
-      alert('Achat enregistre ! (paiement Stripe a venir)');
+      const result = await api.purchaseListing(listingId);
+      if (result.payment_url) {
+        window.location.href = result.payment_url;
+      } else {
+        alert('Achat enregistre, mais aucune page de paiement recue.');
+        setPurchaseLoadingId(null);
+      }
     } catch (err: any) {
       alert(`Erreur: ${err.message}`);
-    } finally {
       setPurchaseLoadingId(null);
     }
   };
@@ -400,6 +490,46 @@ function App() {
   };
 
   if (loading) return <div className="center"><div className="spinner"></div></div>;
+
+  if (marketPaymentStatus) {
+    return (
+      <div className="landing">
+        <div className="landing-hero">
+          <img src="/logo.png" alt="GNB41 IA" className="app-logo app-logo-lg" />
+          <h1>Paiement de votre achat</h1>
+          {marketPaymentStatus === 'checking' && <p className="landing-tagline">Verification du paiement en cours...</p>}
+          {marketPaymentStatus === 'approved' && (
+            <>
+              <p className="landing-tagline">Paiement confirme ! Votre achat est disponible dans "Mes achats".</p>
+              <button onClick={() => { setMarketPaymentStatus(null); window.history.replaceState({}, '', '/'); window.location.reload(); }}>Continuer</button>
+            </>
+          )}
+          {marketPaymentStatus === 'pending' && <p className="landing-tagline">Paiement en attente de confirmation. Cela peut prendre quelques instants.</p>}
+          {marketPaymentStatus === 'error' && <p style={{color: 'red'}}>Le paiement a echoue ou a ete annule.</p>}
+        </div>
+      </div>
+    );
+  }
+
+  if (paymentStatus) {
+    return (
+      <div className="landing">
+        <div className="landing-hero">
+          <img src="/logo.png" alt="GNB41 IA" className="app-logo app-logo-lg" />
+          <h1>Paiement</h1>
+          {paymentStatus === 'checking' && <p className="landing-tagline">Verification du paiement en cours...</p>}
+          {paymentStatus === 'approved' && (
+            <>
+              <p className="landing-tagline">Paiement confirme ! Votre compte est maintenant Pro.</p>
+              <button onClick={() => { setPaymentStatus(null); window.history.replaceState({}, '', '/'); window.location.reload(); }}>Continuer</button>
+            </>
+          )}
+          {paymentStatus === 'pending' && <p className="landing-tagline">Paiement en attente de confirmation. Cela peut prendre quelques instants.</p>}
+          {paymentStatus === 'error' && <p style={{color: 'red'}}>Erreur lors de la verification du paiement.</p>}
+        </div>
+      </div>
+    );
+  }
 
   if (confirmToken) {
     return (
@@ -485,12 +615,21 @@ function App() {
           <p className="landing-tagline">Décrivez votre application. L'IA la construit pour vous.</p>
 
           <form onSubmit={handleLandingSubmit} className="landing-prompt-form">
-            <textarea
-              placeholder="Décrivez l'application que vous souhaitez créer..."
-              value={landingPrompt}
-              onChange={(e) => setLandingPrompt(e.target.value)}
-              rows={2}
-            />
+            <div className="textarea-wrap">
+              <textarea
+                placeholder=""
+                value={landingPrompt}
+                onChange={(e) => {
+                  setLandingPrompt(e.target.value);
+                  e.target.style.height = 'auto';
+                  e.target.style.height = e.target.scrollHeight + 'px';
+                }}
+                rows={2}
+                className="auto-grow-textarea"
+                ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }}
+              />
+              <AnimatedPlaceholder text="Décrivez l'application que vous souhaitez créer..." active={!landingPrompt} />
+            </div>
             <div className="landing-prompt-toolbar">
               <button type="button" className="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
               <div className="landing-divider" />
@@ -651,6 +790,7 @@ function App() {
         <header className="marketplace-header">
           <h1 onClick={() => setShowAdminDashboard(false)}>← Boutique</h1>
           <div className="marketplace-header-actions">
+            <NotificationBell />
             <span>{user.username}</span>
             <button onClick={handleLogout}>Déconnexion</button>
           </div>
@@ -721,6 +861,7 @@ function App() {
         <header className="marketplace-header">
           <h1 onClick={() => setShowMesAchats(false)}>← Boutique</h1>
           <div className="marketplace-header-actions">
+            <NotificationBell />
             <span>{user.username}</span>
             <button onClick={handleLogout}>Déconnexion</button>
           </div>
@@ -748,6 +889,19 @@ function App() {
                 <p className="marketplace-card-desc">
                   Acheté le {new Date(p.created_at).toLocaleDateString('fr-FR')}
                 </p>
+                {p.statut === 'en_attente' && (
+                  <button
+                    type="button"
+                    className="btn-publish"
+                    style={{ marginTop: '0.5rem', justifyContent: 'center', width: '100%' }}
+                    onClick={async () => {
+                      const res = await api.verifyPurchase(p.id);
+                      setMyPurchasesList((prev) => prev.map((x) => (x.id === p.id ? res : x)));
+                    }}
+                  >
+                    Verifier le paiement
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -766,6 +920,7 @@ function App() {
         <header className="marketplace-header">
           <h1 onClick={() => setShowMesVentes(false)}>← Boutique</h1>
           <div className="marketplace-header-actions">
+            <NotificationBell />
             <span>{user.username}</span>
             <button onClick={handleLogout}>Déconnexion</button>
           </div>
@@ -827,6 +982,7 @@ function App() {
         <header className="marketplace-header">
           <h1 onClick={() => setShowMarketplace(false)}>← GNB41 IA</h1>
           <div className="marketplace-header-actions">
+            <NotificationBell />
             <span>{user.username}</span>
             <button onClick={handleLogout}>Déconnexion</button>
           </div>
@@ -924,11 +1080,11 @@ function App() {
         ) : (
           <div className="marketplace-grid">
             {marketplaceListings.map((l) => {
-              const openLink = l.source_type === 'externe_lien' ? l.lien_externe : `http://localhost:5001/api/marketplace/${l.id}/preview`;
+              const openLink = l.source_type === 'externe_lien' ? l.lien_externe : `https://favor-legendary-edge-cultural.trycloudflare.com/api/marketplace/${l.id}/preview`;
               const copyLink = () => {
                 navigator.clipboard.writeText(openLink).catch(() => {});
               };
-              const bannerUrl = l.image_url && l.image_url.startsWith('/') ? `http://localhost:5001${l.image_url}` : l.image_url;
+              const bannerUrl = l.image_url && l.image_url.startsWith('/') ? `https://favor-legendary-edge-cultural.trycloudflare.com${l.image_url}` : l.image_url;
               return (
                 <div key={l.id} className="marketplace-card">
                   {bannerUrl && (
@@ -1009,6 +1165,7 @@ function App() {
         <header>
           <h1 onClick={() => setShowSettings(false)} style={{ cursor: 'pointer' }}>← GNB41 IA</h1>
           <div>
+            <NotificationBell />
             <span>{user.username}</span>
             <button onClick={handleLogout}>Déconnexion</button>
           </div>
@@ -1191,7 +1348,7 @@ function App() {
                   <li>Tous les fournisseurs IA</li>
                   <li>Support prioritaire</li>
                 </ul>
-                <button className="plan-btn plan-btn-primary" disabled>Bientôt disponible</button>
+                <button className="plan-btn plan-btn-primary" disabled={upgradeLoading} onClick={() => handleUpgrade('pro')}>{upgradeLoading ? 'Redirection...' : 'Passer au Pro'}</button>
               </div>
               <div className="plan-card">
                 <h3>Entreprise</h3>
@@ -1289,8 +1446,13 @@ function App() {
               <textarea
                 placeholder="Demandez une modification ou une nouvelle fonctionnalité..."
                 value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
+                onChange={(e) => {
+                  setChatInput(e.target.value);
+                  e.target.style.height = 'auto';
+                  e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+                }}
                 rows={2}
+                ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 200) + 'px'; } }}
               />
               <div className="chat-input-toolbar">
                 <input
@@ -1392,6 +1554,7 @@ function App() {
           <h1 onClick={() => { setActiveWorkspace(null); setShowMembers(false); }} style={{ cursor: 'pointer' }}>← GNB41 IA</h1>
           <div>
             <button onClick={() => setShowMembers(!showMembers)}>Membres</button>
+            <NotificationBell />
             <span>{user.username}</span>
             <button className="upgrade-btn" onClick={() => setShowUpgradeModal(true)}>✦ Mettre à niveau</button>
             <button onClick={() => { setShowMarketplace(true); setShowSettings(false); }}>Boutique</button>
@@ -1430,8 +1593,14 @@ function App() {
             <textarea
               placeholder="Décrivez l'application à générer (prompt IA)"
               value={newProjectPrompt}
-              onChange={(e) => setNewProjectPrompt(e.target.value)}
+              onChange={(e) => {
+                setNewProjectPrompt(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = e.target.scrollHeight + 'px';
+              }}
               rows={3}
+              className="auto-grow-textarea"
+              ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }}
             />
             <select value={newProjectProvider} onChange={(e) => setNewProjectProvider(e.target.value)} className="provider-select">
               <option value="claude">Claude (Anthropic)</option>
@@ -1495,7 +1664,7 @@ function App() {
                   <li>Tous les fournisseurs IA</li>
                   <li>Support prioritaire</li>
                 </ul>
-                <button className="plan-btn plan-btn-primary" disabled>Bientôt disponible</button>
+                <button className="plan-btn plan-btn-primary" disabled={upgradeLoading} onClick={() => handleUpgrade('pro')}>{upgradeLoading ? 'Redirection...' : 'Passer au Pro'}</button>
               </div>
               <div className="plan-card">
                 <h3>Entreprise</h3>
@@ -1514,7 +1683,8 @@ function App() {
       <header>
         <h1><img src="/logo.png" alt="" className="app-logo" />GNB41 IA</h1>
         <div>
-          <span>{user.username}</span>
+          <NotificationBell />
+            <span>{user.username}</span>
           <button className="upgrade-btn" onClick={() => setShowUpgradeModal(true)}>✦ Mettre à niveau</button>
             <button onClick={() => { setShowMarketplace(true); setShowSettings(false); }}>Boutique</button>
             <button onClick={() => setShowSettings(true)}>Paramètres</button>
@@ -1530,12 +1700,21 @@ function App() {
         <h2 className="quickstart-greeting">Bonjour {user.username}. <span className="accent-dot">•</span><br/>Que construirez-vous ensuite ?</h2>
 
         <form onSubmit={handleQuickStart} className="quickstart-form">
-          <textarea
-            placeholder="Décrivez l'application que vous souhaitez créer..."
-            value={quickPrompt}
-            onChange={(e) => setQuickPrompt(e.target.value)}
-            rows={2}
-          />
+          <div className="textarea-wrap">
+            <textarea
+              placeholder=""
+              value={quickPrompt}
+              onChange={(e) => {
+                setQuickPrompt(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = e.target.scrollHeight + 'px';
+              }}
+              rows={2}
+              className="auto-grow-textarea"
+              ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }}
+            />
+            <AnimatedPlaceholder text="Décrivez l'application que vous souhaitez créer..." active={!quickPrompt} />
+          </div>
           <div className="quickstart-toolbar">
             <button type="button" className="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
             <select value={quickProvider} onChange={(e) => setQuickProvider(e.target.value)} className="provider-select">
