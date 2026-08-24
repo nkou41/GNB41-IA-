@@ -167,6 +167,48 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (!user) return;
+    const path = window.location.pathname;
+
+    if (path === '/marketplace') {
+      setShowMarketplace(true);
+    } else if (path === '/mes-achats') {
+      setShowMesAchats(true);
+    } else if (path === '/mes-ventes') {
+      setShowMesVentes(true);
+    } else if (path === '/administration') {
+      setShowAdminDashboard(true);
+    } else if (path === '/parametres') {
+      setShowSettings(true);
+    } else if (path === '/mentions-legales') {
+      setShowLegal('mentions');
+    } else if (path === '/cgv') {
+      setShowLegal('cgv');
+    } else if (path.startsWith('/projet/')) {
+      const projectId = path.replace('/projet/', '');
+      if (projectId) {
+        api.getProject(projectId).then((p) => {
+          setActiveProject(p);
+        }).catch(() => {
+          window.history.replaceState({}, '', '/');
+        });
+      }
+    }
+  }, [user]);
+
+  const navigateTo = (path: string) => {
+    window.history.pushState({}, '', path);
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      window.location.reload();
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
     if (user) {
       api.listWorkspaces().then(async (ws) => {
         setWorkspaces(ws);
@@ -730,7 +772,7 @@ function App() {
     return (
       <div className="marketplace-page">
         <header className="marketplace-header">
-          <h1 onClick={() => setShowLegal(null)}>← Retour</h1>
+          <h1 onClick={() => { setShowLegal(null); navigateTo('/marketplace'); }}>← Retour</h1>
         </header>
         <div style={{ padding: '1.5rem', maxWidth: '700px', lineHeight: 1.6 }}>
           {showLegal === 'mentions' ? (
@@ -787,7 +829,7 @@ function App() {
     return (
       <div className="marketplace-page">
         <header className="marketplace-header">
-          <h1 onClick={() => setShowAdminDashboard(false)}>← Boutique</h1>
+          <h1 onClick={() => { setShowAdminDashboard(false); navigateTo('/marketplace'); }}>← Boutique</h1>
           <div className="marketplace-header-actions">
             <NotificationBell />
             <span>{user.username}</span>
@@ -858,7 +900,7 @@ function App() {
     return (
       <div className="marketplace-page">
         <header className="marketplace-header">
-          <h1 onClick={() => setShowMesAchats(false)}>← Boutique</h1>
+          <h1 onClick={() => { setShowMesAchats(false); navigateTo('/marketplace'); }}>← Boutique</h1>
           <div className="marketplace-header-actions">
             <NotificationBell />
             <span>{user.username}</span>
@@ -917,7 +959,7 @@ function App() {
     return (
       <div className="marketplace-page">
         <header className="marketplace-header">
-          <h1 onClick={() => setShowMesVentes(false)}>← Boutique</h1>
+          <h1 onClick={() => { setShowMesVentes(false); navigateTo('/marketplace'); }}>← Boutique</h1>
           <div className="marketplace-header-actions">
             <NotificationBell />
             <span>{user.username}</span>
@@ -979,7 +1021,7 @@ function App() {
     return (
       <div className="marketplace-page">
         <header className="marketplace-header">
-          <h1 onClick={() => setShowMarketplace(false)}>← GNB41 IA</h1>
+          <h1 onClick={() => { setShowMarketplace(false); navigateTo('/'); }}>← GNB41 IA</h1>
           <div className="marketplace-header-actions">
             <NotificationBell />
             <span>{user.username}</span>
@@ -993,14 +1035,14 @@ function App() {
             <p>Découvrez et publiez des applications prêtes à l'emploi</p>
           </div>
           {user.email === 'nkougnarigo226@gmail.com' && (
-            <button className="btn-publish is-cancel" onClick={() => setShowAdminDashboard(true)} style={{ marginRight: '0.6rem' }}>
+            <button className="btn-publish is-cancel" onClick={() => { setShowAdminDashboard(true); navigateTo('/administration'); }} style={{ marginRight: '0.6rem' }}>
               Administration
             </button>
           )}
-          <button className="btn-publish is-cancel" onClick={() => setShowMesAchats(true)} style={{ marginRight: '0.6rem' }}>
+          <button className="btn-publish is-cancel" onClick={() => { setShowMesAchats(true); navigateTo('/mes-achats'); }} style={{ marginRight: '0.6rem' }}>
             Mes achats
           </button>
-          <button className="btn-publish is-cancel" onClick={() => setShowMesVentes(true)} style={{ marginRight: '0.6rem' }}>
+          <button className="btn-publish is-cancel" onClick={() => { setShowMesVentes(true); navigateTo('/mes-ventes'); }} style={{ marginRight: '0.6rem' }}>
             Mes ventes
           </button>
           <button className={`btn-publish ${showPublishForm ? 'is-cancel' : ''}`} onClick={() => setShowPublishForm(!showPublishForm)}>
@@ -1162,7 +1204,7 @@ function App() {
     return (
       <div className="dashboard">
         <header>
-          <h1 onClick={() => setShowSettings(false)} style={{ cursor: 'pointer' }}>← GNB41 IA</h1>
+          <h1 onClick={() => { setShowSettings(false); navigateTo('/'); }} style={{ cursor: 'pointer' }}>← GNB41 IA</h1>
           <div>
             <NotificationBell />
             <span>{user.username}</span>
@@ -1357,7 +1399,7 @@ function App() {
         </div>
       )}
         <header>
-          <h1 onClick={() => setActiveProject(null)} style={{ cursor: 'pointer' }}>← {activeWorkspace?.nom}</h1>
+          <h1 onClick={() => { setActiveProject(null); navigateTo('/'); }} style={{ cursor: 'pointer' }}>← {activeWorkspace?.nom}</h1>
           <div>
             <span>{activeProject.nom}</span>
             <button className="toolbar-icon-btn" title="Partager" onClick={handleShare}>
@@ -1549,8 +1591,8 @@ function App() {
             <NotificationBell />
             <span>{user.username}</span>
             <button className="upgrade-btn" onClick={() => setShowUpgradeModal(true)}>✦ Mettre à niveau</button>
-            <button onClick={() => { setShowMarketplace(true); setShowSettings(false); }}>Boutique</button>
-            <button onClick={() => setShowSettings(true)}>Paramètres</button>
+            <button onClick={() => { setShowMarketplace(true); setShowSettings(false); navigateTo('/marketplace'); }}>Boutique</button>
+            <button onClick={() => { setShowSettings(true); navigateTo('/parametres'); }}>Paramètres</button>
             <button onClick={handleLogout}>Déconnexion</button>
           </div>
         </header>
@@ -1612,7 +1654,7 @@ function App() {
 
           <div className="workspace-grid">
             {filteredProjects.map((p) => (
-              <div key={p.id} className="workspace-card" onClick={() => setActiveProject(p)}>
+              <div key={p.id} className="workspace-card" onClick={() => { setActiveProject(p); navigateTo(`/projet/${p.id}`); }}>
                 <button className="delete-btn" onClick={(e) => handleDeleteProject(p.id, e)}>×</button>
                 <h3>{p.nom}</h3>
                 <p className={`statut statut-${p.statut}`}>{p.statut}</p>
@@ -1678,8 +1720,8 @@ function App() {
           <NotificationBell />
             <span>{user.username}</span>
           <button className="upgrade-btn" onClick={() => setShowUpgradeModal(true)}>✦ Mettre à niveau</button>
-            <button onClick={() => { setShowMarketplace(true); setShowSettings(false); }}>Boutique</button>
-            <button onClick={() => setShowSettings(true)}>Paramètres</button>
+            <button onClick={() => { setShowMarketplace(true); setShowSettings(false); navigateTo('/marketplace'); }}>Boutique</button>
+            <button onClick={() => { setShowSettings(true); navigateTo('/parametres'); }}>Paramètres</button>
           <button onClick={handleLogout}>Déconnexion</button>
         </div>
       </header>
@@ -1733,6 +1775,7 @@ function App() {
                   const ws = workspaces.find((w) => w.id === p.parentWorkspaceId);
                   if (ws) setActiveWorkspace(ws);
                   setActiveProject(p);
+                  navigateTo(`/projet/${p.id}`);
                 }}>
                   <h3>{p.nom}</h3>
                   <p className={`statut statut-${p.statut}`}>{p.statut}</p>
