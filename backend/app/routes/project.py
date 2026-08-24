@@ -224,3 +224,42 @@ def duplicate_project(project_id):
     db.session.commit()
 
     return jsonify(copy.to_dict()), 201
+
+
+@project_bp.route('/<project_id>/files', methods=['PUT'])
+@login_required
+def update_file(project_id):
+    project = Project.query.get_or_404(project_id)
+    if not _check_access(project.workspace_id):
+        return jsonify({'error': 'Non autorisé'}), 403
+
+    data = request.get_json() or {}
+    chemin = data.get('chemin')
+    contenu = data.get('contenu')
+
+    if not chemin or contenu is None:
+        return jsonify({'error': 'chemin et contenu requis'}), 400
+
+    if not project.code_genere:
+        return jsonify({'error': "Aucun code genere pour ce projet"}), 400
+
+    try:
+        parsed = json.loads(project.code_genere)
+    except json.JSONDecodeError:
+        return jsonify({'error': 'Code genere illisible'}), 500
+
+    fichiers = parsed.get('fichiers', [])
+    found = False
+    for f in fichiers:
+        if f.get('chemin') == chemin:
+            f['contenu'] = contenu
+            found = True
+            break
+
+    if not found:
+        return jsonify({'error': 'Fichier introuvable dans ce projet'}), 404
+
+    project.code_genere = json.dumps(parsed, ensure_ascii=False, indent=2)
+    db.session.commit()
+
+    return jsonify(project.to_dict())

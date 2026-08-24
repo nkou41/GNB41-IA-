@@ -129,6 +129,9 @@ function App() {
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [previewFile, setPreviewFile] = useState<string | null>(null);
+  const [editorContent, setEditorContent] = useState<string>('');
+  const [editorSaving, setEditorSaving] = useState(false);
+  const [editorDirty, setEditorDirty] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [attachedImage, setAttachedImage] = useState<{ data: string; mediaType: string; name: string } | null>(null);
   const [showProviderMenu, setShowProviderMenu] = useState(false);
@@ -1556,14 +1559,65 @@ function App() {
                 </div>
               )
             ) : parsedFiles && parsedFiles.fichiers ? (
-              <div className="files-list preview-files">
-                <p className="stack-badge">{parsedFiles.stack}</p>
-                {parsedFiles.fichiers.map((f: any, i: number) => (
-                  <details key={i} className="file-item" open={previewFile === f.chemin} onToggle={() => setPreviewFile(f.chemin)}>
-                    <summary>{f.chemin}</summary>
-                    <pre className="code-block">{f.contenu}</pre>
-                  </details>
-                ))}
+              <div className="code-editor-layout">
+                <div className="code-editor-sidebar">
+                  <p className="stack-badge">{parsedFiles.stack}</p>
+                  {parsedFiles.fichiers.map((f: any, i: number) => (
+                    <button
+                      key={i}
+                      type="button"
+                      className={`code-editor-file-btn ${previewFile === f.chemin ? 'active' : ''}`}
+                      onClick={() => {
+                        if (editorDirty && previewFile && !confirm('Modifications non enregistrees. Changer de fichier quand meme ?')) return;
+                        setPreviewFile(f.chemin);
+                        setEditorContent(f.contenu);
+                        setEditorDirty(false);
+                      }}
+                    >
+                      {f.chemin}
+                    </button>
+                  ))}
+                </div>
+                <div className="code-editor-main">
+                  {previewFile ? (
+                    <>
+                      <div className="code-editor-toolbar">
+                        <span className="code-editor-filename">{previewFile}</span>
+                        <button
+                          type="button"
+                          className="btn-publish"
+                          disabled={!editorDirty || editorSaving}
+                          onClick={async () => {
+                            if (!activeProject || !previewFile) return;
+                            setEditorSaving(true);
+                            try {
+                              const updated = await api.updateFile(activeProject.id, previewFile, editorContent);
+                              setActiveProject(updated);
+                              setProjects(projects.map((p) => (p.id === updated.id ? updated : p)));
+                              setEditorDirty(false);
+                            } catch (err: any) {
+                              alert(`Erreur: ${err.message}`);
+                            } finally {
+                              setEditorSaving(false);
+                            }
+                          }}
+                        >
+                          {editorSaving ? 'Enregistrement...' : editorDirty ? 'Enregistrer' : 'Enregistre'}
+                        </button>
+                      </div>
+                      <textarea
+                        className="code-editor-textarea"
+                        value={editorContent}
+                        onChange={(e) => { setEditorContent(e.target.value); setEditorDirty(true); }}
+                        spellCheck={false}
+                      />
+                    </>
+                  ) : (
+                    <div className="preview-empty">
+                      <p>Selectionnez un fichier a gauche pour l'editer.</p>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="preview-empty">

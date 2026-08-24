@@ -107,4 +107,6 @@ export const api = {
   updateListing: (listingId: string, data: any) => request(`/marketplace/${listingId}`, { method: 'PUT', body: JSON.stringify(data) }),
   adminDashboard: () => request('/marketplace/admin/dashboard'),
   verifyPurchase: (purchaseId: string) => request(`/marketplace/purchase/${purchaseId}/verify`),
+  updateFile: (projectId: string, chemin: string, contenu: string) =>
+    request(`/projects/${projectId}/files`, { method: 'PUT', body: JSON.stringify({ chemin, contenu }) }),
 };
