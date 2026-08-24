@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
-from app import db, limiter, mail, csrf
+from app import db, limiter, csrf
 from flask_wtf.csrf import generate_csrf
 from app.models.user import User
+from app.services.email_service import send_email
 import secrets
-from flask_mail import Message
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -43,9 +43,11 @@ def register():
 
     confirm_url = f"http://localhost:5173/confirm-email?token={confirm_token}"
     try:
-        msg = Message("Confirmez votre email - Tableau IA", recipients=[email])
-        msg.body = f"Bienvenue sur GNB41 IA ! Cliquez sur ce lien pour confirmer votre email : {confirm_url}"
-        mail.send(msg)
+        send_email(
+            to=email,
+            subject="Confirmez votre email - Tableau IA",
+            text=f"Bienvenue sur GNB41 IA ! Cliquez sur ce lien pour confirmer votre email : {confirm_url}"
+        )
     except Exception as e:
         from flask import current_app
         current_app.logger.error(f"Erreur envoi email confirmation: {str(e)}")
@@ -69,9 +71,11 @@ def confirm_email():
     db.session.commit()
 
     try:
-        welcome_msg = Message('Bienvenue sur GNB41 IA !', recipients=[user.email])
-        welcome_msg.body = f"Bonjour {user.username},\n\nVotre email est confirme et votre compte GNB41 IA est maintenant actif.\n\nVous pouvez commencer a creer vos applications des maintenant.\n\nA bientot,\nL'equipe GNB41 IA"
-        mail.send(welcome_msg)
+        send_email(
+            to=user.email,
+            subject='Bienvenue sur GNB41 IA !',
+            text=f"Bonjour {user.username},\n\nVotre email est confirme et votre compte GNB41 IA est maintenant actif.\n\nVous pouvez commencer a creer vos applications des maintenant.\n\nA bientot,\nL'equipe GNB41 IA"
+        )
     except Exception as e:
         from flask import current_app
         current_app.logger.error(f'Erreur envoi email bienvenue: {str(e)}')
@@ -104,8 +108,6 @@ def login():
 def forgot_password():
     import secrets
     from datetime import datetime, timedelta
-    from flask_mail import Message
-    from app import mail
     data = request.get_json()
     email = data.get('email')
     user = User.query.filter_by(email=email).first()
@@ -116,9 +118,11 @@ def forgot_password():
         db.session.commit()
         reset_url = f"http://localhost:5173/reset-password?token={token}"
         try:
-            msg = Message('Reinitialisation de mot de passe - Tableau IA', recipients=[email])
-            msg.body = f"Cliquez sur ce lien pour reinitialiser votre mot de passe (valable 1 heure) : {reset_url}"
-            mail.send(msg)
+            send_email(
+                to=email,
+                subject='Reinitialisation de mot de passe - Tableau IA',
+                text=f"Cliquez sur ce lien pour reinitialiser votre mot de passe (valable 1 heure) : {reset_url}"
+            )
         except Exception as e:
             from flask import current_app
             current_app.logger.error(f'Erreur envoi email: {str(e)}')

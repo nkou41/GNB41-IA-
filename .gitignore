@@ -25,3 +25,5 @@ frontend.log
 backend/cookies.txt
 backend/backups/
 backend/backups/backup.log
+.vercel
+.env*
