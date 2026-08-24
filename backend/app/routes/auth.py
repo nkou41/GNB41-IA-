@@ -60,6 +60,7 @@ def register():
 
 @auth_bp.route('/confirm-email', methods=['POST'])
 @limiter.limit('10 per hour')
+@csrf.exempt
 def confirm_email():
     data = request.get_json()
     token = data.get('token')
