@@ -41,7 +41,9 @@ def register():
     db.session.add(user)
     db.session.commit()
 
-    confirm_url = f"http://localhost:5173/confirm-email?token={confirm_token}"
+    import os
+    frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+    confirm_url = f"{frontend_url}/confirm-email?token={confirm_token}"
     try:
         send_email(
             to=email,
@@ -116,7 +118,9 @@ def forgot_password():
         user.reset_token = token
         user.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)
         db.session.commit()
-        reset_url = f"http://localhost:5173/reset-password?token={token}"
+        import os
+        frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+        reset_url = f"{frontend_url}/reset-password?token={token}"
         try:
             send_email(
                 to=email,
