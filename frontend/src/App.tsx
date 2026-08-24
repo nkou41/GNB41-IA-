@@ -163,6 +163,7 @@ function App() {
   const [settingsError, setSettingsError] = useState('');
 
   const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('editeur');
   const [inviteError, setInviteError] = useState('');
 
   useEffect(() => {
@@ -448,7 +449,7 @@ function App() {
     if (!activeWorkspace) return;
     setInviteError('');
     try {
-      const m = await api.addMember(activeWorkspace.id, inviteEmail);
+      const m = await api.addMember(activeWorkspace.id, inviteEmail, inviteRole);
       setMembers([...members, m]);
       setInviteEmail('');
     } catch (err: any) {
@@ -1659,6 +1660,10 @@ function App() {
               {activeWorkspace.owner_id === user.id && (
                 <form onSubmit={handleInvite} className="new-workspace-form">
                   <input placeholder="Email à inviter" type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} />
+                  <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} className="role-select">
+                    <option value="editeur">Éditeur</option>
+                    <option value="lecteur">Lecteur</option>
+                  </select>
                   <button type="submit">Inviter</button>
                 </form>
               )}

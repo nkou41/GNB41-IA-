@@ -79,8 +79,8 @@ export const api = {
   deleteWorkspace: (workspaceId: string) =>
     request(`/workspaces/${workspaceId}`, { method: 'DELETE' }),
   listMembers: (workspaceId: string) => request(`/workspaces/${workspaceId}/members`),
-  addMember: (workspaceId: string, email: string) =>
-    request(`/workspaces/${workspaceId}/members`, { method: 'POST', body: JSON.stringify({ email }) }),
+  addMember: (workspaceId: string, email: string, role: string = 'editeur') =>
+    request(`/workspaces/${workspaceId}/members`, { method: 'POST', body: JSON.stringify({ email, role }) }),
   removeMember: (workspaceId: string, userId: string) =>
     request(`/workspaces/${workspaceId}/members/${userId}`, { method: 'DELETE' }),
 

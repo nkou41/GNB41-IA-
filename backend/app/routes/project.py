@@ -8,6 +8,7 @@ from app.models.project import Project
 from app.models.project_version import ProjectVersion
 from app.models.project_message import ProjectMessage
 from app.models.workspace import Workspace, WorkspaceMember
+from app.utils.permissions import get_role, can_edit
 from app.services.generator import generate_project_code
 
 project_bp = Blueprint('project', __name__)
@@ -20,6 +21,10 @@ def _check_access(workspace_id):
         workspace_id=workspace_id, user_id=current_user.id
     ).first()
     return member is not None
+
+def _check_edit_access(workspace_id):
+    role = get_role(workspace_id, current_user.id)
+    return can_edit(role)
 
 
 def _run_generation(project, prompt, provider, history=None, image=None):
@@ -63,7 +68,7 @@ def list_projects(workspace_id):
 @project_bp.route('/workspace/<workspace_id>', methods=['POST'])
 @login_required
 def create_project(workspace_id):
-    if not _check_access(workspace_id):
+    if not _check_edit_access(workspace_id):
         return jsonify({'error': 'Non autorisé'}), 403
 
     data = request.get_json()
@@ -94,7 +99,7 @@ def get_project(project_id):
 @login_required
 def delete_project(project_id):
     project = Project.query.get_or_404(project_id)
-    if not _check_access(project.workspace_id):
+    if not _check_edit_access(project.workspace_id):
         return jsonify({'error': 'Non autorisé'}), 403
     db.session.delete(project)
     db.session.commit()
@@ -105,7 +110,7 @@ def delete_project(project_id):
 @login_required
 def regenerate_project(project_id):
     project = Project.query.get_or_404(project_id)
-    if not _check_access(project.workspace_id):
+    if not _check_edit_access(project.workspace_id):
         return jsonify({'error': 'Non autorisé'}), 403
 
     data = request.get_json()
@@ -167,7 +172,7 @@ def list_messages(project_id):
 @login_required
 def chat_project(project_id):
     project = Project.query.get_or_404(project_id)
-    if not _check_access(project.workspace_id):
+    if not _check_edit_access(project.workspace_id):
         return jsonify({'error': 'Non autorisé'}), 403
 
     data = request.get_json()
@@ -208,7 +213,7 @@ def chat_project(project_id):
 @login_required
 def duplicate_project(project_id):
     project = Project.query.get_or_404(project_id)
-    if not _check_access(project.workspace_id):
+    if not _check_edit_access(project.workspace_id):
         return jsonify({'error': 'Non autorisé'}), 403
 
     copy = Project(
@@ -230,7 +235,7 @@ def duplicate_project(project_id):
 @login_required
 def update_file(project_id):
     project = Project.query.get_or_404(project_id)
-    if not _check_access(project.workspace_id):
+    if not _check_edit_access(project.workspace_id):
         return jsonify({'error': 'Non autorisé'}), 403
 
     data = request.get_json() or {}

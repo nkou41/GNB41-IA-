@@ -3,13 +3,11 @@ from flask_login import login_required, current_user
 from app import db
 from app.models.workspace import Workspace, WorkspaceMember
 from app.models.user import User
+from app.utils.permissions import get_role, can_manage_members, VALID_ROLES, ROLE_EDITOR
 
 workspace_bp = Blueprint('workspace', __name__)
 
 
-def _get_role(workspace_id, user_id):
-    member = WorkspaceMember.query.filter_by(workspace_id=workspace_id, user_id=user_id).first()
-    return member.role if member else None
 
 
 @workspace_bp.route('', methods=['GET'])
@@ -43,7 +41,7 @@ def create_workspace():
 @login_required
 def get_workspace(workspace_id):
     workspace = Workspace.query.get_or_404(workspace_id)
-    if not _get_role(workspace_id, current_user.id):
+    if not get_role(workspace_id, current_user.id):
         return jsonify({'error': 'Non autorisé'}), 403
     return jsonify(workspace.to_dict())
 
@@ -62,7 +60,7 @@ def delete_workspace(workspace_id):
 @workspace_bp.route('/<workspace_id>/members', methods=['GET'])
 @login_required
 def list_members(workspace_id):
-    if not _get_role(workspace_id, current_user.id):
+    if not get_role(workspace_id, current_user.id):
         return jsonify({'error': 'Non autorisé'}), 403
     members = WorkspaceMember.query.filter_by(workspace_id=workspace_id).all()
     result = []
@@ -80,12 +78,15 @@ def list_members(workspace_id):
 @workspace_bp.route('/<workspace_id>/members', methods=['POST'])
 @login_required
 def add_member(workspace_id):
-    role = _get_role(workspace_id, current_user.id)
-    if role != 'owner':
+    role = get_role(workspace_id, current_user.id)
+    if not can_manage_members(role):
         return jsonify({'error': 'Seul le propriétaire peut inviter des membres'}), 403
 
     data = request.get_json()
     email = data.get('email')
+    new_role = data.get('role', ROLE_EDITOR)
+    if new_role not in VALID_ROLES or new_role == 'owner':
+        new_role = ROLE_EDITOR
     if not email:
         return jsonify({'error': 'email requis'}), 400
 
@@ -97,7 +98,7 @@ def add_member(workspace_id):
     if existing:
         return jsonify({'error': 'Cet utilisateur est déjà membre'}), 409
 
-    member = WorkspaceMember(workspace_id=workspace_id, user_id=user.id, role='member')
+    member = WorkspaceMember(workspace_id=workspace_id, user_id=user.id, role=new_role)
     db.session.add(member)
     db.session.commit()
 
@@ -105,15 +106,15 @@ def add_member(workspace_id):
         'user_id': user.id,
         'username': user.username,
         'email': user.email,
-        'role': 'member'
+        'role': new_role
     }), 201
 
 
 @workspace_bp.route('/<workspace_id>/members/<user_id>', methods=['DELETE'])
 @login_required
 def remove_member(workspace_id, user_id):
-    role = _get_role(workspace_id, current_user.id)
-    if role != 'owner':
+    role = get_role(workspace_id, current_user.id)
+    if not can_manage_members(role):
         return jsonify({'error': 'Seul le propriétaire peut retirer des membres'}), 403
 
     if user_id == current_user.id:
