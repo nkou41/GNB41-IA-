@@ -131,6 +131,7 @@ function App() {
   const [quickProvider, setQuickProvider] = useState('claude');
   const [quickLoading, setQuickLoading] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [landingPrompt, setLandingPrompt] = useState('');
   const [landingModel, setLandingModel] = useState('claude');
   const [recentProjects, setRecentProjects] = useState<any[]>([]);
@@ -1622,16 +1623,27 @@ function App() {
           </div>
         </div>
       )}
-      <header>
-        <h1><img src="/logo.png" alt="" className="app-logo" />GNB41 IA</h1>
-        <div>
-          <NotificationBell />
-            <span>{user.username}</span>
-          <button className="upgrade-btn" onClick={() => setShowUpgradeModal(true)}>✦ Mettre à niveau</button>
-            <button onClick={() => { setShowMarketplace(true); setShowSettings(false); navigateTo('/marketplace'); }}>Boutique</button>
-            <button onClick={() => { setShowSettings(true); navigateTo('/parametres'); }}>Paramètres</button>
-          <button onClick={handleLogout}>Déconnexion</button>
-        </div>
+      <header className="header-minimal">
+        <button className="hamburger-btn" onClick={() => setShowMenu(!showMenu)} aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+        <img src="/logo.png" alt="GNB41 IA" className="app-logo-center" />
+        <div className="header-spacer" />
+        {showMenu && (
+          <>
+            <div className="menu-overlay" onClick={() => setShowMenu(false)} />
+            <nav className="side-menu">
+              <div className="side-menu-user">
+                <span className="side-menu-username">{user.username}</span>
+              </div>
+              <NotificationBell />
+              <button className="side-menu-item upgrade-btn" onClick={() => { setShowMenu(false); setShowUpgradeModal(true); }}>✦ Mettre à niveau</button>
+              <button className="side-menu-item" onClick={() => { setShowMenu(false); setShowMarketplace(true); setShowSettings(false); navigateTo('/marketplace'); }}>Boutique</button>
+              <button className="side-menu-item" onClick={() => { setShowMenu(false); setShowSettings(true); navigateTo('/parametres'); }}>Paramètres</button>
+              <button className="side-menu-item side-menu-logout" onClick={handleLogout}>Déconnexion</button>
+            </nav>
+          </>
+        )}
       </header>
 
       <div className="app-nav-tabs">
