@@ -27,13 +27,6 @@ interface Project {
   provider?: string;
 }
 
-interface Member {
-  user_id: string;
-  username: string;
-  email: string;
-  role: string;
-}
-
 function AnimatedPlaceholder({ text, active }: { text: string; active: boolean }) {
   const [displayed, setDisplayed] = useState('');
 
@@ -116,18 +109,12 @@ function App() {
   const [publishTags, setPublishTags] = useState('');
   const [publishLoading, setPublishLoading] = useState(false);
   const [publishError, setPublishError] = useState('');
-  const [showMembers, setShowMembers] = useState(false);
-  const [showActivity, setShowActivity] = useState(false);
-  const [activityLogs, setActivityLogs] = useState<any[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [showVersions, setShowVersions] = useState(false);
   const [versions, setVersions] = useState<any[]>([]);
   const [showAuth, setShowAuth] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotMessage, setForgotMessage] = useState('');
-  const [newProjectProvider, setNewProjectProvider] = useState('claude');
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
@@ -155,9 +142,6 @@ function App() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const [newProjectName, setNewProjectName] = useState('');
-  const [newProjectPrompt, setNewProjectPrompt] = useState('');
-  const [generating, setGenerating] = useState(false);
 
   const [settingsEmail, setSettingsEmail] = useState('');
   const [settingsPassword, setSettingsPassword] = useState('');
@@ -165,9 +149,6 @@ function App() {
   const [settingsMsg, setSettingsMsg] = useState('');
   const [settingsError, setSettingsError] = useState('');
 
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState('editeur');
-  const [inviteError, setInviteError] = useState('');
 
   useEffect(() => {
     api.me().then(setUser).catch(() => {}).finally(() => setLoading(false));
@@ -302,18 +283,6 @@ function App() {
   }, [activeWorkspace]);
 
   useEffect(() => {
-    if (showMembers && activeWorkspace) {
-      api.listMembers(activeWorkspace.id).then(setMembers).catch(() => {});
-    }
-  }, [showMembers, activeWorkspace]);
-
-  useEffect(() => {
-    if (showActivity && activeWorkspace) {
-      api.getActivity(activeWorkspace.id).then(setActivityLogs).catch(() => {});
-    }
-  }, [showActivity, activeWorkspace]);
-
-  useEffect(() => {
     if (showMarketplace) {
       api.listMarketplace().then((res) => setMarketplaceListings(res.listings)).catch(() => {});
     }
@@ -424,27 +393,6 @@ function App() {
   };
 
 
-  const handleCreateProject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!activeWorkspace || !newProjectName.trim() || !newProjectPrompt.trim()) return;
-    setGenerating(true);
-    try {
-      const project = await api.createProject(activeWorkspace.id, newProjectName, newProjectPrompt, newProjectProvider);
-      setProjects([...projects, project]);
-      setNewProjectName('');
-      setNewProjectPrompt('');
-    } finally {
-      setGenerating(false);
-    }
-  };
-
-  const handleDeleteProject = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!confirm('Supprimer ce projet ?')) return;
-    await api.deleteProject(id);
-    setProjects(projects.filter((p) => p.id !== id));
-  };
-
   const handleUpdateSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setSettingsError('');
@@ -458,26 +406,6 @@ function App() {
     } catch (err: any) {
       setSettingsError(err.message);
     }
-  };
-
-  const handleInvite = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!activeWorkspace) return;
-    setInviteError('');
-    try {
-      const m = await api.addMember(activeWorkspace.id, inviteEmail, inviteRole);
-      setMembers([...members, m]);
-      setInviteEmail('');
-    } catch (err: any) {
-      setInviteError(err.message);
-    }
-  };
-
-  const handleRemoveMember = async (userId: string) => {
-    if (!activeWorkspace) return;
-    if (!confirm('Retirer ce membre ?')) return;
-    await api.removeMember(activeWorkspace.id, userId);
-    setMembers(members.filter((m) => m.user_id !== userId));
   };
 
   const handlePurchase = async (listingId: string) => {
@@ -1647,126 +1575,6 @@ function App() {
     );
   }
   // Vue liste projets d'un workspace
-  if (activeWorkspace) {
-    const filteredProjects = projects.filter((p) =>
-      p.nom.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.prompt_initial.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    return (
-      <div className="dashboard">
-        <header>
-          <h1 onClick={() => { setActiveWorkspace(null); setShowMembers(false); }} style={{ cursor: 'pointer' }}>← GNB41 IA</h1>
-          <div>
-            <button onClick={() => setShowMembers(!showMembers)}>Membres</button>
-            <button onClick={() => setShowActivity(!showActivity)}>Activité</button>
-            <NotificationBell />
-            <span>{user.username}</span>
-            <button className="upgrade-btn" onClick={() => setShowUpgradeModal(true)}>✦ Mettre à niveau</button>
-            <button onClick={() => { setShowMarketplace(true); setShowSettings(false); navigateTo('/marketplace'); }}>Boutique</button>
-            <button onClick={() => { setShowSettings(true); navigateTo('/parametres'); }}>Paramètres</button>
-            <button onClick={handleLogout}>Déconnexion</button>
-          </div>
-        </header>
-        <main>
-          <h2>{activeWorkspace.nom}</h2>
-
-          {showMembers && (
-            <div className="detail-section members-panel">
-              <h3>Membres</h3>
-              {activeWorkspace.owner_id === user.id && (
-                <form onSubmit={handleInvite} className="new-workspace-form">
-                  <input placeholder="Email à inviter" type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} />
-                  <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} className="role-select">
-                    <option value="editeur">Éditeur</option>
-                    <option value="lecteur">Lecteur</option>
-                  </select>
-                  <button type="submit">Inviter</button>
-                </form>
-              )}
-              {inviteError && <p className="error">{inviteError}</p>}
-              <ul className="members-list">
-                {members.map((m) => (
-                  <li key={m.user_id}>
-                    <span>{m.username} ({m.email}) — {m.role}</span>
-                    {activeWorkspace.owner_id === user.id && m.role !== 'owner' && (
-                      <button className="delete-btn" onClick={() => handleRemoveMember(m.user_id)}>×</button>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {showActivity && (
-            <div className="detail-section activity-panel">
-              <h3>Activité récente</h3>
-              <ul className="activity-list">
-                {activityLogs.length === 0 && <li>Aucune activité récente</li>}
-                {activityLogs.map((log) => {
-                  const labels: Record<string, string> = {
-                    project_created: 'a créé le projet',
-                    project_deleted: 'a supprimé le projet',
-                    member_added: 'a invité',
-                    member_removed: 'a retiré',
-                  };
-                  const label = labels[log.action] || log.action;
-                  return (
-                    <li key={log.id}>
-                      <strong>{log.username}</strong> {label} {log.details && <em>{log.details}</em>}
-                      <span className="activity-date"> — {new Date(log.created_at).toLocaleString('fr-FR')}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-
-          <form onSubmit={handleCreateProject} className="new-project-form">
-            <input placeholder="Nom du projet" value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} />
-            <textarea
-              placeholder="Décrivez l'application à générer (prompt IA)"
-              value={newProjectPrompt}
-              onChange={(e) => {
-                setNewProjectPrompt(e.target.value);
-                e.target.style.height = 'auto';
-                e.target.style.height = e.target.scrollHeight + 'px';
-              }}
-              rows={3}
-              className="auto-grow-textarea"
-              ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }}
-            />
-            <select value={newProjectProvider} onChange={(e) => setNewProjectProvider(e.target.value)} className="provider-select">
-              <option value="claude">Claude (Anthropic)</option>
-              <option value="openai">GPT (OpenAI)</option>
-              <option value="gemini">Gemini (Google)</option>
-              <option value="mistral">Mistral (Mistral AI)</option>
-            </select>
-            <button type="submit" disabled={generating}>{generating ? <div className="spinner"></div> : 'Générer le projet'}</button>
-          </form>
-
-          <input
-            placeholder="Rechercher un projet..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
-          />
-
-          <div className="workspace-grid">
-            {filteredProjects.map((p) => (
-              <div key={p.id} className="workspace-card" onClick={() => { setActiveProject(p); navigateTo(`/projet/${p.id}`); }}>
-                <button className="delete-btn" onClick={(e) => handleDeleteProject(p.id, e)}>×</button>
-                <h3>{p.nom}</h3>
-                <p className={`statut statut-${p.statut}`}>{p.statut}</p>
-                <p>{p.prompt_initial}</p>
-              </div>
-            ))}
-            {filteredProjects.length === 0 && <p>Aucun projet trouvé.</p>}
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   // Vue accueil rapide (type Base44) - écran unique après connexion
   return (
