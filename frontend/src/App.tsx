@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import NotificationBell from './components/NotificationBell';
+import { identifyUser, trackEvent, resetAnalytics } from './analytics';
 import { api } from './api';
 import './App.css';
 
@@ -116,6 +117,8 @@ function App() {
   const [publishLoading, setPublishLoading] = useState(false);
   const [publishError, setPublishError] = useState('');
   const [showMembers, setShowMembers] = useState(false);
+  const [showActivity, setShowActivity] = useState(false);
+  const [activityLogs, setActivityLogs] = useState<any[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showVersions, setShowVersions] = useState(false);
@@ -305,6 +308,12 @@ function App() {
   }, [showMembers, activeWorkspace]);
 
   useEffect(() => {
+    if (showActivity && activeWorkspace) {
+      api.getActivity(activeWorkspace.id).then(setActivityLogs).catch(() => {});
+    }
+  }, [showActivity, activeWorkspace]);
+
+  useEffect(() => {
     if (showMarketplace) {
       api.listMarketplace().then((res) => setMarketplaceListings(res.listings)).catch(() => {});
     }
@@ -394,12 +403,19 @@ function App() {
         ? await api.login(username, password)
         : await api.register(username, email, password);
       setUser(result);
+      identifyUser(String(result.id), { username: result.username, email: result.email });
+      trackEvent(authMode === 'login' ? 'user_logged_in' : 'user_registered');
+      if (authMode === 'register') {
+        trackEvent('welcome_notification_triggered');
+      }
     } catch (err: any) {
       setError(err.message);
     }
   };
 
   const handleLogout = async () => {
+    trackEvent('user_logged_out');
+    resetAnalytics();
     await api.logout();
     setUser(null);
     setWorkspaces([]);
@@ -1643,6 +1659,7 @@ function App() {
           <h1 onClick={() => { setActiveWorkspace(null); setShowMembers(false); }} style={{ cursor: 'pointer' }}>← GNB41 IA</h1>
           <div>
             <button onClick={() => setShowMembers(!showMembers)}>Membres</button>
+            <button onClick={() => setShowActivity(!showActivity)}>Activité</button>
             <NotificationBell />
             <span>{user.username}</span>
             <button className="upgrade-btn" onClick={() => setShowUpgradeModal(true)}>✦ Mettre à niveau</button>
@@ -1677,6 +1694,30 @@ function App() {
                     )}
                   </li>
                 ))}
+              </ul>
+            </div>
+          )}
+
+          {showActivity && (
+            <div className="detail-section activity-panel">
+              <h3>Activité récente</h3>
+              <ul className="activity-list">
+                {activityLogs.length === 0 && <li>Aucune activité récente</li>}
+                {activityLogs.map((log) => {
+                  const labels: Record<string, string> = {
+                    project_created: 'a créé le projet',
+                    project_deleted: 'a supprimé le projet',
+                    member_added: 'a invité',
+                    member_removed: 'a retiré',
+                  };
+                  const label = labels[log.action] || log.action;
+                  return (
+                    <li key={log.id}>
+                      <strong>{log.username}</strong> {label} {log.details && <em>{log.details}</em>}
+                      <span className="activity-date"> — {new Date(log.created_at).toLocaleString('fr-FR')}</span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}

@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from app import db
 from app.models.workspace import Workspace, WorkspaceMember
 from app.models.user import User
-from app.utils.permissions import get_role, can_manage_members, VALID_ROLES, ROLE_EDITOR
+from app.utils.permissions import get_role, can_manage_members, VALID_ROLES, ROLE_EDITOR, log_activity
 
 workspace_bp = Blueprint('workspace', __name__)
 
@@ -100,6 +100,7 @@ def add_member(workspace_id):
 
     member = WorkspaceMember(workspace_id=workspace_id, user_id=user.id, role=new_role)
     db.session.add(member)
+    log_activity(workspace_id, current_user.id, 'member_added', user.email)
     db.session.commit()
 
     return jsonify({
@@ -124,6 +125,18 @@ def remove_member(workspace_id, user_id):
     if not member:
         return jsonify({'error': 'Membre introuvable'}), 404
 
+    removed_user = User.query.get(user_id)
+    log_activity(workspace_id, current_user.id, 'member_removed', removed_user.email if removed_user else user_id)
     db.session.delete(member)
     db.session.commit()
     return jsonify({'success': True})
+
+
+@workspace_bp.route('/<workspace_id>/activity', methods=['GET'])
+@login_required
+def list_activity(workspace_id):
+    if not get_role(workspace_id, current_user.id):
+        return jsonify({'error': 'Non autorisé'}), 403
+    from app.models.activity_log import ActivityLog
+    logs = ActivityLog.query.filter_by(workspace_id=workspace_id).order_by(ActivityLog.created_at.desc()).limit(50).all()
+    return jsonify([l.to_dict() for l in logs])

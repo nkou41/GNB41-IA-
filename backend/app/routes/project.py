@@ -8,7 +8,7 @@ from app.models.project import Project
 from app.models.project_version import ProjectVersion
 from app.models.project_message import ProjectMessage
 from app.models.workspace import Workspace, WorkspaceMember
-from app.utils.permissions import get_role, can_edit
+from app.utils.permissions import get_role, can_edit, log_activity
 from app.services.generator import generate_project_code
 
 project_bp = Blueprint('project', __name__)
@@ -83,6 +83,8 @@ def create_project(workspace_id):
     db.session.commit()
 
     project = _run_generation(project, prompt_initial, provider)
+    log_activity(workspace_id, current_user.id, 'project_created', nom)
+    db.session.commit()
     return jsonify(project.to_dict()), 201
 
 
@@ -101,6 +103,7 @@ def delete_project(project_id):
     project = Project.query.get_or_404(project_id)
     if not _check_edit_access(project.workspace_id):
         return jsonify({'error': 'Non autorisé'}), 403
+    log_activity(project.workspace_id, current_user.id, 'project_deleted', project.nom)
     db.session.delete(project)
     db.session.commit()
     return jsonify({'success': True})

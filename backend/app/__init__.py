@@ -84,6 +84,7 @@ def create_app(test_config=None):
     from app.models.listing import Listing
     from app.models.purchase import Purchase
     from app.models.notification import Notification
+    from app.models.activity_log import ActivityLog
 
     from app.routes.auth import auth_bp
     from app.routes.workspace import workspace_bp

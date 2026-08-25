@@ -14,3 +14,10 @@ def can_edit(role):
 
 def can_manage_members(role):
     return role == ROLE_OWNER
+
+
+def log_activity(workspace_id, user_id, action, details=None):
+    from app import db
+    from app.models.activity_log import ActivityLog
+    entry = ActivityLog(workspace_id=workspace_id, user_id=user_id, action=action, details=details)
+    db.session.add(entry)
