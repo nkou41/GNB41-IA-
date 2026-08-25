@@ -60,6 +60,7 @@ def create_app(test_config=None):
 
     app.config['WTF_CSRF_TIME_LIMIT'] = None
     app.config['WTF_CSRF_CHECK_DEFAULT'] = True
+    app.config['WTF_CSRF_SSL_STRICT'] = False
     csrf.init_app(app)
     socketio.init_app(app, async_mode='eventlet')
 

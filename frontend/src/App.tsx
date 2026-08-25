@@ -132,6 +132,13 @@ function App() {
   const [quickLoading, setQuickLoading] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showWorkspaceSettings, setShowWorkspaceSettings] = useState(false);
+  const [workspaceSettingsTab, setWorkspaceSettingsTab] = useState<'membres' | 'activite' | 'general'>('membres');
+  const [wsMembers, setWsMembers] = useState<any[]>([]);
+  const [wsActivityLogs, setWsActivityLogs] = useState<any[]>([]);
+  const [wsInviteEmail, setWsInviteEmail] = useState('');
+  const [wsInviteRole, setWsInviteRole] = useState('editeur');
+  const [wsInviteError, setWsInviteError] = useState('');
   const [landingPrompt, setLandingPrompt] = useState('');
   const [landingModel, setLandingModel] = useState('claude');
   const [recentProjects, setRecentProjects] = useState<any[]>([]);
@@ -154,6 +161,13 @@ function App() {
   useEffect(() => {
     api.me().then(setUser).catch(() => {}).finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (showWorkspaceSettings && activeWorkspace) {
+      api.listMembers(activeWorkspace.id).then(setWsMembers).catch(() => {});
+      api.getActivity(activeWorkspace.id).then(setWsActivityLogs).catch(() => {});
+    }
+  }, [showWorkspaceSettings, activeWorkspace]);
 
   useEffect(() => {
     if (!user) return;
