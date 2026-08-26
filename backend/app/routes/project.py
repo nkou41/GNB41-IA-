@@ -8,7 +8,7 @@ from app.models.project import Project
 from app.models.project_version import ProjectVersion
 from app.models.project_message import ProjectMessage
 from app.models.workspace import Workspace, WorkspaceMember
-from app.utils.permissions import get_role, can_edit, log_activity
+from app.utils.permissions import get_role, can_edit, log_activity, get_plan_limits
 from app.services.generator import generate_project_code
 
 project_bp = Blueprint('project', __name__)
@@ -77,6 +77,15 @@ def create_project(workspace_id):
     provider = data.get('provider', 'claude')
     if not nom or not prompt_initial:
         return jsonify({'error': 'nom et prompt_initial requis'}), 400
+
+    workspace = Workspace.query.get(workspace_id)
+    owner = User.query.get(workspace.owner_id) if workspace else None
+    if owner:
+        limits = get_plan_limits(owner.plan)
+        if limits['max_projects_per_workspace'] is not None:
+            current_count = Project.query.filter_by(workspace_id=workspace_id).count()
+            if current_count >= limits['max_projects_per_workspace']:
+                return jsonify({'error': f"Limite atteinte pour le plan {owner.plan} ({limits['max_projects_per_workspace']} projets max par espace). Passez au plan Pro pour en creer davantage."}), 403
 
     project = Project(workspace_id=workspace_id, nom=nom, prompt_initial=prompt_initial, statut='en_generation')
     db.session.add(project)

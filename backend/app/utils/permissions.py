@@ -21,3 +21,12 @@ def log_activity(workspace_id, user_id, action, details=None):
     from app.models.activity_log import ActivityLog
     entry = ActivityLog(workspace_id=workspace_id, user_id=user_id, action=action, details=details)
     db.session.add(entry)
+
+
+PLAN_LIMITS = {
+    'gratuit': {'max_workspaces': 1, 'max_projects_per_workspace': 3},
+    'pro': {'max_workspaces': None, 'max_projects_per_workspace': None},
+}
+
+def get_plan_limits(plan):
+    return PLAN_LIMITS.get(plan, PLAN_LIMITS['gratuit'])

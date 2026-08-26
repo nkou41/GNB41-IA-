@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from app import db
 from app.models.workspace import Workspace, WorkspaceMember
 from app.models.user import User
-from app.utils.permissions import get_role, can_manage_members, VALID_ROLES, ROLE_EDITOR, log_activity
+from app.utils.permissions import get_role, can_manage_members, VALID_ROLES, ROLE_EDITOR, log_activity, get_plan_limits
 
 workspace_bp = Blueprint('workspace', __name__)
 
@@ -25,6 +25,12 @@ def create_workspace():
     nom = data.get('nom')
     if not nom:
         return jsonify({'error': 'nom requis'}), 400
+
+    limits = get_plan_limits(current_user.plan)
+    if limits['max_workspaces'] is not None:
+        current_count = WorkspaceMember.query.filter_by(user_id=current_user.id, role='owner').count()
+        if current_count >= limits['max_workspaces']:
+            return jsonify({'error': f"Limite atteinte pour le plan {current_user.plan} ({limits['max_workspaces']} espace(s) de travail max). Passez au plan Pro pour en creer davantage."}), 403
 
     workspace = Workspace(nom=nom, owner_id=current_user.id)
     db.session.add(workspace)
