@@ -356,6 +356,7 @@ function App() {
       }
       const nom = quickPrompt.slice(0, 40);
       const project = await api.createProject(targetWorkspace.id, nom, quickPrompt, quickProvider);
+      trackEvent('project_created', { provider: quickProvider });
       setQuickPrompt('');
       setActiveWorkspace(targetWorkspace);
       setActiveProject(project);
@@ -408,6 +409,26 @@ function App() {
   };
 
 
+  const handleWsInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeWorkspace) return;
+    setWsInviteError('');
+    try {
+      const m = await api.addMember(activeWorkspace.id, wsInviteEmail, wsInviteRole);
+      setWsMembers([...wsMembers, m]);
+      setWsInviteEmail('');
+    } catch (err: any) {
+      setWsInviteError(err.message);
+    }
+  };
+
+  const handleWsRemoveMember = async (userId: string) => {
+    if (!activeWorkspace) return;
+    if (!confirm('Retirer ce membre ?')) return;
+    await api.removeMember(activeWorkspace.id, userId);
+    setWsMembers(wsMembers.filter((m) => m.user_id !== userId));
+  };
+
   const handleUpdateSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setSettingsError('');
@@ -427,6 +448,7 @@ function App() {
     setPurchaseLoadingId(listingId);
     try {
       const result = await api.purchaseListing(listingId);
+      trackEvent('marketplace_purchase_initiated', { listing_id: listingId });
       if (result.payment_url) {
         window.location.href = result.payment_url;
       } else {
@@ -474,6 +496,7 @@ function App() {
       formData.append('tags', publishTags);
 
       await api.createListing(formData);
+      trackEvent('listing_published', { categorie: publishCategorie, source_type: publishSourceType });
       setShowPublishForm(false);
       setPublishTitre('');
       setPublishDescription('');
@@ -1377,9 +1400,80 @@ function App() {
             <a href={api.exportProjectUrl(activeProject.id)} className="toolbar-icon-btn" title="Télécharger (.zip)" download>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </a>
+            <button className="toolbar-icon-btn" title="Paramètres du workspace" onClick={() => setShowWorkspaceSettings(true)}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </button>
             <button onClick={handleLogout}>Déconnexion</button>
           </div>
         </header>
+
+        {showWorkspaceSettings && (
+          <div className="ws-settings-overlay" onClick={() => setShowWorkspaceSettings(false)}>
+            <div className="ws-settings-panel" onClick={(e) => e.stopPropagation()}>
+              <div className="ws-settings-header">
+                <h3>Paramètres du workspace</h3>
+                <button className="modal-close" onClick={() => setShowWorkspaceSettings(false)}>×</button>
+              </div>
+              <div className="ws-settings-tabs">
+                <button className={workspaceSettingsTab === 'membres' ? 'active' : ''} onClick={() => setWorkspaceSettingsTab('membres')}>Membres</button>
+                <button className={workspaceSettingsTab === 'activite' ? 'active' : ''} onClick={() => setWorkspaceSettingsTab('activite')}>Activité</button>
+                <button className={workspaceSettingsTab === 'general' ? 'active' : ''} onClick={() => setWorkspaceSettingsTab('general')}>Général</button>
+              </div>
+              <div className="ws-settings-content">
+                {workspaceSettingsTab === 'membres' && (
+                  <>
+                    {activeWorkspace?.owner_id === user.id && (
+                      <form onSubmit={handleWsInvite} className="new-workspace-form">
+                        <input placeholder="Email à inviter" type="email" value={wsInviteEmail} onChange={(e) => setWsInviteEmail(e.target.value)} />
+                        <select value={wsInviteRole} onChange={(e) => setWsInviteRole(e.target.value)} className="role-select">
+                          <option value="editeur">Éditeur</option>
+                          <option value="lecteur">Lecteur</option>
+                        </select>
+                        <button type="submit">Inviter</button>
+                      </form>
+                    )}
+                    {wsInviteError && <p className="error">{wsInviteError}</p>}
+                    <ul className="members-list">
+                      {wsMembers.map((m) => (
+                        <li key={m.user_id}>
+                          <span>{m.username} ({m.email}) — {m.role}</span>
+                          {activeWorkspace?.owner_id === user.id && m.role !== 'owner' && (
+                            <button className="delete-btn" onClick={() => handleWsRemoveMember(m.user_id)}>×</button>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                {workspaceSettingsTab === 'activite' && (
+                  <ul className="activity-list">
+                    {wsActivityLogs.length === 0 && <li>Aucune activité récente</li>}
+                    {wsActivityLogs.map((log) => {
+                      const labels: Record<string, string> = {
+                        project_created: 'a créé le projet',
+                        project_deleted: 'a supprimé le projet',
+                        member_added: 'a invité',
+                        member_removed: 'a retiré',
+                      };
+                      const label = labels[log.action] || log.action;
+                      return (
+                        <li key={log.id}>
+                          <strong>{log.username}</strong> {label} {log.details && <em>{log.details}</em>}
+                          <span className="activity-date"> — {new Date(log.created_at).toLocaleString('fr-FR')}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                {workspaceSettingsTab === 'general' && (
+                  <div className="ws-general">
+                    <p><strong>Nom :</strong> {activeWorkspace?.nom}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="preview-tabs">
           <button className={`preview-tab ${previewTab === 'apercu' ? 'active' : ''}`} onClick={() => setPreviewTab('apercu')}>Aperçu</button>

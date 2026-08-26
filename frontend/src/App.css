@@ -1943,3 +1943,65 @@ input:focus, textarea:focus, select:focus {
   margin-top: auto;
   color: #e11d48;
 }
+
+/* --- Paramètres du workspace (modal) --- */
+.ws-settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.ws-settings-panel {
+  background: var(--bg, #fff);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 480px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.ws-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border, #e5e4e7);
+}
+
+.ws-settings-header h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.ws-settings-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border, #e5e4e7);
+}
+
+.ws-settings-tabs button {
+  flex: 1;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 2px solid transparent;
+}
+
+.ws-settings-tabs button.active {
+  border-bottom-color: var(--accent, #aa3bff);
+  color: var(--accent, #aa3bff);
+  font-weight: 600;
+}
+
+.ws-settings-content {
+  padding: 20px;
+  overflow-y: auto;
+}
