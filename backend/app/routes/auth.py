@@ -5,6 +5,7 @@ from flask_wtf.csrf import generate_csrf
 from app.models.user import User
 from app.services.email_service import send_email
 import secrets
+from app.utils.permissions import check_and_downgrade_plan
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -54,6 +55,7 @@ def register():
         from flask import current_app
         current_app.logger.error(f"Erreur envoi email confirmation: {str(e)}")
 
+    check_and_downgrade_plan(user)
     login_user(user)
     return jsonify(user.to_dict()), 201
 
@@ -101,6 +103,7 @@ def login():
     if not user or not user.check_password(password):
         return jsonify({'error': 'Identifiants invalides'}), 401
 
+    check_and_downgrade_plan(user)
     login_user(user)
     return jsonify(user.to_dict())
 
@@ -166,6 +169,7 @@ def logout():
 @auth_bp.route('/me', methods=['GET'])
 @login_required
 def me():
+    check_and_downgrade_plan(current_user)
     return jsonify(current_user.to_dict())
 
 

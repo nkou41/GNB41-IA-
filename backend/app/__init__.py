@@ -84,6 +84,9 @@ def create_app(test_config=None):
     from app.models.project_message import ProjectMessage
     from app.models.listing import Listing
     from app.models.purchase import Purchase
+    from app.models.app_table import AppTable
+    from app.models.app_row import AppRow
+    from app.models.api_key import ApiKey
     from app.models.notification import Notification
     from app.models.activity_log import ActivityLog
 
@@ -91,11 +94,13 @@ def create_app(test_config=None):
     from app.routes.workspace import workspace_bp
     from app.routes.project import project_bp
     from app.routes.marketplace import marketplace_bp
+    from app.routes.appdb import appdb_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(workspace_bp, url_prefix='/api/workspaces')
     app.register_blueprint(project_bp, url_prefix='/api/projects')
     app.register_blueprint(marketplace_bp, url_prefix='/api/marketplace')
+    app.register_blueprint(appdb_bp, url_prefix='/api/appdb')
     from app.routes.billing import billing_bp
     app.register_blueprint(billing_bp, url_prefix='/api/billing')
     from app.routes.notifications import notifications_bp

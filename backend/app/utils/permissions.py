@@ -30,3 +30,12 @@ PLAN_LIMITS = {
 
 def get_plan_limits(plan):
     return PLAN_LIMITS.get(plan, PLAN_LIMITS['gratuit'])
+
+
+def check_and_downgrade_plan(user):
+    from app import db
+    from datetime import datetime
+    if user.plan == 'pro' and user.plan_expiry and user.plan_expiry < datetime.utcnow():
+        user.plan = 'gratuit'
+        user.plan_expiry = None
+        db.session.commit()

@@ -1,6 +1,7 @@
 import os
 import requests
 from flask import Blueprint, request, jsonify, current_app
+from datetime import datetime, timedelta
 from flask_login import login_required, current_user
 from app import db, limiter
 
@@ -71,8 +72,9 @@ def verify_payment(transaction_id):
         status = transaction.get('status')
         if status == 'approved':
             current_user.plan = 'pro'
+            current_user.plan_expiry = datetime.utcnow() + timedelta(days=30)
             db.session.commit()
-            return jsonify({'status': 'approved', 'plan': current_user.plan})
+            return jsonify({'status': 'approved', 'plan': current_user.plan, 'plan_expiry': current_user.plan_expiry.isoformat()})
         return jsonify({'status': status})
     except requests.exceptions.RequestException as e:
         current_app.logger.error(f'Erreur verification paiement FedaPay: {str(e)}')

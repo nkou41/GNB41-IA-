@@ -18,6 +18,7 @@ class User(UserMixin, db.Model):
     email_confirmed = db.Column(db.Boolean, default=False)
     confirm_token = db.Column(db.String(100), unique=True, nullable=True)
     plan = db.Column(db.String(20), default='gratuit')
+    plan_expiry = db.Column(db.DateTime, nullable=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -31,7 +32,8 @@ class User(UserMixin, db.Model):
             'username': self.username,
             'email': self.email,
             'created_at': self.created_at.isoformat(),
-            'plan': self.plan or 'gratuit'
+            'plan': self.plan or 'gratuit',
+            'plan_expiry': self.plan_expiry.isoformat() if self.plan_expiry else None
         }
 
 

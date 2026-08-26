@@ -1743,6 +1743,9 @@ function App() {
             <nav className="side-menu">
               <div className="side-menu-user">
                 <span className="side-menu-username">{user.username}</span>
+                {user.plan === 'pro' && user.plan_expiry && (
+                  <span className="side-menu-plan">Pro jusqu'au {new Date(user.plan_expiry).toLocaleDateString('fr-FR')}</span>
+                )}
               </div>
               <NotificationBell />
               <button className="side-menu-item upgrade-btn" onClick={() => { setShowMenu(false); setShowUpgradeModal(true); }}>✦ Mettre à niveau</button>
