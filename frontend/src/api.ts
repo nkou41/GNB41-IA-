@@ -34,7 +34,7 @@ async function request(path: string, options: RequestInit = {}) {
     } catch {}
   }
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Erreur serveur');
+  if (!res.ok) throw new Error(data.detail ? `${data.error}: ${data.detail}` : (data.error || 'Erreur serveur'));
   return data;
 }
 
