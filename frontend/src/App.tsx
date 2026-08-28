@@ -1677,7 +1677,7 @@ function App() {
                           + Nouvelle cle API
                         </button>
                         {newKeyRevealed && (
-                          <div style={{ padding: '0.8rem', background: '#fef3c7', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.78rem', wordBreak: 'break-all' }}>
+                          <div style={{ padding: '0.8rem', background: darkMode ? '#4a3f1a' : '#fef3c7', color: darkMode ? '#f0e6c0' : 'inherit', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.78rem', wordBreak: 'break-all' }}>
                             Copiez cette cle maintenant, elle ne sera plus affichee : <strong>{newKeyRevealed}</strong>
                           </div>
                         )}

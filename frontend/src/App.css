@@ -2131,3 +2131,25 @@ body.dark-mode .chat-input-form textarea::placeholder {
 body.dark-mode .side-menu-user {
   border-color: #3a3448;
 }
+
+body.dark-mode .code-editor-sidebar,
+body.dark-mode .code-editor-main,
+body.dark-mode .code-editor-toolbar {
+  background: #241f2e;
+  color: #e8e5f0;
+  border-color: #3a3448;
+}
+
+body.dark-mode .code-editor-file-btn {
+  color: #e8e5f0;
+  border-color: #3a3448;
+}
+
+body.dark-mode .code-editor-file-btn:hover {
+  background: #322c3e;
+}
+
+body.dark-mode .stack-badge {
+  background: #322c3e;
+  color: #e8e5f0;
+}
