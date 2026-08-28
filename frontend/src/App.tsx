@@ -128,7 +128,12 @@ function App() {
   const [attachedImage, setAttachedImage] = useState<{ data: string; mediaType: string; name: string } | null>(null);
   const [showProviderMenu, setShowProviderMenu] = useState(false);
   const [chatProvider, setChatProvider] = useState('claude');
-  const [previewTab, setPreviewTab] = useState<'apercu' | 'code'>('apercu');
+  const [previewTab, setPreviewTab] = useState<'apercu' | 'code' | 'donnees'>('apercu');
+  const [appTables, setAppTables] = useState<any[]>([]);
+  const [appKeys, setAppKeys] = useState<any[]>([]);
+  const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
+  const [selectedTableRows, setSelectedTableRows] = useState<any[]>([]);
+  const [newKeyRevealed, setNewKeyRevealed] = useState<string | null>(null);
   const [quickPrompt, setQuickPrompt] = useState('');
   const [quickProvider, setQuickProvider] = useState('claude');
   const [quickLoading, setQuickLoading] = useState(false);
@@ -1480,6 +1485,7 @@ function App() {
         <div className="preview-tabs">
           <button className={`preview-tab ${previewTab === 'apercu' ? 'active' : ''}`} onClick={() => setPreviewTab('apercu')}>Aperçu</button>
           <button className={`preview-tab ${previewTab === 'code' ? 'active' : ''}`} onClick={() => setPreviewTab('code')}>Code</button>
+          <button className={`preview-tab ${previewTab === 'donnees' ? 'active' : ''}`} onClick={() => { setPreviewTab('donnees'); if (activeProject) { api.listAppTables(activeProject.id).then(setAppTables).catch(() => {}); api.listAppKeys(activeProject.id).then(setAppKeys).catch(() => {}); } }}>Base de donnees</button>
         </div>
 
         {showVersions && (
@@ -1614,6 +1620,85 @@ function App() {
                   <p>L'aperçu apparaîtra ici une fois l'application générée.</p>
                 </div>
               )
+            ) : previewTab === 'donnees' ? (
+              <div className="code-editor-layout">
+                <div className="code-editor-sidebar">
+                  <p className="stack-badge">Tables</p>
+                  {appTables.map((t: any) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      className={`code-editor-file-btn ${selectedTableId === t.id ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedTableId(t.id);
+                        api.listAppRows(t.id).then(setSelectedTableRows).catch(() => setSelectedTableRows([]));
+                      }}
+                    >
+                      {t.nom}
+                    </button>
+                  ))}
+                  {appTables.length === 0 && <p style={{ fontSize: '0.78rem', color: '#8a7f68', padding: '0.5rem' }}>Aucune table declaree pour ce projet.</p>}
+                </div>
+                <div className="code-editor-main">
+                  <div className="code-editor-toolbar">
+                    <span className="code-editor-filename">
+                      {selectedTableId ? appTables.find((t: any) => t.id === selectedTableId)?.nom : 'Cles API'}
+                    </span>
+                  </div>
+                  <div style={{ padding: '1rem', overflow: 'auto', flex: 1 }}>
+                    {selectedTableId ? (
+                      <>
+                        <p style={{ fontSize: '0.8rem', color: '#8a7f68', marginBottom: '0.6rem' }}>{selectedTableRows.length} ligne(s)</p>
+                        {selectedTableRows.map((row: any) => (
+                          <pre key={row.id} className="code-block" style={{ fontSize: '0.75rem', marginBottom: '0.5rem' }}>{JSON.stringify(row.data, null, 2)}</pre>
+                        ))}
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          className="btn-publish"
+                          style={{ marginBottom: '1rem' }}
+                          onClick={async () => {
+                            if (!activeProject) return;
+                            const res = await api.createAppKey(activeProject.id);
+                            setNewKeyRevealed(res.key);
+                            const keys = await api.listAppKeys(activeProject.id);
+                            setAppKeys(keys);
+                          }}
+                        >
+                          + Nouvelle cle API
+                        </button>
+                        {newKeyRevealed && (
+                          <div style={{ padding: '0.8rem', background: '#fef3c7', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.78rem', wordBreak: 'break-all' }}>
+                            Copiez cette cle maintenant, elle ne sera plus affichee : <strong>{newKeyRevealed}</strong>
+                          </div>
+                        )}
+                        {appKeys.map((k: any) => (
+                          <div key={k.id} className="admin-sales-row" style={{ gridTemplateColumns: '1fr auto' }}>
+                            <span>{k.key_prefix}... {k.revoked ? '(revoquee)' : ''}</span>
+                            {!k.revoked && (
+                              <button
+                                type="button"
+                                className="marketplace-link-btn"
+                                onClick={async () => {
+                                  await api.revokeAppKey(k.id);
+                                  if (activeProject) {
+                                    const keys = await api.listAppKeys(activeProject.id);
+                                    setAppKeys(keys);
+                                  }
+                                }}
+                              >
+                                Revoquer
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
             ) : parsedFiles && parsedFiles.fichiers ? (
               <div className="code-editor-layout">
                 <div className="code-editor-sidebar">

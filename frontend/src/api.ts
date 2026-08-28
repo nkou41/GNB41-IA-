@@ -110,4 +110,12 @@ export const api = {
   verifyPurchase: (purchaseId: string) => request(`/marketplace/purchase/${purchaseId}/verify`),
   updateFile: (projectId: string, chemin: string, contenu: string) =>
     request(`/projects/${projectId}/files`, { method: 'PUT', body: JSON.stringify({ chemin, contenu }) }),
+  listAppTables: (projectId: string) => request(`/appdb/${projectId}/tables`),
+  createAppTable: (projectId: string, nom: string, colonnes: any[]) =>
+    request(`/appdb/${projectId}/tables`, { method: 'POST', body: JSON.stringify({ nom, colonnes }) }),
+  deleteAppTable: (tableId: string) => request(`/appdb/tables/${tableId}`, { method: 'DELETE' }),
+  listAppRows: (tableId: string) => request(`/appdb/tables/${tableId}/rows`),
+  listAppKeys: (projectId: string) => request(`/appdb/${projectId}/keys`),
+  createAppKey: (projectId: string) => request(`/appdb/${projectId}/keys`, { method: 'POST' }),
+  revokeAppKey: (keyId: string) => request(`/appdb/keys/${keyId}`, { method: 'DELETE' }),
 };

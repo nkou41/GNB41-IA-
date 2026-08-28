@@ -74,6 +74,16 @@ def create_table(project_id):
     return jsonify(table.to_dict()), 201
 
 
+@appdb_bp.route('/tables/<table_id>/rows', methods=['GET'])
+@login_required
+def owner_list_rows(table_id):
+    table = AppTable.query.get_or_404(table_id)
+    if not _check_project_access(table.project_id):
+        return jsonify({'error': 'Non autorisé'}), 403
+    rows = AppRow.query.filter_by(table_id=table_id).all()
+    return jsonify([r.to_dict() for r in rows])
+
+
 @appdb_bp.route('/tables/<table_id>', methods=['DELETE'])
 @login_required
 def delete_table(table_id):
