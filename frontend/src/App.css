@@ -2153,3 +2153,22 @@ body.dark-mode .stack-badge {
   background: #322c3e;
   color: #e8e5f0;
 }
+
+body.dark-mode .dashboard header,
+body.dark-mode .dashboard header div button,
+body.dark-mode .auth-form {
+  background: #241f2e;
+  color: #e8e5f0;
+  border-color: #3a3448;
+}
+
+body.dark-mode .dashboard header h1,
+body.dark-mode .dashboard main h2 {
+  color: #e8e5f0;
+}
+
+body.dark-mode .auth-form input {
+  background: #322c3e;
+  color: #e8e5f0;
+  border-color: #3a3448;
+}
