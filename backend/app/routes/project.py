@@ -27,6 +27,53 @@ def _check_edit_access(workspace_id):
     return can_edit(role)
 
 
+def _provision_database(project, tables):
+    import json as json_lib
+    from app.models.app_table import AppTable
+    from app.models.api_key import ApiKey
+
+    if not tables:
+        return None
+
+    for t in tables:
+        existing = AppTable.query.filter_by(project_id=project.id, nom=t.get('nom')).first()
+        if not existing:
+            new_table = AppTable(project_id=project.id, nom=t.get('nom'), colonnes=json_lib.dumps(t.get('colonnes', [])))
+            db.session.add(new_table)
+    db.session.commit()
+
+    ApiKey.query.filter_by(project_id=project.id, revoked=False).update({'revoked': True})
+    raw, prefix, key_hash = ApiKey.generate_key()
+    key = ApiKey(project_id=project.id, key_prefix=prefix, key_hash=key_hash)
+    db.session.add(key)
+    db.session.commit()
+
+    return raw
+
+
+def _substitute_placeholders(code_genere_json, project, api_key_raw):
+    import json as json_lib
+    from app.models.app_table import AppTable
+
+    parsed = json_lib.loads(code_genere_json)
+    fichiers = parsed.get('fichiers', [])
+    tables = AppTable.query.filter_by(project_id=project.id).all()
+    table_map = {t.nom: t.id for t in tables}
+
+    api_base = os.environ.get('API_PUBLIC_URL', 'http://localhost:5001/api')
+
+    for f in fichiers:
+        contenu = f.get('contenu', '')
+        contenu = contenu.replace('{{API_BASE}}', api_base)
+        if api_key_raw:
+            contenu = contenu.replace('{{API_KEY}}', api_key_raw)
+        for nom_table, table_id in table_map.items():
+            contenu = contenu.replace('{{TABLE_ID:' + nom_table + '}}', table_id)
+        f['contenu'] = contenu
+
+    return json_lib.dumps(parsed, ensure_ascii=False, indent=2)
+
+
 def _run_generation(project, prompt, provider, history=None, image=None):
     if provider not in VALID_PROVIDERS:
         provider = 'claude'
@@ -52,6 +99,12 @@ def _run_generation(project, prompt, provider, history=None, image=None):
     else:
         project.code_genere = result.get('code')
         project.erreur_message = None
+
+        tables = result.get('tables', [])
+        if tables:
+            api_key_raw = _provision_database(project, tables)
+            project.code_genere = _substitute_placeholders(project.code_genere, project, api_key_raw)
+
     db.session.commit()
     return project
 
