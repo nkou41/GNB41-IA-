@@ -383,14 +383,7 @@ function App() {
   const [upgradeLoading, setUpgradeLoading] = useState(false);
 
   const handleUpgrade = async (plan: string) => {
-    setUpgradeLoading(true);
-    try {
-      const res = await api.createPayment(plan);
-      window.location.href = res.payment_url;
-    } catch (err: any) {
-      alert(err.message || "Erreur lors de la creation du paiement");
-      setUpgradeLoading(false);
-    }
+    alert("Le paiement n'est pas encore disponible. Cette section est un aperçu des offres à venir.");
   };
 
   const handleAuth = async (e: React.FormEvent) => {
