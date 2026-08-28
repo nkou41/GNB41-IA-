@@ -139,6 +139,12 @@ function App() {
   const [quickLoading, setQuickLoading] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [darkMode, setDarkMode] = useState<boolean>(() => localStorage.getItem('theme') === 'dark');
+
+  useEffect(() => {
+    document.body.classList.toggle('dark-mode', darkMode);
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
   const [showWorkspaceSettings, setShowWorkspaceSettings] = useState(false);
   const [workspaceSettingsTab, setWorkspaceSettingsTab] = useState<'membres' | 'activite' | 'general'>('membres');
   const [wsMembers, setWsMembers] = useState<any[]>([]);
@@ -1841,6 +1847,7 @@ function App() {
               <button className="side-menu-item" onClick={() => { setShowMenu(false); document.querySelector('.recent-section')?.scrollIntoView({ behavior: 'smooth' }); }}>Projets</button>
               <button className="side-menu-item" onClick={() => { setShowMenu(false); setShowMarketplace(true); setShowSettings(false); navigateTo('/marketplace'); }}>Boutique</button>
               <button className="side-menu-item" onClick={() => { setShowMenu(false); setShowSettings(true); navigateTo('/parametres'); }}>Paramètres</button>
+              <button className="side-menu-item" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️ Mode clair' : '🌙 Mode sombre'}</button>
               <button className="side-menu-item side-menu-logout" onClick={handleLogout}>Déconnexion</button>
             </nav>
           </>

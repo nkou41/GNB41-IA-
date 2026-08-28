@@ -2080,3 +2080,54 @@ input:focus, textarea:focus, select:focus {
     left: 0;
   }
 }
+
+/* --- Mode sombre --- */
+body.dark-mode {
+  background: #1a1720;
+  color: #e8e5f0;
+}
+
+body.dark-mode .header-minimal,
+body.dark-mode .quickstart-form,
+body.dark-mode .chat-input-form,
+body.dark-mode .side-menu,
+body.dark-mode .workspace-card,
+body.dark-mode .chat-msg-assistant,
+body.dark-mode .workspace-builder header,
+body.dark-mode .builder-chat,
+body.dark-mode .plan-card,
+body.dark-mode .upgrade-modal,
+body.dark-mode .ws-settings-overlay > div,
+body.dark-mode .modal-overlay > div {
+  background: #241f2e;
+  color: #e8e5f0;
+  border-color: #3a3448;
+}
+
+body.dark-mode .toolbar-icon-btn,
+body.dark-mode .icon-btn,
+body.dark-mode .side-menu-item {
+  background: transparent;
+  color: #e8e5f0;
+  border-color: #3a3448;
+}
+
+body.dark-mode .side-menu-item:hover,
+body.dark-mode .toolbar-icon-btn:hover {
+  background: #322c3e;
+}
+
+body.dark-mode .quickstart-form textarea,
+body.dark-mode .chat-input-form textarea {
+  color: #e8e5f0;
+}
+
+body.dark-mode .recent-section h3,
+body.dark-mode .quickstart-form textarea::placeholder,
+body.dark-mode .chat-input-form textarea::placeholder {
+  color: #9d94b0;
+}
+
+body.dark-mode .side-menu-user {
+  border-color: #3a3448;
+}
