@@ -2172,3 +2172,39 @@ body.dark-mode .auth-form input {
   color: #e8e5f0;
   border-color: #3a3448;
 }
+
+body.dark-mode .marketplace-page {
+  background: #1a1720;
+  color: #e8e5f0;
+}
+
+body.dark-mode .marketplace-header,
+body.dark-mode .marketplace-card,
+body.dark-mode .marketplace-form-panel,
+body.dark-mode .marketplace-empty,
+body.dark-mode .marketplace-link-btn {
+  background: #241f2e;
+  color: #e8e5f0;
+  border-color: #3a3448;
+}
+
+body.dark-mode .marketplace-header h1,
+body.dark-mode .marketplace-title-row h2,
+body.dark-mode .marketplace-card h3 {
+  color: #e8e5f0;
+}
+
+body.dark-mode .marketplace-title-row p,
+body.dark-mode .marketplace-card-desc {
+  color: #9d94b0;
+}
+
+body.dark-mode .marketplace-badge,
+body.dark-mode .btn-publish.is-cancel {
+  background: #322c3e;
+  color: #e8e5f0;
+}
+
+body.dark-mode .marketplace-card-icon {
+  background: #322c3e;
+}
