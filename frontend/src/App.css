@@ -1894,7 +1894,7 @@ input:focus, textarea:focus, select:focus {
 .side-menu {
   position: fixed;
   top: 0;
-  left: 0;
+  left: 72px;
   bottom: 0;
   width: 260px;
   background: var(--bg, #fff);
@@ -2079,5 +2079,8 @@ input:focus, textarea:focus, select:focus {
   .quickstart-main {
     margin-left: 0;
     margin-bottom: 60px;
+  }
+  .side-menu {
+    left: 0;
   }
 }
