@@ -2081,130 +2081,17 @@ input:focus, textarea:focus, select:focus {
   }
 }
 
-/* --- Mode sombre --- */
+
+/* --- Mode sombre automatique (filtre global) --- */
 body.dark-mode {
-  background: #1a1720;
-  color: #e8e5f0;
+  filter: invert(1) hue-rotate(180deg);
+  background: #f7f5f0;
 }
 
-body.dark-mode .header-minimal,
-body.dark-mode .quickstart-form,
-body.dark-mode .chat-input-form,
-body.dark-mode .side-menu,
-body.dark-mode .workspace-card,
-body.dark-mode .chat-msg-assistant,
-body.dark-mode .workspace-builder header,
-body.dark-mode .builder-chat,
-body.dark-mode .plan-card,
-body.dark-mode .upgrade-modal,
-body.dark-mode .ws-settings-overlay > div,
-body.dark-mode .modal-overlay > div {
-  background: #241f2e;
-  color: #e8e5f0;
-  border-color: #3a3448;
-}
-
-body.dark-mode .toolbar-icon-btn,
-body.dark-mode .icon-btn,
-body.dark-mode .side-menu-item {
-  background: transparent;
-  color: #e8e5f0;
-  border-color: #3a3448;
-}
-
-body.dark-mode .side-menu-item:hover,
-body.dark-mode .toolbar-icon-btn:hover {
-  background: #322c3e;
-}
-
-body.dark-mode .quickstart-form textarea,
-body.dark-mode .chat-input-form textarea {
-  color: #e8e5f0;
-}
-
-body.dark-mode .recent-section h3,
-body.dark-mode .quickstart-form textarea::placeholder,
-body.dark-mode .chat-input-form textarea::placeholder {
-  color: #9d94b0;
-}
-
-body.dark-mode .side-menu-user {
-  border-color: #3a3448;
-}
-
-body.dark-mode .code-editor-sidebar,
-body.dark-mode .code-editor-main,
-body.dark-mode .code-editor-toolbar {
-  background: #241f2e;
-  color: #e8e5f0;
-  border-color: #3a3448;
-}
-
-body.dark-mode .code-editor-file-btn {
-  color: #e8e5f0;
-  border-color: #3a3448;
-}
-
-body.dark-mode .code-editor-file-btn:hover {
-  background: #322c3e;
-}
-
-body.dark-mode .stack-badge {
-  background: #322c3e;
-  color: #e8e5f0;
-}
-
-body.dark-mode .dashboard header,
-body.dark-mode .dashboard header div button,
-body.dark-mode .auth-form {
-  background: #241f2e;
-  color: #e8e5f0;
-  border-color: #3a3448;
-}
-
-body.dark-mode .dashboard header h1,
-body.dark-mode .dashboard main h2 {
-  color: #e8e5f0;
-}
-
-body.dark-mode .auth-form input {
-  background: #322c3e;
-  color: #e8e5f0;
-  border-color: #3a3448;
-}
-
-body.dark-mode .marketplace-page {
-  background: #1a1720;
-  color: #e8e5f0;
-}
-
-body.dark-mode .marketplace-header,
-body.dark-mode .marketplace-card,
-body.dark-mode .marketplace-form-panel,
-body.dark-mode .marketplace-empty,
-body.dark-mode .marketplace-link-btn {
-  background: #241f2e;
-  color: #e8e5f0;
-  border-color: #3a3448;
-}
-
-body.dark-mode .marketplace-header h1,
-body.dark-mode .marketplace-title-row h2,
-body.dark-mode .marketplace-card h3 {
-  color: #e8e5f0;
-}
-
-body.dark-mode .marketplace-title-row p,
-body.dark-mode .marketplace-card-desc {
-  color: #9d94b0;
-}
-
-body.dark-mode .marketplace-badge,
-body.dark-mode .btn-publish.is-cancel {
-  background: #322c3e;
-  color: #e8e5f0;
-}
-
-body.dark-mode .marketplace-card-icon {
-  background: #322c3e;
+body.dark-mode img,
+body.dark-mode svg,
+body.dark-mode video,
+body.dark-mode iframe,
+body.dark-mode .preview-iframe {
+  filter: invert(1) hue-rotate(180deg);
 }
