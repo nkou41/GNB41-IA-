@@ -2061,10 +2061,6 @@ input:focus, textarea:focus, select:focus {
   flex: 1;
 }
 
-.quickstart-main {
-  margin-left: 0;
-}
-
 @media (max-width: 640px) {
   .app-sidebar {
     width: 100%;
