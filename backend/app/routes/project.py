@@ -8,6 +8,7 @@ from app.models.project import Project
 from app.models.project_version import ProjectVersion
 from app.models.project_message import ProjectMessage
 from app.models.workspace import Workspace, WorkspaceMember
+from app.models.user import User
 from app.utils.permissions import get_role, can_edit, log_activity, get_plan_limits
 from app.services.generator import generate_project_code
 
