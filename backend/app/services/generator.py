@@ -32,15 +32,29 @@ Règles strictes :
 4. Applique les bonnes pratiques : gestion d'erreurs, validation des entrées, sécurité de base, code lisible et commenté quand utile.
 5. Inclus un fichier README.md expliquant comment installer et lancer le projet.
 
+6. Si l'application a besoin de stocker des données persistantes (utilisateurs, produits, messages, taches, etc.), NE CODE PAS de backend/base de donnees toi-meme pour ca. Declare plutot les tables necessaires dans le champ "tables" (voir format ci-dessous), et utilise dans ton code JS l'API REST déjà fournie par la plateforme :
+   - Base URL: {{API_BASE}}
+   - Cle a envoyer dans le header "X-API-Key: {{API_KEY}}" sur CHAQUE requete vers cette API
+   - Lister les lignes: GET {{API_BASE}}/appdb/v1/tables/{{TABLE_ID:nom_table}}/rows
+   - Creer une ligne: POST {{API_BASE}}/appdb/v1/tables/{{TABLE_ID:nom_table}}/rows avec un JSON correspondant aux colonnes
+   - Modifier une ligne: PUT {{API_BASE}}/appdb/v1/tables/{{TABLE_ID:nom_table}}/rows/<id_ligne>
+   - Supprimer une ligne: DELETE {{API_BASE}}/appdb/v1/tables/{{TABLE_ID:nom_table}}/rows/<id_ligne>
+   Remplace nom_table par le nom exact de la table declaree. Ces placeholders {{API_BASE}}, {{API_KEY}} et {{TABLE_ID:nom_table}} seront automatiquement remplaces par les vraies valeurs apres generation — utilise-les tels quels dans le code JS genere, ne les invente pas differemment.
+
 Réponds UNIQUEMENT avec un objet JSON valide, sans texte avant ou après, au format exact suivant :
 {
   "description": "Description courte de l'application générée",
   "stack": "Nom de la stack technique utilisée",
+  "tables": [
+    {"nom": "taches", "colonnes": [{"nom": "titre", "type": "texte", "requis": true}, {"nom": "fait", "type": "booleen", "requis": false}]}
+  ],
   "fichiers": [
     {"chemin": "index.html", "contenu": "..."},
     {"chemin": "style.css", "contenu": "..."}
   ]
 }
+
+Le champ "tables" est optionnel (liste vide si l'app n'a pas besoin de stockage persistant). Types de colonnes valides: "texte", "nombre", "booleen", "date".
 """
 
 
@@ -84,7 +98,8 @@ def _parse_result(raw_text: str) -> dict:
         'code': json.dumps(parsed, ensure_ascii=False, indent=2),
         'description': parsed.get('description', ''),
         'stack': parsed.get('stack', ''),
-        'fichiers': parsed['fichiers']
+        'fichiers': parsed['fichiers'],
+        'tables': parsed.get('tables', [])
     }
 
 

@@ -8,6 +8,8 @@ interface User {
   id: string;
   username: string;
   email: string;
+  plan?: string;
+  plan_expiry?: string | null;
 }
 
 interface Workspace {
