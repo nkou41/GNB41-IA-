@@ -46,18 +46,25 @@ def create_payment():
             }
         }
         res = requests.post(f'{base}/transactions', json=payload, headers=headers, timeout=15)
-        res.raise_for_status()
+        if not res.ok:
+            current_app.logger.error(f'FedaPay create transaction {res.status_code}: {res.text}')
+            return jsonify({'error': 'Erreur lors de la creation du paiement', 'detail': res.text}), 500
         transaction = res.json()['v1/transaction']
         transaction_id = transaction['id']
 
         token_res = requests.post(f'{base}/transactions/{transaction_id}/token', headers=headers, timeout=15)
-        token_res.raise_for_status()
+        if not token_res.ok:
+            current_app.logger.error(f'FedaPay token {token_res.status_code}: {token_res.text}')
+            return jsonify({'error': 'Erreur lors de la creation du paiement', 'detail': token_res.text}), 500
         token_data = token_res.json()['token']
 
         return jsonify({'payment_url': token_data['url'], 'transaction_id': transaction_id})
     except requests.exceptions.RequestException as e:
         current_app.logger.error(f'Erreur creation paiement FedaPay: {str(e)}')
-        return jsonify({'error': 'Erreur lors de la creation du paiement'}), 500
+        return jsonify({'error': 'Erreur lors de la creation du paiement', 'detail': str(e)}), 500
+    except Exception as e:
+        current_app.logger.error(f'Erreur inattendue paiement: {str(e)}')
+        return jsonify({'error': 'Erreur lors de la creation du paiement', 'detail': str(e)}), 500
 
 
 @billing_bp.route('/verify-payment/<int:transaction_id>', methods=['GET'])
