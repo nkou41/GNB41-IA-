@@ -76,11 +76,27 @@ def _substitute_placeholders(code_genere_json, project, api_key_raw):
     return json_lib.dumps(parsed, ensure_ascii=False, indent=2)
 
 
+def _build_contexte_projet(project):
+    import json as json_lib
+    if not project.code_genere:
+        return None
+    try:
+        parsed = json_lib.loads(project.code_genere)
+    except (ValueError, TypeError):
+        return None
+    fichiers = parsed.get('fichiers', [])
+    if not fichiers:
+        return None
+    liste = ', '.join(f.get('chemin', '?') for f in fichiers)
+    return f"Stack: {parsed.get('stack', 'inconnue')}. Fichiers existants: {liste}."
+
+
 def _run_generation(project, prompt, provider, history=None, image=None):
     if provider not in VALID_PROVIDERS:
         provider = 'claude'
 
-    result = generate_project_code(prompt, provider, history=history, image=image)
+    contexte_projet = _build_contexte_projet(project)
+    result = generate_project_code(prompt, provider, history=history, image=image, contexte_projet=contexte_projet)
 
     version = ProjectVersion(
         project_id=project.id,

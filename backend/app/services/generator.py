@@ -815,8 +815,14 @@ PROVIDERS = {
 }
 
 
-def generate_project_code(prompt: str, provider: str = 'claude', history=None, image=None) -> dict:
+def generate_project_code(prompt: str, provider: str = 'claude', history=None, image=None, contexte_projet: str = None) -> dict:
     """Génère une application structurée (multi-fichiers) via le fournisseur IA choisi."""
+    if contexte_projet:
+        entete = "[CONTEXTE - PROJET EXISTANT]" + chr(10)
+        entete += "Ce projet contient deja les elements suivants. Ne les recree pas inutilement, "
+        entete += "reste coherent avec l'existant, et ne modifie que ce qui est necessaire pour repondre a la demande." + chr(10)
+        entete += contexte_projet + chr(10) + chr(10) + "[DEMANDE]" + chr(10)
+        prompt = entete + prompt
     aucune_cle = not any([
         os.environ.get('ANTHROPIC_API_KEY', '').strip(),
         os.environ.get('OPENAI_API_KEY', '').strip(),
