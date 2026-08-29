@@ -27,6 +27,7 @@ interface Project {
   code_genere?: string;
   erreur_message?: string;
   provider?: string;
+  est_deploye?: boolean;
 }
 
 function AnimatedPlaceholder({ text, active }: { text: string; active: boolean }) {
@@ -84,6 +85,11 @@ function App() {
   const [resetStatus, setResetStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [resetMessage, setResetMessage] = useState('');
   const [adminStats, setAdminStats] = useState<any | null>(null);
+  const [adminTab, setAdminTab] = useState<'boutique' | 'utilisateurs' | 'workspaces'>('boutique');
+  const [adminUsers, setAdminUsers] = useState<any[]>([]);
+  const [adminWorkspaces, setAdminWorkspaces] = useState<any[]>([]);
+  const [adminUsersLoading, setAdminUsersLoading] = useState(false);
+  const [adminWorkspacesLoading, setAdminWorkspacesLoading] = useState(false);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -335,6 +341,17 @@ function App() {
       api.adminDashboard().then(setAdminStats).catch(() => {});
     }
   }, [showAdminDashboard]);
+
+  useEffect(() => {
+    if (showAdminDashboard && adminTab === 'utilisateurs') {
+      setAdminUsersLoading(true);
+      api.adminListUsers().then((res) => setAdminUsers(res.users)).catch(() => {}).finally(() => setAdminUsersLoading(false));
+    }
+    if (showAdminDashboard && adminTab === 'workspaces') {
+      setAdminWorkspacesLoading(true);
+      api.adminListWorkspaces().then((res) => setAdminWorkspaces(res.workspaces)).catch(() => {}).finally(() => setAdminWorkspacesLoading(false));
+    }
+  }, [showAdminDashboard, adminTab]);
 
   useEffect(() => {
     if (activeProject) {
@@ -867,7 +884,14 @@ function App() {
           </div>
         </div>
 
-        {!adminStats ? (
+        <div className="admin-tabs" style={{ display: 'flex', gap: '0.6rem', padding: '0 1.5rem 1rem' }}>
+          <button onClick={() => setAdminTab('boutique')} className={adminTab === 'boutique' ? 'btn-publish' : 'btn-publish is-cancel'}>Boutique</button>
+          <button onClick={() => setAdminTab('utilisateurs')} className={adminTab === 'utilisateurs' ? 'btn-publish' : 'btn-publish is-cancel'}>Utilisateurs</button>
+          <button onClick={() => setAdminTab('workspaces')} className={adminTab === 'workspaces' ? 'btn-publish' : 'btn-publish is-cancel'}>Workspaces</button>
+        </div>
+
+        {adminTab === 'boutique' && (
+        !adminStats ? (
           <div className="marketplace-empty">
             <p>Chargement...</p>
           </div>
@@ -911,6 +935,43 @@ function App() {
               )}
             </div>
           </>
+        )
+        )}
+
+        {adminTab === 'utilisateurs' && (
+          <div style={{ padding: '0 1.5rem 2rem' }}>
+            {adminUsersLoading ? <p>Chargement...</p> : (
+              <div className="admin-sales-table">
+                {adminUsers.map((u: any) => (
+                  <div key={u.id} className="admin-sales-row">
+                    <span className="admin-sales-titre">{u.username} ({u.email})</span>
+                    <span className="admin-sales-date">{new Date(u.created_at).toLocaleDateString('fr-FR')}</span>
+                    <select value={u.role} onChange={(e) => api.adminUpdateUserRole(u.id, e.target.value).then(() => api.adminListUsers().then((res) => setAdminUsers(res.users)))}>
+                      <option value="user">user</option>
+                      <option value="admin">admin</option>
+                      <option value="superadmin">superadmin</option>
+                    </select>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {adminTab === 'workspaces' && (
+          <div style={{ padding: '0 1.5rem 2rem' }}>
+            {adminWorkspacesLoading ? <p>Chargement...</p> : (
+              <div className="admin-sales-table">
+                {adminWorkspaces.map((w: any) => (
+                  <div key={w.id} className="admin-sales-row">
+                    <span className="admin-sales-titre">{w.nom} — {w.owner_email}</span>
+                    <span className="admin-sales-date">{w.member_count} membre(s)</span>
+                    <button className="btn-publish is-cancel" onClick={() => { if (confirm('Supprimer ce workspace ?')) api.adminDeleteWorkspace(w.id).then(() => api.adminListWorkspaces().then((res) => setAdminWorkspaces(res.workspaces))); }}>Supprimer</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
     );

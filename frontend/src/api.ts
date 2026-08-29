@@ -107,6 +107,11 @@ export const api = {
   purchaseListing: (listingId: string) => request(`/marketplace/${listingId}/purchase`, { method: 'POST' }),
   updateListing: (listingId: string, data: any) => request(`/marketplace/${listingId}`, { method: 'PUT', body: JSON.stringify(data) }),
   adminDashboard: () => request('/marketplace/admin/dashboard'),
+  adminListUsers: (q?: string) => request(`/admin/users${q ? '?q=' + encodeURIComponent(q) : ''}`),
+  adminUpdateUserRole: (userId: string, role: string) => request(`/admin/users/${userId}/role`, { method: 'PATCH', body: JSON.stringify({ role }) }),
+  adminListWorkspaces: () => request('/admin/workspaces'),
+  adminDeleteWorkspace: (workspaceId: string) => request(`/admin/workspaces/${workspaceId}`, { method: 'DELETE' }),
+  adminStats: () => request('/admin/stats'),
   verifyPurchase: (purchaseId: string) => request(`/marketplace/purchase/${purchaseId}/verify`),
   updateFile: (projectId: string, chemin: string, contenu: string) =>
     request(`/projects/${projectId}/files`, { method: 'PUT', body: JSON.stringify({ chemin, contenu }) }),
