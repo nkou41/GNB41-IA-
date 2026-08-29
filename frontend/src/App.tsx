@@ -1912,6 +1912,14 @@ function App() {
           </div>
         </form>
 
+        {recentProjects.length === 0 && !quickLoading && (
+          <div className="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
+            <h3>Aucun projet pour l'instant</h3>
+            <p>Décrivez votre idée ci-dessus et l'IA génère votre première application.</p>
+          </div>
+        )}
+
         {recentProjects.length > 0 && (
           <div className="recent-section">
             <h3>Récents</h3>
