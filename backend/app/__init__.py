@@ -105,6 +105,8 @@ def create_app(test_config=None):
     app.register_blueprint(billing_bp, url_prefix='/api/billing')
     from app.routes.notifications import notifications_bp
     app.register_blueprint(notifications_bp, url_prefix='/api/notifications')
+    from app.routes.admin import admin_bp
+    app.register_blueprint(admin_bp, url_prefix='/api/admin')
 
     @app.errorhandler(404)
     def not_found(e):
