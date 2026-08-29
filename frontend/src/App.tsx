@@ -1901,8 +1901,16 @@ function App() {
                   setActiveProject(p);
                   navigateTo(`/projet/${p.id}`);
                 }}>
+                  <div className="workspace-card-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                  </div>
                   <h3>{p.nom}</h3>
-                  <p className={`statut statut-${p.statut}`}>{p.statut}</p>
+                  <div className="workspace-card-footer">
+                    <span className={`statut-badge statut-badge-${p.statut}`}>
+                      {p.statut === 'genere' ? 'Prêt' : p.statut === 'en_generation' ? 'En cours' : p.statut === 'erreur' ? 'Erreur' : p.statut}
+                    </span>
+                    <span className="workspace-card-date">{new Date(p.created_at).toLocaleDateString('fr-FR')}</span>
+                  </div>
                 </div>
               ))}
             </div>

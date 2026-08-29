@@ -2094,3 +2094,52 @@ body.dark-mode iframe,
 body.dark-mode .preview-iframe {
   filter: invert(1) hue-rotate(180deg);
 }
+
+/* --- Cartes projet enrichies --- */
+.workspace-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--accent-bg, rgba(170, 59, 255, 0.1));
+  color: var(--accent, #aa3bff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.workspace-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.statut-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: capitalize;
+}
+
+.statut-badge-genere {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+}
+
+.statut-badge-en_generation {
+  background: rgba(234, 179, 8, 0.15);
+  color: #b45309;
+}
+
+.statut-badge-erreur {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
+
+.workspace-card-date {
+  font-size: 11px;
+  color: var(--text, #6b6375);
+  opacity: 0.7;
+}
