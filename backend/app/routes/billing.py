@@ -56,7 +56,7 @@ def create_payment():
         if not token_res.ok:
             current_app.logger.error(f'FedaPay token {token_res.status_code}: {token_res.text}')
             return jsonify({'error': 'Erreur lors de la creation du paiement', 'detail': token_res.text}), 500
-        token_data = token_res.json()['token']
+        token_data = token_res.json()
 
         return jsonify({'payment_url': token_data['url'], 'transaction_id': transaction_id})
     except requests.exceptions.RequestException as e:
