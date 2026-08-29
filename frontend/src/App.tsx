@@ -1421,10 +1421,17 @@ function App() {
       )}
         <header>
           <div>
-            <button className="toolbar-icon-btn" title="Retour" onClick={() => { setActiveProject(null); navigateTo('/'); }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-            </button>
-            <span>{activeProject.nom}</span>
+            <nav className="breadcrumb">
+              <button className="breadcrumb-item" onClick={() => { setActiveProject(null); navigateTo('/'); }}>Accueil</button>
+              <span className="breadcrumb-sep">/</span>
+              {activeWorkspace && (
+                <>
+                  <button className="breadcrumb-item" onClick={() => { setActiveProject(null); navigateTo('/'); }}>{activeWorkspace.nom}</button>
+                  <span className="breadcrumb-sep">/</span>
+                </>
+              )}
+              <span className="breadcrumb-current">{activeProject.nom}</span>
+            </nav>
             <button className="toolbar-icon-btn" title="Partager" onClick={handleShare}>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             </button>

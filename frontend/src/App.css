@@ -2282,3 +2282,36 @@ body.dark-mode .preview-iframe {
   color: var(--text, #6b6375);
   opacity: 0.7;
 }
+
+/* --- Breadcrumb --- */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.breadcrumb-item {
+  background: transparent;
+  border: none;
+  color: var(--text, #6b6375);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+
+.breadcrumb-item:hover {
+  background: var(--code-bg, #f4f3ec);
+  color: var(--text-h, #08060d);
+}
+
+.breadcrumb-sep {
+  color: var(--text, #6b6375);
+  opacity: 0.5;
+}
+
+.breadcrumb-current {
+  color: var(--text-h, #08060d);
+  font-weight: 600;
+  padding: 4px 6px;
+}
