@@ -2250,3 +2250,35 @@ body.dark-mode .preview-iframe {
   max-width: 320px;
   opacity: 0.8;
 }
+
+/* --- Avatar utilisateur --- */
+.side-menu-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 50%;
+  background: var(--accent, #aa3bff);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.side-menu-user-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.side-menu-plan-free {
+  color: var(--text, #6b6375);
+  opacity: 0.7;
+}

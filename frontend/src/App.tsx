@@ -1858,10 +1858,15 @@ function App() {
             <div className="menu-overlay" onClick={() => setShowMenu(false)} />
             <nav className="side-menu">
               <div className="side-menu-user">
-                <span className="side-menu-username">{user.username}</span>
-                {user.plan === 'pro' && user.plan_expiry && (
-                  <span className="side-menu-plan">Pro jusqu'au {new Date(user.plan_expiry).toLocaleDateString('fr-FR')}</span>
-                )}
+                <div className="user-avatar">{user.username.charAt(0).toUpperCase()}</div>
+                <div className="side-menu-user-info">
+                  <span className="side-menu-username">{user.username}</span>
+                  {user.plan === 'pro' && user.plan_expiry ? (
+                    <span className="side-menu-plan">Pro jusqu'au {new Date(user.plan_expiry).toLocaleDateString('fr-FR')}</span>
+                  ) : (
+                    <span className="side-menu-plan side-menu-plan-free">Plan Gratuit</span>
+                  )}
+                </div>
               </div>
               <NotificationBell />
               <button className="side-menu-item upgrade-btn" onClick={() => { setShowMenu(false); setShowUpgradeModal(true); }}>✦ Mettre à niveau</button>
