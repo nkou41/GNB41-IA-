@@ -529,7 +529,29 @@ function App() {
     }
   };
 
-  if (loading) return <div className="center"><div className="spinner"></div></div>;
+  if (loading) return (
+    <div className="dashboard">
+      <div className="skeleton-header">
+        <div className="skeleton-block skeleton-hamburger" />
+        <div className="skeleton-block skeleton-logo" />
+        <div className="skeleton-block skeleton-spacer-el" />
+      </div>
+      <main className="quickstart-main">
+        <div className="skeleton-block skeleton-greeting" />
+        <div className="skeleton-block skeleton-form" />
+        <div className="skeleton-block skeleton-section-title" />
+        <div className="workspace-grid">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="workspace-card skeleton-card">
+              <div className="skeleton-block skeleton-card-icon" />
+              <div className="skeleton-block skeleton-card-title" />
+              <div className="skeleton-block skeleton-card-footer" />
+            </div>
+          ))}
+        </div>
+      </main>
+    </div>
+  );
 
   if (marketPaymentStatus) {
     return (

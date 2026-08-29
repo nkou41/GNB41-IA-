@@ -2143,3 +2143,83 @@ body.dark-mode .preview-iframe {
   color: var(--text, #6b6375);
   opacity: 0.7;
 }
+
+/* --- Skeleton loaders --- */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.skeleton-block {
+  background: var(--code-bg, #f4f3ec);
+  border-radius: 8px;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+.skeleton-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+}
+
+.skeleton-hamburger {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.skeleton-logo {
+  width: 100px;
+  height: 24px;
+}
+
+.skeleton-spacer-el {
+  width: 40px;
+  height: 40px;
+  visibility: hidden;
+}
+
+.skeleton-greeting {
+  width: 60%;
+  max-width: 320px;
+  height: 32px;
+  margin: 24px auto 20px;
+}
+
+.skeleton-form {
+  width: 90%;
+  max-width: 640px;
+  height: 90px;
+  margin: 0 auto 32px;
+  border-radius: 16px;
+}
+
+.skeleton-section-title {
+  width: 90px;
+  height: 18px;
+  margin: 0 0 12px;
+}
+
+.skeleton-card {
+  cursor: default;
+  pointer-events: none;
+}
+
+.skeleton-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.skeleton-card-title {
+  width: 70%;
+  height: 16px;
+  margin-bottom: 12px;
+}
+
+.skeleton-card-footer {
+  width: 50%;
+  height: 20px;
+}
