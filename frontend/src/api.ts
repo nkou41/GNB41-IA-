@@ -118,4 +118,6 @@ export const api = {
   listAppKeys: (projectId: string) => request(`/appdb/${projectId}/keys`),
   createAppKey: (projectId: string) => request(`/appdb/${projectId}/keys`, { method: 'POST' }),
   revokeAppKey: (keyId: string) => request(`/appdb/keys/${keyId}`, { method: 'DELETE' }),
+  deployProject: (projectId: string) => request(`/projects/${projectId}/deploy`, { method: 'POST' }),
+  undeployProject: (projectId: string) => request(`/projects/${projectId}/undeploy`, { method: 'POST' }),
 };

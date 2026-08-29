@@ -121,6 +121,8 @@ function App() {
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [previewFile, setPreviewFile] = useState<string | null>(null);
+  const [liveUrl, setLiveUrl] = useState<string | null>(null);
+  const [deployLoading, setDeployLoading] = useState(false);
   const [editorContent, setEditorContent] = useState<string>('');
   const [editorSaving, setEditorSaving] = useState(false);
   const [editorDirty, setEditorDirty] = useState(false);
@@ -1444,6 +1446,30 @@ function App() {
             <a href={api.exportProjectUrl(activeProject.id)} className="toolbar-icon-btn" title="Télécharger (.zip)" download>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </a>
+            <button
+              className="toolbar-icon-btn"
+              title={activeProject.est_deploye ? "Deployee (cliquer pour voir le lien)" : "Deployer l'application"}
+              disabled={deployLoading}
+              onClick={async () => {
+                if (activeProject.est_deploye) {
+                  const base = (import.meta as any).env.VITE_API_URL || 'http://localhost:5001/api';
+                  setLiveUrl(`${base}/projects/${activeProject.id}/live/`);
+                  return;
+                }
+                setDeployLoading(true);
+                try {
+                  const res = await api.deployProject(activeProject.id);
+                  setActiveProject(res.project);
+                  setLiveUrl(res.live_url);
+                } catch (err: any) {
+                  alert(`Erreur: ${err.message}`);
+                } finally {
+                  setDeployLoading(false);
+                }
+              }}
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={activeProject.est_deploye ? '#22c55e' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </button>
             <button className="toolbar-icon-btn" title="Paramètres du workspace" onClick={() => setShowWorkspaceSettings(true)}>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </button>
@@ -1515,6 +1541,32 @@ function App() {
                 )}
               </div>
             </div>
+          </div>
+        )}
+
+        {liveUrl && (
+          <div style={{ padding: '0.6rem 1rem', background: '#dcfce7', display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.82rem', color: '#166534' }}>App en ligne :</span>
+            <a href={liveUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.82rem', color: '#166534', fontWeight: 600, wordBreak: 'break-all' }}>{liveUrl}</a>
+            <button
+              type="button"
+              className="marketplace-link-btn"
+              onClick={() => navigator.clipboard.writeText(liveUrl).catch(() => {})}
+            >
+              Copier
+            </button>
+            <button
+              type="button"
+              className="marketplace-link-btn"
+              onClick={async () => {
+                if (!activeProject) return;
+                await api.undeployProject(activeProject.id);
+                setActiveProject({ ...activeProject, est_deploye: false });
+                setLiveUrl(null);
+              }}
+            >
+              Depublier
+            </button>
           </div>
         )}
 

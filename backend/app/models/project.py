@@ -13,6 +13,7 @@ class Project(db.Model):
     provider = db.Column(db.String(20), default='claude')
     statut = db.Column(db.String(20), default='en_attente')
     code_genere = db.Column(db.Text)
+    est_deploye = db.Column(db.Boolean, default=False)
     erreur_message = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -26,6 +27,7 @@ class Project(db.Model):
             'provider': self.provider,
             'statut': self.statut,
             'code_genere': self.code_genere,
+            'est_deploye': self.est_deploye,
             'erreur_message': self.erreur_message,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()

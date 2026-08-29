@@ -1,5 +1,6 @@
-from flask import Blueprint, request, jsonify, send_file
+from flask import Blueprint, request, jsonify, send_file, Response
 import json
+import os
 import io
 import zipfile
 from flask_login import login_required, current_user
@@ -334,3 +335,72 @@ def update_file(project_id):
     db.session.commit()
 
     return jsonify(project.to_dict())
+
+
+def _get_file_mimetype(chemin):
+    if chemin.endswith('.html'):
+        return 'text/html'
+    if chemin.endswith('.css'):
+        return 'text/css'
+    if chemin.endswith('.js'):
+        return 'application/javascript'
+    if chemin.endswith('.json'):
+        return 'application/json'
+    if chemin.endswith('.svg'):
+        return 'image/svg+xml'
+    if chemin.endswith('.png'):
+        return 'image/png'
+    return 'text/plain'
+
+
+@project_bp.route('/<project_id>/deploy', methods=['POST'])
+@login_required
+def deploy_project(project_id):
+    project = Project.query.get_or_404(project_id)
+    if not _check_access(project.workspace_id):
+        return jsonify({'error': 'Non autorisé'}), 403
+    if project.statut != 'pret' or not project.code_genere:
+        return jsonify({'error': "Le projet doit etre genere avec succes avant deploiement"}), 400
+
+    project.est_deploye = True
+    db.session.commit()
+
+    base_url = os.environ.get('API_PUBLIC_URL', 'http://localhost:5001/api')
+    live_url = f"{base_url}/projects/{project.id}/live/"
+    return jsonify({'project': project.to_dict(), 'live_url': live_url})
+
+
+@project_bp.route('/<project_id>/undeploy', methods=['POST'])
+@login_required
+def undeploy_project(project_id):
+    project = Project.query.get_or_404(project_id)
+    if not _check_access(project.workspace_id):
+        return jsonify({'error': 'Non autorisé'}), 403
+
+    project.est_deploye = False
+    db.session.commit()
+    return jsonify(project.to_dict())
+
+
+@project_bp.route('/<project_id>/live/', defaults={'chemin': 'index.html'}, methods=['GET'])
+@project_bp.route('/<project_id>/live/<path:chemin>', methods=['GET'])
+def serve_live(project_id, chemin):
+    project = Project.query.get_or_404(project_id)
+    if not project.est_deploye or not project.code_genere:
+        return jsonify({'error': "Cette application n'est pas deployee"}), 404
+
+    try:
+        parsed = json.loads(project.code_genere)
+    except json.JSONDecodeError:
+        return jsonify({'error': 'Code illisible'}), 500
+
+    fichiers = parsed.get('fichiers', [])
+    fichier = next((f for f in fichiers if f['chemin'] == chemin), None)
+
+    if not fichier and chemin == 'index.html':
+        fichier = next((f for f in fichiers if f['chemin'].endswith('.html')), None)
+
+    if not fichier:
+        return jsonify({'error': 'Fichier introuvable'}), 404
+
+    return Response(fichier['contenu'], mimetype=_get_file_mimetype(chemin))
