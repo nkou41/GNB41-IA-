@@ -98,6 +98,9 @@ def _run_generation(project, prompt, provider, history=None, image=None):
     contexte_projet = _build_contexte_projet(project)
     result = generate_project_code(prompt, provider, history=history, image=image, contexte_projet=contexte_projet)
 
+    import json as json_lib
+    plan_json = json_lib.dumps(result.get('plan', []), ensure_ascii=False) if result.get('plan') else None
+
     version = ProjectVersion(
         project_id=project.id,
         prompt=prompt,
@@ -105,7 +108,8 @@ def _run_generation(project, prompt, provider, history=None, image=None):
         statut=result['statut'],
         code_genere=result.get('code'),
         erreur_message=result.get('message'),
-        comprehension=result.get('comprehension')
+        comprehension=result.get('comprehension'),
+        plan=plan_json
     )
     db.session.add(version)
 
@@ -279,9 +283,18 @@ def chat_project(project_id):
     project = _run_generation(project, user_message, provider, history=history, image=image)
 
     if project.statut == 'pret':
+        import json as json_lib
         derniere_version = ProjectVersion.query.filter_by(project_id=project.id).order_by(ProjectVersion.created_at.desc()).first()
         comprehension = derniere_version.comprehension if derniere_version else None
-        assistant_content = comprehension if comprehension else f"J'ai généré l'application : {project.nom}."
+        plan_texte = ''
+        if derniere_version and derniere_version.plan:
+            try:
+                etapes = json_lib.loads(derniere_version.plan)
+                if etapes:
+                    plan_texte = chr(10) + chr(10).join(f'- {e}' for e in etapes)
+            except (ValueError, TypeError):
+                pass
+        assistant_content = (comprehension + plan_texte) if comprehension else f"J'ai généré l'application : {project.nom}."
     else:
         assistant_content = f"Erreur lors de la génération : {project.erreur_message}"
 

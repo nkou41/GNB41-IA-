@@ -147,6 +147,9 @@ def create_app(test_config=None):
             if 'comprehension' not in colonnes:
                 db.session.execute(db.text('ALTER TABLE project_version ADD COLUMN comprehension TEXT'))
                 db.session.commit()
+            if 'plan' not in colonnes:
+                db.session.execute(db.text('ALTER TABLE project_version ADD COLUMN plan TEXT'))
+                db.session.commit()
 
     from flask_socketio import join_room
     from flask_login import current_user
