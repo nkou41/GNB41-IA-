@@ -100,6 +100,7 @@ def _run_generation(project, prompt, provider, history=None, image=None):
 
     import json as json_lib
     plan_json = json_lib.dumps(result.get('plan', []), ensure_ascii=False) if result.get('plan') else None
+    avertissements_json = json_lib.dumps(result.get('avertissements', []), ensure_ascii=False) if result.get('avertissements') else None
 
     version = ProjectVersion(
         project_id=project.id,
@@ -109,7 +110,8 @@ def _run_generation(project, prompt, provider, history=None, image=None):
         code_genere=result.get('code'),
         erreur_message=result.get('message'),
         comprehension=result.get('comprehension'),
-        plan=plan_json
+        plan=plan_json,
+        avertissements=avertissements_json
     )
     db.session.add(version)
 
@@ -294,7 +296,15 @@ def chat_project(project_id):
                     plan_texte = chr(10) + chr(10).join(f'- {e}' for e in etapes)
             except (ValueError, TypeError):
                 pass
-        assistant_content = (comprehension + plan_texte) if comprehension else f"J'ai généré l'application : {project.nom}."
+        avert_texte = ''
+        if derniere_version and derniere_version.avertissements:
+            try:
+                avert_liste = json_lib.loads(derniere_version.avertissements)
+                if avert_liste:
+                    avert_texte = chr(10) + chr(10) + 'A verifier :' + chr(10) + chr(10).join(f'- {a}' for a in avert_liste)
+            except (ValueError, TypeError):
+                pass
+        assistant_content = (comprehension + plan_texte + avert_texte) if comprehension else f"J'ai généré l'application : {project.nom}."
     else:
         assistant_content = f"Erreur lors de la génération : {project.erreur_message}"
 

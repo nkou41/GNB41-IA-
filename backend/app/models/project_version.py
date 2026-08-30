@@ -15,6 +15,7 @@ class ProjectVersion(db.Model):
     erreur_message = db.Column(db.Text)
     comprehension = db.Column(db.Text)
     plan = db.Column(db.Text)
+    avertissements = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
@@ -28,5 +29,6 @@ class ProjectVersion(db.Model):
             'erreur_message': self.erreur_message,
             'comprehension': self.comprehension,
             'plan': self.plan,
+            'avertissements': self.avertissements,
             'created_at': self.created_at.isoformat()
         }

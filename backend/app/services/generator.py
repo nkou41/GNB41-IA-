@@ -60,6 +60,33 @@ Le champ "tables" est optionnel (liste vide si l'app n'a pas besoin de stockage 
 """
 
 
+def _verifier_fichiers(fichiers):
+    """Controles basiques post-generation: placeholders oublies, fichiers vides, references cassees."""
+    avertissements = []
+    noms_fichiers = [f.get('chemin', '') for f in fichiers]
+    q = chr(34) + chr(39)
+
+    for f in fichiers:
+        chemin = f.get('chemin', '?')
+        contenu = f.get('contenu', '') or ''
+
+        if not contenu.strip():
+            avertissements.append('Fichier vide: ' + chemin)
+            continue
+
+        if 'TODO' in contenu or 'PLACEHOLDER' in contenu.upper():
+            avertissements.append('Placeholder non resolu detecte dans ' + chemin)
+
+        if chemin.endswith('.html'):
+            pattern = '(?:href|src)=[' + q + '](?!http|#|mailto:|data:|\\{\\{)([^' + q + '\\s]+)[' + q + ']'
+            refs = re.findall(pattern, contenu)
+            for ref in refs:
+                if ref not in noms_fichiers:
+                    avertissements.append(chemin + ' reference ' + ref + ' qui n\'est pas parmi les fichiers generes')
+
+    return avertissements
+
+
 def _extract_json(text: str) -> str:
     text = text.strip()
     if text.startswith('```'):
@@ -103,7 +130,8 @@ def _parse_result(raw_text: str) -> dict:
         'description': parsed.get('description', ''),
         'stack': parsed.get('stack', ''),
         'fichiers': parsed['fichiers'],
-        'tables': parsed.get('tables', [])
+        'tables': parsed.get('tables', []),
+        'avertissements': _verifier_fichiers(parsed['fichiers'])
     }
 
 
