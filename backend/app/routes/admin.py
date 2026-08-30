@@ -5,6 +5,7 @@ from app.models.user import User
 from app.models.workspace import Workspace, WorkspaceMember
 from app.models.project import Project
 from app.utils_admin import admin_required, superadmin_required
+from app.services.reqres_client import get_users as reqres_get_users, TEST_MODE
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -13,6 +14,10 @@ admin_bp = Blueprint('admin', __name__)
 @login_required
 @admin_required
 def list_users():
+    if TEST_MODE:
+        data = reqres_get_users()
+        return jsonify({'users': data.get('data', []), 'total': data.get('total', 0), 'test_mode': True})
+
     search = request.args.get('q', '').strip()
     query = User.query
     if search:
