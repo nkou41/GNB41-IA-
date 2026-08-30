@@ -104,7 +104,8 @@ def _run_generation(project, prompt, provider, history=None, image=None):
         provider=provider,
         statut=result['statut'],
         code_genere=result.get('code'),
-        erreur_message=result.get('message')
+        erreur_message=result.get('message'),
+        comprehension=result.get('comprehension')
     )
     db.session.add(version)
 
@@ -278,7 +279,9 @@ def chat_project(project_id):
     project = _run_generation(project, user_message, provider, history=history, image=image)
 
     if project.statut == 'pret':
-        assistant_content = project.code_genere if project.code_genere else f"J'ai généré l'application : {project.nom}."
+        derniere_version = ProjectVersion.query.filter_by(project_id=project.id).order_by(ProjectVersion.created_at.desc()).first()
+        comprehension = derniere_version.comprehension if derniere_version else None
+        assistant_content = comprehension if comprehension else f"J'ai généré l'application : {project.nom}."
     else:
         assistant_content = f"Erreur lors de la génération : {project.erreur_message}"
 

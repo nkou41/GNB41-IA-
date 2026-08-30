@@ -140,6 +140,14 @@ def create_app(test_config=None):
             db.session.execute(db.text('PRAGMA journal_mode=WAL'))
             db.session.commit()
 
+        from sqlalchemy import inspect
+        inspector = inspect(db.engine)
+        if 'project_version' in inspector.get_table_names():
+            colonnes = [c['name'] for c in inspector.get_columns('project_version')]
+            if 'comprehension' not in colonnes:
+                db.session.execute(db.text('ALTER TABLE project_version ADD COLUMN comprehension TEXT'))
+                db.session.commit()
+
     from flask_socketio import join_room
     from flask_login import current_user
 

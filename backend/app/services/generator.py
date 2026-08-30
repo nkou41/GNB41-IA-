@@ -41,8 +41,9 @@ Règles strictes :
    - Supprimer une ligne: DELETE {{API_BASE}}/appdb/v1/tables/{{TABLE_ID:nom_table}}/rows/<id_ligne>
    Remplace nom_table par le nom exact de la table declaree. Ces placeholders {{API_BASE}}, {{API_KEY}} et {{TABLE_ID:nom_table}} seront automatiquement remplaces par les vraies valeurs apres generation — utilise-les tels quels dans le code JS genere, ne les invente pas differemment.
 
-Réponds UNIQUEMENT avec un objet JSON valide, sans texte avant ou après, au format exact suivant :
+Avant de generer, analyse la demande. Reponds UNIQUEMENT avec un objet JSON valide, sans texte avant ou après, au format exact suivant :
 {
+  "comprehension": "Une phrase courte reformulant ce que tu as compris de la demande, et si applicable, quels fichiers existants sont modifies",
   "description": "Description courte de l'application générée",
   "stack": "Nom de la stack technique utilisée",
   "tables": [
@@ -96,6 +97,7 @@ def _parse_result(raw_text: str) -> dict:
     return {
         'statut': 'pret',
         'code': json.dumps(parsed, ensure_ascii=False, indent=2),
+        'comprehension': parsed.get('comprehension', ''),
         'description': parsed.get('description', ''),
         'stack': parsed.get('stack', ''),
         'fichiers': parsed['fichiers'],

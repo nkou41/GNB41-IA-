@@ -13,6 +13,7 @@ class ProjectVersion(db.Model):
     code_genere = db.Column(db.Text)
     statut = db.Column(db.String(20), default='en_generation')
     erreur_message = db.Column(db.Text)
+    comprehension = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
@@ -24,5 +25,6 @@ class ProjectVersion(db.Model):
             'code_genere': self.code_genere,
             'statut': self.statut,
             'erreur_message': self.erreur_message,
+            'comprehension': self.comprehension,
             'created_at': self.created_at.isoformat()
         }
