@@ -1434,7 +1434,39 @@ function App() {
     const previewContent = (() => {
       if (!parsedFiles || !parsedFiles.fichiers) return null;
       const htmlFile = parsedFiles.fichiers.find((f: any) => f.chemin.endsWith('.html'));
-      return htmlFile ? htmlFile.contenu : null;
+      if (!htmlFile) return null;
+      let html = htmlFile.contenu;
+
+      const cssFiles = parsedFiles.fichiers.filter((f: any) => f.chemin.endsWith('.css'));
+      const jsFiles = parsedFiles.fichiers.filter((f: any) => f.chemin.endsWith('.js'));
+
+      cssFiles.forEach((cssFile: any) => {
+        const linkPattern = new RegExp(`<link[^>]+href=["'][^"']*${cssFile.chemin.split('/').pop()}["'][^>]*>`, 'i');
+        const styleTag = `<style>
+${cssFile.contenu}
+</style>`;
+        if (linkPattern.test(html)) {
+          html = html.replace(linkPattern, styleTag);
+        } else {
+          html = html.replace('</head>', `${styleTag}
+</head>`);
+        }
+      });
+
+      jsFiles.forEach((jsFile: any) => {
+        const scriptPattern = new RegExp(`<script[^>]+src=["'][^"']*${jsFile.chemin.split('/').pop()}["'][^>]*></script>`, 'i');
+        const scriptTag = `<script>
+${jsFile.contenu}
+</script>`;
+        if (scriptPattern.test(html)) {
+          html = html.replace(scriptPattern, scriptTag);
+        } else {
+          html = html.replace('</body>', `${scriptTag}
+</body>`);
+        }
+      });
+
+      return html;
     })();
 
     return (
