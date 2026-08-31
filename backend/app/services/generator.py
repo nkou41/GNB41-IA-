@@ -61,10 +61,14 @@ Le champ "tables" est optionnel (liste vide si l'app n'a pas besoin de stockage 
 """
 
 
-def _verifier_fichiers(fichiers):
-    """Controles basiques post-generation: placeholders oublies, fichiers vides, references cassees."""
+def _verifier_fichiers(fichiers, fichiers_connus=None):
+    """Controles basiques post-generation: placeholders oublies, fichiers vides, references cassees.
+    fichiers_connus: chemins deja presents dans le projet avant cette generation (evite les faux positifs
+    quand un fichier existant n'est pas retourne dans cette reponse car non modifie)."""
     avertissements = []
-    noms_fichiers = [f.get('chemin', '') for f in fichiers]
+    noms_fichiers = set(f.get('chemin', '') for f in fichiers)
+    if fichiers_connus:
+        noms_fichiers = noms_fichiers | set(fichiers_connus)
     q = chr(34) + chr(39)
 
     for f in fichiers:
@@ -849,7 +853,7 @@ PROVIDERS = {
 }
 
 
-def generate_project_code(prompt: str, provider: str = 'claude', history=None, image=None, contexte_projet: str = None) -> dict:
+def generate_project_code(prompt: str, provider: str = 'claude', history=None, image=None, contexte_projet: str = None, fichiers_connus=None) -> dict:
     """Génère une application structurée (multi-fichiers) via le fournisseur IA choisi."""
     if contexte_projet:
         entete = "[CONTEXTE - PROJET EXISTANT]" + chr(10)
@@ -873,6 +877,8 @@ def generate_project_code(prompt: str, provider: str = 'claude', history=None, i
 
     try:
         result = func(prompt, history, image)
+        if result.get('statut') == 'pret' and 'fichiers' in result:
+            result['avertissements'] = _verifier_fichiers(result['fichiers'], fichiers_connus)
         if result.get('statut') == 'erreur':
             msg = str(result.get('message', '')).lower()
             if 'credit' in msg or 'quota' in msg or '429' in msg or 'insufficient' in msg or 'non configurée' in msg:

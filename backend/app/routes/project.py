@@ -112,7 +112,7 @@ def _run_generation(project, prompt, provider, history=None, image=None):
             pass
 
     contexte_projet = _build_contexte_projet(project)
-    result = generate_project_code(prompt, provider, history=history, image=image, contexte_projet=contexte_projet)
+    result = generate_project_code(prompt, provider, history=history, image=image, contexte_projet=contexte_projet, fichiers_connus=anciens_fichiers)
 
     if result.get('statut') == 'pret' and anciens_fichiers:
         nouveaux_fichiers = {f.get('chemin') for f in result.get('fichiers', [])}
