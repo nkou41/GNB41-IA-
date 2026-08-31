@@ -78,17 +78,24 @@ def _substitute_placeholders(code_genere_json, project, api_key_raw):
 
 def _build_contexte_projet(project):
     import json as json_lib
-    if not project.code_genere:
+    morceaux = []
+
+    if project.memoire_projet and project.memoire_projet.strip():
+        morceaux.append('Regles et decisions a respecter pour ce projet: ' + project.memoire_projet.strip())
+
+    if project.code_genere:
+        try:
+            parsed = json_lib.loads(project.code_genere)
+            fichiers = parsed.get('fichiers', [])
+            if fichiers:
+                liste = ', '.join(f.get('chemin', '?') for f in fichiers)
+                morceaux.append(f"Stack: {parsed.get('stack', 'inconnue')}. Fichiers existants: {liste}.")
+        except (ValueError, TypeError):
+            pass
+
+    if not morceaux:
         return None
-    try:
-        parsed = json_lib.loads(project.code_genere)
-    except (ValueError, TypeError):
-        return None
-    fichiers = parsed.get('fichiers', [])
-    if not fichiers:
-        return None
-    liste = ', '.join(f.get('chemin', '?') for f in fichiers)
-    return f"Stack: {parsed.get('stack', 'inconnue')}. Fichiers existants: {liste}."
+    return chr(10).join(morceaux)
 
 
 def _run_generation(project, prompt, provider, history=None, image=None):
@@ -210,6 +217,19 @@ def delete_project(project_id):
     db.session.delete(project)
     db.session.commit()
     return jsonify({'success': True})
+
+
+@project_bp.route('/<project_id>/memoire', methods=['PUT'])
+@login_required
+def update_memoire_projet(project_id):
+    project = Project.query.get_or_404(project_id)
+    if not _check_edit_access(project.workspace_id):
+        return jsonify({'error': 'Non autorisé'}), 403
+    data = request.get_json()
+    project.memoire_projet = (data.get('memoire_projet') or '').strip() or None
+    db.session.commit()
+    log_activity(project.workspace_id, current_user.id, 'memoire_projet_updated', project.nom)
+    return jsonify(project.to_dict())
 
 
 @project_bp.route('/<project_id>/regenerate', methods=['POST'])

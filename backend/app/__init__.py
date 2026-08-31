@@ -153,6 +153,11 @@ def create_app(test_config=None):
             if 'avertissements' not in colonnes:
                 db.session.execute(db.text('ALTER TABLE project_version ADD COLUMN avertissements TEXT'))
                 db.session.commit()
+        if 'project' in inspector.get_table_names():
+            colonnes_project = [c['name'] for c in inspector.get_columns('project')]
+            if 'memoire_projet' not in colonnes_project:
+                db.session.execute(db.text('ALTER TABLE project ADD COLUMN memoire_projet TEXT'))
+                db.session.commit()
 
     from flask_socketio import join_room
     from flask_login import current_user
