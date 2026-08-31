@@ -92,6 +92,7 @@ export const api = {
   regenerateProject: (projectId: string, prompt: string, provider?: string) =>
     request(`/projects/${projectId}/regenerate`, { method: 'POST', body: JSON.stringify({ prompt, provider }) }),
   listVersions: (projectId: string) => request(`/projects/${projectId}/versions`),
+  restoreVersion: (projectId: string, versionId: string) => request(`/projects/${projectId}/versions/${versionId}/restore`, { method: 'POST' }),
   deleteProject: (projectId: string) => request(`/projects/${projectId}`, { method: 'DELETE' }),
   exportProjectUrl: (projectId: string) => `${API_BASE}/projects/${projectId}/export`,
   duplicateProject: (projectId: string) => request(`/projects/${projectId}/duplicate`, { method: 'POST' }),
