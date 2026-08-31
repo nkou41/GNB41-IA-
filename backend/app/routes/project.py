@@ -121,6 +121,13 @@ def _run_generation(project, prompt, provider, history=None, image=None):
             avert = result.setdefault('avertissements', [])
             avert.append('Fichiers presents avant et absents apres generation: ' + ', '.join(sorted(supprimes)))
 
+    if result.get('statut') == 'pret' and result.get('decisions_a_retenir'):
+        existantes = (project.memoire_projet or '')
+        lignes_existantes = set(l.strip() for l in existantes.split(chr(10)) if l.strip())
+        nouvelles = [d.strip() for d in result['decisions_a_retenir'] if d.strip() and d.strip() not in lignes_existantes]
+        if nouvelles:
+            project.memoire_projet = (existantes + chr(10) if existantes else '') + chr(10).join(nouvelles)
+
     import json as json_lib
     plan_json = json_lib.dumps(result.get('plan', []), ensure_ascii=False) if result.get('plan') else None
     avertissements_json = json_lib.dumps(result.get('avertissements', []), ensure_ascii=False) if result.get('avertissements') else None

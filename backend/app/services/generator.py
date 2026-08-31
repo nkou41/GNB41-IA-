@@ -45,6 +45,7 @@ Avant de generer, analyse la demande et decompose-la en etapes si elle est compl
 {
   "comprehension": "Une phrase courte reformulant ce que tu as compris de la demande, et si applicable, quels fichiers existants sont modifies",
   "plan": ["Etape courte 1", "Etape courte 2"],
+  "decisions_a_retenir": ["Uniquement si une convention/contrainte technique durable doit etre memorisee pour les prochaines generations, sinon liste vide"],
   "description": "Description courte de l'application générée",
   "stack": "Nom de la stack technique utilisée",
   "tables": [
@@ -131,7 +132,8 @@ def _parse_result(raw_text: str) -> dict:
         'stack': parsed.get('stack', ''),
         'fichiers': parsed['fichiers'],
         'tables': parsed.get('tables', []),
-        'avertissements': _verifier_fichiers(parsed['fichiers'])
+        'avertissements': _verifier_fichiers(parsed['fichiers']),
+        'decisions_a_retenir': parsed.get('decisions_a_retenir', [])
     }
 
 
