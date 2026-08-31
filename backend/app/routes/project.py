@@ -90,6 +90,16 @@ def _build_contexte_projet(project):
             if fichiers:
                 liste = ', '.join(f.get('chemin', '?') for f in fichiers)
                 morceaux.append(f"Stack: {parsed.get('stack', 'inconnue')}. Fichiers existants: {liste}.")
+
+                MAX_CHARS_PAR_FICHIER = 6000
+                blocs = []
+                for f in fichiers:
+                    chemin = f.get('chemin', '?')
+                    contenu = f.get('contenu', '')
+                    if len(contenu) > MAX_CHARS_PAR_FICHIER:
+                        contenu = contenu[:MAX_CHARS_PAR_FICHIER] + "\n... (fichier tronque, trop volumineux)"
+                    blocs.append(f"--- {chemin} ---\n{contenu}")
+                morceaux.append("Contenu des fichiers existants:\n\n" + "\n\n".join(blocs))
         except (ValueError, TypeError):
             pass
 
