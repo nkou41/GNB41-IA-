@@ -7,7 +7,7 @@ import anthropic
 import openai
 
 
-def _with_retry(func, max_attempts=2):
+def _with_retry(func, max_attempts=4):
     """Reessaie une fois en cas de timeout/erreur reseau avant d'abandonner."""
     def wrapper(*args, **kwargs):
         last_result = None
@@ -232,7 +232,7 @@ def _generate_mistral(prompt: str, history=None, image=None) -> dict:
         response = requests.post(
             'https://api.mistral.ai/v1/chat/completions',
             headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
-            json={'model': 'mistral-large-latest', 'messages': messages, 'max_tokens': 16000},
+            json={'model': 'mistral-small-latest', 'messages': messages, 'max_tokens': 16000},
             timeout=180
         )
         data = response.json()
@@ -855,13 +855,14 @@ def generate_project_code(prompt: str, provider: str = 'claude', history=None, i
         entete += "reste coherent avec l'existant, et ne modifie que ce qui est necessaire pour repondre a la demande." + chr(10)
         entete += contexte_projet + chr(10) + chr(10) + "[DEMANDE]" + chr(10)
         prompt = entete + prompt
-    aucune_cle = not any([
-        os.environ.get('ANTHROPIC_API_KEY', '').strip(),
-        os.environ.get('OPENAI_API_KEY', '').strip(),
-        os.environ.get('GEMINI_API_KEY', '').strip(),
-        os.environ.get('MISTRAL_API_KEY', '').strip(),
-    ])
-    if aucune_cle:
+    cle_par_provider = {
+        'claude': 'ANTHROPIC_API_KEY',
+        'openai': 'OPENAI_API_KEY',
+        'gemini': 'GEMINI_API_KEY',
+        'mistral': 'MISTRAL_API_KEY',
+    }
+    var_cle = cle_par_provider.get(provider)
+    if not var_cle or not os.environ.get(var_cle, '').strip():
         return _generate_demo(prompt, history, image)
 
     func = PROVIDERS.get(provider)
