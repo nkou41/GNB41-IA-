@@ -266,6 +266,45 @@ def list_versions(project_id):
     return jsonify([v.to_dict() for v in versions])
 
 
+@project_bp.route('/<project_id>/versions/<version_id>/restore', methods=['POST'])
+@login_required
+def restore_version(project_id, version_id):
+    project = Project.query.get_or_404(project_id)
+    if not _check_edit_access(project.workspace_id):
+        return jsonify({'error': 'Non autorisé'}), 403
+
+    version = ProjectVersion.query.filter_by(id=version_id, project_id=project_id).first_or_404()
+    if version.statut != 'pret' or not version.code_genere:
+        return jsonify({'error': 'Cette version ne peut pas etre restauree (pas de code valide)'}), 400
+
+    version_restauree = ProjectVersion(
+        project_id=project.id,
+        prompt=f'[Restauration de la version du {version.created_at.strftime("%d/%m/%Y %H:%M")}]',
+        provider=version.provider,
+        statut='pret',
+        code_genere=version.code_genere,
+        comprehension=version.comprehension,
+        plan=version.plan
+    )
+    db.session.add(version_restauree)
+
+    project.code_genere = version.code_genere
+    project.provider = version.provider
+    project.statut = 'pret'
+    project.erreur_message = None
+
+    assistant_msg = ProjectMessage(
+        project_id=project_id,
+        role='assistant',
+        content=f'Version du {version.created_at.strftime("%d/%m/%Y %H:%M")} restauree avec succes.'
+    )
+    db.session.add(assistant_msg)
+
+    log_activity(project.workspace_id, current_user.id, 'version_restored', project.nom)
+    db.session.commit()
+    return jsonify(project.to_dict())
+
+
 @project_bp.route('/<project_id>/export', methods=['GET'])
 @login_required
 def export_project(project_id):
