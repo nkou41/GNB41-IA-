@@ -30,7 +30,13 @@ Règles strictes :
 2. Genere un ENSEMBLE COMPLET d'ecrans professionnels correspondant au type d'application demandee, pas un ecran minimal isole. Par exemple pour une application bancaire : page de connexion/inscription, tableau de bord avec solde et resume, liste des transactions, page de virement, page de parametres du compte. Pour un site e-commerce : accueil/catalogue, fiche produit, panier, paiement, compte client. Adapte la liste des ecrans au domaine metier precis de la demande.
 3. Le code doit être complet, fonctionnel, sans placeholder ni "TODO". Chaque fichier doit pouvoir être utilisé tel quel.
 4. Structure le projet en plusieurs fichiers propres (pas un seul fichier monolithique), avec une organisation claire (dossiers si nécessaire).
-5. Applique les bonnes pratiques : gestion d'erreurs, validation des entrées, sécurité de base, code lisible et commenté quand utile, design visuel soigne et coherent entre tous les ecrans (meme palette de couleurs, meme style de boutons/formulaires, navigation commune).
+5. Applique les bonnes pratiques : gestion d'erreurs, validation des entrées, sécurité de base, code lisible et commenté quand utile.
+5b. Design visuel professionnel obligatoire, au niveau d'une vraie application mobile/web moderne (pas du HTML brut sans style) :
+   - UN SEUL fichier style.css partage, reference de maniere identique par TOUTES les pages HTML avec exactement <link rel="stylesheet" href="style.css">. Verifie que chaque fichier .html genere contient bien cette ligne dans son <head>, sans exception.
+   - Systeme de couleurs coherent (2-3 couleurs principales + une couleur d'accent), meme typographie sur tout le site, coins arrondis, ombres douces, espacements genereux et reguliers (comme Material Design ou les interfaces iOS/Android natives).
+   - Composants visuels soignes : cartes avec ombre legere pour regrouper l'information, icones (utilise des caracteres unicode/emoji simples ou des SVG inline, jamais de dependance externe), grille responsive, boutons avec etats hover/actif clairement visibles.
+   - Navigation claire et persistante (barre de navigation ou menu identique sur toutes les pages), pas juste une liste de liens texte brut.
+   - Si un fichier JS est partage entre plusieurs pages (script.js), verifie de la meme maniere qu'il est reference de facon identique partout ou necessaire.
 6. Inclus un fichier README.md expliquant comment installer et lancer le projet.
 
 7. Si l'application a besoin de stocker des données persistantes (utilisateurs, produits, messages, taches, etc.), NE CODE PAS de backend/base de donnees toi-meme pour ca. Declare plutot les tables necessaires dans le champ "tables" (voir format ci-dessous), et utilise dans ton code JS l'API REST déjà fournie par la plateforme :
