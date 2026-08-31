@@ -92,11 +92,27 @@ def _build_contexte_projet(project):
 
 
 def _run_generation(project, prompt, provider, history=None, image=None):
+    import json as json_lib_local
     if provider not in VALID_PROVIDERS:
         provider = 'claude'
 
+    anciens_fichiers = set()
+    if project.code_genere:
+        try:
+            ancien_parsed = json_lib_local.loads(project.code_genere)
+            anciens_fichiers = {f.get('chemin') for f in ancien_parsed.get('fichiers', [])}
+        except (ValueError, TypeError):
+            pass
+
     contexte_projet = _build_contexte_projet(project)
     result = generate_project_code(prompt, provider, history=history, image=image, contexte_projet=contexte_projet)
+
+    if result.get('statut') == 'pret' and anciens_fichiers:
+        nouveaux_fichiers = {f.get('chemin') for f in result.get('fichiers', [])}
+        supprimes = anciens_fichiers - nouveaux_fichiers
+        if supprimes:
+            avert = result.setdefault('avertissements', [])
+            avert.append('Fichiers presents avant et absents apres generation: ' + ', '.join(sorted(supprimes)))
 
     import json as json_lib
     plan_json = json_lib.dumps(result.get('plan', []), ensure_ascii=False) if result.get('plan') else None
