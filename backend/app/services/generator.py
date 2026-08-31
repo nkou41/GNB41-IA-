@@ -879,6 +879,24 @@ def generate_project_code(prompt: str, provider: str = 'claude', history=None, i
         result = func(prompt, history, image)
         if result.get('statut') == 'pret' and 'fichiers' in result:
             result['avertissements'] = _verifier_fichiers(result['fichiers'], fichiers_connus)
+
+            corrigibles = [a for a in result['avertissements'] if 'Fichier vide' in a or 'Placeholder' in a]
+            if corrigibles:
+                correction_prompt = (
+                    'Ta reponse precedente contient des problemes a corriger avant validation:' + chr(10)
+                    + chr(10).join('- ' + c for c in corrigibles) + chr(10)
+                    + 'Renvoie une nouvelle reponse JSON complete (meme format) corrigeant ces problemes.'
+                )
+                historique_corrige = list(history) if history else []
+                historique_corrige.append({'role': 'user', 'content': prompt})
+                historique_corrige.append({'role': 'assistant', 'content': result.get('code', '')})
+                result_corrige = func(correction_prompt, historique_corrige, None)
+                if result_corrige.get('statut') == 'pret' and 'fichiers' in result_corrige:
+                    result_corrige['avertissements'] = _verifier_fichiers(result_corrige['fichiers'], fichiers_connus)
+                    result_corrige['comprehension'] = result_corrige.get('comprehension') or result.get('comprehension')
+                    result_corrige['plan'] = result_corrige.get('plan') or result.get('plan')
+                    result = result_corrige
+
         if result.get('statut') == 'erreur':
             msg = str(result.get('message', '')).lower()
             if 'credit' in msg or 'quota' in msg or '429' in msg or 'insufficient' in msg or 'non configurée' in msg:
