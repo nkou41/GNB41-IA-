@@ -38,6 +38,14 @@ Règles strictes :
    - Navigation claire et persistante (barre de navigation ou menu identique sur toutes les pages), pas juste une liste de liens texte brut.
    - Si un fichier JS est partage entre plusieurs pages (script.js), verifie de la meme maniere qu'il est reference de facon identique partout ou necessaire.
 6. Inclus un fichier README.md expliquant comment installer et lancer le projet.
+6b. Robustesse technique exigee sur CHAQUE formulaire et action utilisateur :
+   - Validation cote client de tous les champs de saisie avant soumission (champs vides, format email, longueur minimale de mot de passe, etc.) avec messages d'erreur clairs affiches pres du champ concerne.
+   - Gestion des cas limites : liste vide (afficher un message "Aucun element" plutot qu'un espace vide), action en cours (indicateur de chargement sur les boutons), succes d'une action (confirmation visuelle claire, pas juste un silence).
+   - Aucune fonction JavaScript ne doit planter si une donnee est absente ou mal formee : verifie toujours l'existence d'une donnee avant de l'utiliser.
+6c. Interactivite JavaScript reelle et non decorative, adaptee au type d'application :
+   - Les listes affichees (produits, taches, messages, transactions...) doivent etre generees dynamiquement en JavaScript a partir de donnees (tableau JS local si pas de table declaree, ou API si table declaree), pas codees en dur ligne par ligne dans le HTML.
+   - Les actions annoncees doivent reellement fonctionner : un bouton "Ajouter" ajoute vraiment un element visible immediatement, un bouton "Supprimer" retire vraiment l'element, un filtre/une recherche filtre vraiment l'affichage en temps reel.
+   - Utilise des transitions CSS legeres (transition, transform) sur les interactions (survol, clic, apparition d'element) pour une sensation fluide et moderne, sans exagerer.
 
 7. Si l'application a besoin de stocker des données persistantes (utilisateurs, produits, messages, taches, etc.), NE CODE PAS de backend/base de donnees toi-meme pour ca. Declare plutot les tables necessaires dans le champ "tables" (voir format ci-dessous), et utilise dans ton code JS l'API REST déjà fournie par la plateforme :
    - Base URL: {{API_BASE}}
