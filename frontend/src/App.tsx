@@ -1680,6 +1680,9 @@ ${jsFile.contenu}
                   <span className={`statut statut-${v.statut}`}>{v.statut}</span>
                   <p>{v.prompt}</p>
                   <span className="version-date">{new Date(v.created_at).toLocaleString('fr-FR')}</span>
+                  {v.duree_generation_ms != null && (
+                    <span className="version-date" style={{ marginLeft: '0.5rem' }}>({(v.duree_generation_ms / 1000).toFixed(1)}s)</span>
+                  )}
                   {v.statut === 'pret' && v.code_genere && (
                     <button
                       type="button"
