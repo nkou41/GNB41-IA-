@@ -121,8 +121,11 @@ def _run_generation(project, prompt, provider, history=None, image=None):
         except (ValueError, TypeError):
             pass
 
+    import time as time_lib
     contexte_projet = _build_contexte_projet(project)
+    debut_generation = time_lib.time()
     result = generate_project_code(prompt, provider, history=history, image=image, contexte_projet=contexte_projet, fichiers_connus=anciens_fichiers)
+    duree_ms = int((time_lib.time() - debut_generation) * 1000)
 
     if result.get('statut') == 'pret' and result.get('decisions_a_retenir'):
         existantes = (project.memoire_projet or '')
@@ -144,7 +147,8 @@ def _run_generation(project, prompt, provider, history=None, image=None):
         erreur_message=result.get('message'),
         comprehension=result.get('comprehension'),
         plan=plan_json,
-        avertissements=avertissements_json
+        avertissements=avertissements_json,
+        duree_generation_ms=duree_ms
     )
     db.session.add(version)
 

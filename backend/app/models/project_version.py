@@ -16,6 +16,7 @@ class ProjectVersion(db.Model):
     comprehension = db.Column(db.Text)
     plan = db.Column(db.Text)
     avertissements = db.Column(db.Text)
+    duree_generation_ms = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
@@ -30,5 +31,6 @@ class ProjectVersion(db.Model):
             'comprehension': self.comprehension,
             'plan': self.plan,
             'avertissements': self.avertissements,
+            'duree_generation_ms': self.duree_generation_ms,
             'created_at': self.created_at.isoformat()
         }
