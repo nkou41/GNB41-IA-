@@ -910,36 +910,57 @@ def generate_project_code(prompt: str, provider: str = 'claude', history=None, i
             mots_suppression_voulue = ['supprim', 'retir', 'enlev', 'remplac', 'recre', 'reecri', 'refaire entierement']
             suppression_voulue = any(m in prompt.lower() for m in mots_suppression_voulue)
 
-            corrigibles = []
-            for a in result['avertissements']:
-                if 'Fichier vide' in a or 'Placeholder' in a:
-                    corrigibles.append(a)
-                elif 'reference' in a and "n'est pas parmi les fichiers generes" in a:
-                    corrigibles.append(a)
-                elif a.startswith('Fichiers presents avant et absents') and not suppression_voulue:
-                    corrigibles.append(a)
-            if corrigibles:
+            def _extraire_corrigibles(avertissements):
+                trouves = []
+                for a in avertissements:
+                    if 'Fichier vide' in a or 'Placeholder' in a:
+                        trouves.append(a)
+                    elif 'reference' in a and "n'est pas parmi les fichiers generes" in a:
+                        trouves.append(a)
+                    elif a.startswith('Fichiers presents avant et absents') and not suppression_voulue:
+                        trouves.append(a)
+                return trouves
+
+            historique_courant = list(history) if history else []
+            dernier_prompt_envoye = prompt
+            tentatives = 0
+            max_tentatives = 2
+
+            while True:
+                corrigibles = _extraire_corrigibles(result.get('avertissements', []))
+                if not corrigibles or tentatives >= max_tentatives:
+                    if corrigibles:
+                        result['avertissements'].append(
+                            'Correction automatique non aboutie apres ' + str(tentatives) + ' tentative(s) - verification manuelle recommandee.'
+                        )
+                    break
+
+                tentatives += 1
                 correction_prompt = (
                     'Ta reponse precedente contient des problemes a corriger avant validation:' + chr(10)
                     + chr(10).join('- ' + c for c in corrigibles) + chr(10)
                     + 'Renvoie une nouvelle reponse JSON complete (meme format) corrigeant ces problemes.'
                 )
-                historique_corrige = list(history) if history else []
-                historique_corrige.append({'role': 'user', 'content': prompt})
-                historique_corrige.append({'role': 'assistant', 'content': result.get('code', '')})
-                result_corrige = func(correction_prompt, historique_corrige, None)
-                if result_corrige.get('statut') == 'pret' and 'fichiers' in result_corrige:
-                    result_corrige['avertissements'] = _verifier_fichiers(result_corrige['fichiers'], fichiers_connus)
-                    if fichiers_connus:
-                        nouveaux_chemins_c = {f.get('chemin') for f in result_corrige['fichiers']}
-                        supprimes_c = set(fichiers_connus) - nouveaux_chemins_c
-                        if supprimes_c:
-                            result_corrige['avertissements'].append(
-                                'Fichiers presents avant et absents apres generation: ' + ', '.join(sorted(supprimes_c))
-                            )
-                    result_corrige['comprehension'] = result_corrige.get('comprehension') or result.get('comprehension')
-                    result_corrige['plan'] = result_corrige.get('plan') or result.get('plan')
-                    result = result_corrige
+                historique_courant.append({'role': 'user', 'content': dernier_prompt_envoye})
+                historique_courant.append({'role': 'assistant', 'content': result.get('code', '')})
+
+                result_corrige = func(correction_prompt, historique_courant, None)
+                if result_corrige.get('statut') != 'pret' or 'fichiers' not in result_corrige:
+                    break
+
+                result_corrige['avertissements'] = _verifier_fichiers(result_corrige['fichiers'], fichiers_connus)
+                if fichiers_connus:
+                    nouveaux_chemins_c = {f.get('chemin') for f in result_corrige['fichiers']}
+                    supprimes_c = set(fichiers_connus) - nouveaux_chemins_c
+                    if supprimes_c:
+                        result_corrige['avertissements'].append(
+                            'Fichiers presents avant et absents apres generation: ' + ', '.join(sorted(supprimes_c))
+                        )
+                result_corrige['comprehension'] = result_corrige.get('comprehension') or result.get('comprehension')
+                result_corrige['plan'] = result_corrige.get('plan') or result.get('plan')
+
+                result = result_corrige
+                dernier_prompt_envoye = correction_prompt
 
         if result.get('statut') == 'erreur':
             msg = str(result.get('message', '')).lower()
