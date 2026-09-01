@@ -28,7 +28,7 @@ SYSTEM_PROMPT = """Tu es un ingénieur logiciel senior qui génère des applicat
 Règles strictes :
 1. SAUF demande explicite d'une autre stack (React, Vue, backend Node/Flask...), utilise du HTML/CSS/JS pur en plusieurs pages/fichiers .html distincts relies par des liens <a href="...">. Cette stack est deployee automatiquement et instantanement par la plateforme sans etape de compilation — React et les frameworks necessitant un build (npm run build) ne peuvent PAS etre deployes automatiquement pour le moment, donc evite-les sauf si l'utilisateur les demande explicitement par leur nom.
 2. Genere un ENSEMBLE COMPLET d'ecrans professionnels correspondant au type d'application demandee, pas un ecran minimal isole. Par exemple pour une application bancaire : page de connexion/inscription, tableau de bord avec solde et resume, liste des transactions, page de virement, page de parametres du compte. Pour un site e-commerce : accueil/catalogue, fiche produit, panier, paiement, compte client. Adapte la liste des ecrans au domaine metier precis de la demande.
-3. Le code doit être complet, fonctionnel, sans placeholder ni "TODO". Chaque fichier doit pouvoir être utilisé tel quel.
+3. Le code doit être complet, fonctionnel, sans placeholder ni "TODO". Chaque fichier doit pouvoir être utilisé tel quel. Aucun texte de remplissage generique (type "Lorem ipsum", "Common Marketing", "Sample Text") : tout le texte doit etre du vrai contenu pertinent pour l'application demandee, en francais sauf demande contraire. Comme aucune image ne peut etre generee ou telechargee, ne jamais utiliser de balise <img> pointant vers un fichier inexistant ou un service de placeholder externe (via.placeholder.com, picsum, etc.) : remplace toute illustration par un element visuel en CSS pur (degrade de couleur, forme geometrique, icone SVG inline ou emoji) qui s'integre proprement au design.
 4. Structure le projet en plusieurs fichiers propres (pas un seul fichier monolithique), avec une organisation claire (dossiers si nécessaire).
 5. Applique les bonnes pratiques : gestion d'erreurs, validation des entrées, sécurité de base, code lisible et commenté quand utile.
 5b. Design visuel professionnel obligatoire, au niveau d'une vraie application mobile/web moderne (pas du HTML brut sans style) :
@@ -887,7 +887,25 @@ def generate_project_code(prompt: str, provider: str = 'claude', history=None, i
         if result.get('statut') == 'pret' and 'fichiers' in result:
             result['avertissements'] = _verifier_fichiers(result['fichiers'], fichiers_connus)
 
-            corrigibles = [a for a in result['avertissements'] if 'Fichier vide' in a or 'Placeholder' in a]
+            if fichiers_connus:
+                nouveaux_chemins = {f.get('chemin') for f in result['fichiers']}
+                supprimes = set(fichiers_connus) - nouveaux_chemins
+                if supprimes:
+                    result['avertissements'].append(
+                        'Fichiers presents avant et absents apres generation: ' + ', '.join(sorted(supprimes))
+                    )
+
+            mots_suppression_voulue = ['supprim', 'retir', 'enlev', 'remplac', 'recre', 'reecri', 'refaire entierement']
+            suppression_voulue = any(m in prompt.lower() for m in mots_suppression_voulue)
+
+            corrigibles = []
+            for a in result['avertissements']:
+                if 'Fichier vide' in a or 'Placeholder' in a:
+                    corrigibles.append(a)
+                elif 'reference' in a and "n'est pas parmi les fichiers generes" in a:
+                    corrigibles.append(a)
+                elif a.startswith('Fichiers presents avant et absents') and not suppression_voulue:
+                    corrigibles.append(a)
             if corrigibles:
                 correction_prompt = (
                     'Ta reponse precedente contient des problemes a corriger avant validation:' + chr(10)
@@ -900,6 +918,13 @@ def generate_project_code(prompt: str, provider: str = 'claude', history=None, i
                 result_corrige = func(correction_prompt, historique_corrige, None)
                 if result_corrige.get('statut') == 'pret' and 'fichiers' in result_corrige:
                     result_corrige['avertissements'] = _verifier_fichiers(result_corrige['fichiers'], fichiers_connus)
+                    if fichiers_connus:
+                        nouveaux_chemins_c = {f.get('chemin') for f in result_corrige['fichiers']}
+                        supprimes_c = set(fichiers_connus) - nouveaux_chemins_c
+                        if supprimes_c:
+                            result_corrige['avertissements'].append(
+                                'Fichiers presents avant et absents apres generation: ' + ', '.join(sorted(supprimes_c))
+                            )
                     result_corrige['comprehension'] = result_corrige.get('comprehension') or result.get('comprehension')
                     result_corrige['plan'] = result_corrige.get('plan') or result.get('plan')
                     result = result_corrige
