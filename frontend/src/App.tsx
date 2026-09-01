@@ -1551,6 +1551,20 @@ ${jsFile.contenu}
                   setLiveUrl(`${base}/projects/${activeProject.id}/live/`);
                   return;
                 }
+                try {
+                  const versionsCheck = await api.listVersions(activeProject.id);
+                  const derniere = versionsCheck[0];
+                  if (derniere && derniere.avertissements) {
+                    const liste = JSON.parse(derniere.avertissements);
+                    if (liste.length > 0) {
+                      const suite = window.confirm(
+                        'Des points a verifier ont ete detectes sur la derniere generation :\n\n' + liste.join('\n') + '\n\nDeployer quand meme ?'
+                      );
+                      if (!suite) return;
+                    }
+                  }
+                } catch {}
+
                 setDeployLoading(true);
                 try {
                   const res = await api.deployProject(activeProject.id);
