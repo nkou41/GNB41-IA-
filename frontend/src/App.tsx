@@ -1677,6 +1677,28 @@ ${jsFile.contenu}
                   <span className={`statut statut-${v.statut}`}>{v.statut}</span>
                   <p>{v.prompt}</p>
                   <span className="version-date">{new Date(v.created_at).toLocaleString('fr-FR')}</span>
+                  {v.statut === 'pret' && v.code_genere && (
+                    <button
+                      type="button"
+                      className="marketplace-link-btn"
+                      onClick={async () => {
+                        if (!activeProject) return;
+                        if (!window.confirm('Restaurer cette version ? Le code actuel du projet sera remplace.')) return;
+                        try {
+                          const updated = await api.restoreVersion(activeProject.id, v.id);
+                          setActiveProject(updated);
+                          const msgs = await api.listMessages(activeProject.id);
+                          setChatMessages(msgs);
+                          const vs = await api.listVersions(activeProject.id);
+                          setVersions(vs);
+                        } catch (err: any) {
+                          alert('Erreur lors de la restauration: ' + err.message);
+                        }
+                      }}
+                    >
+                      Restaurer
+                    </button>
+                  )}
                 </li>
               ))}
               {versions.length === 0 && <p>Aucune version dans l'historique.</p>}
