@@ -4,7 +4,7 @@ import os
 import io
 import zipfile
 from flask_login import login_required, current_user
-from app import db
+from app import db, limiter
 from app.models.project import Project
 from app.models.project_version import ProjectVersion
 from app.models.project_message import ProjectMessage
@@ -182,6 +182,7 @@ def list_projects(workspace_id):
 
 @project_bp.route('/workspace/<workspace_id>', methods=['POST'])
 @login_required
+@limiter.limit('20 per hour')
 def create_project(workspace_id):
     if not _check_edit_access(workspace_id):
         return jsonify({'error': 'Non autorisé'}), 403
@@ -248,6 +249,7 @@ def update_memoire_projet(project_id):
 
 @project_bp.route('/<project_id>/regenerate', methods=['POST'])
 @login_required
+@limiter.limit('20 per hour')
 def regenerate_project(project_id):
     project = Project.query.get_or_404(project_id)
     if not _check_edit_access(project.workspace_id):
@@ -349,6 +351,7 @@ def list_messages(project_id):
 
 @project_bp.route('/<project_id>/chat', methods=['POST'])
 @login_required
+@limiter.limit('30 per hour')
 def chat_project(project_id):
     project = Project.query.get_or_404(project_id)
     if not _check_edit_access(project.workspace_id):
