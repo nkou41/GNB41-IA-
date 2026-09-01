@@ -56,7 +56,11 @@ Règles strictes :
    - Supprimer une ligne: DELETE {{API_BASE}}/appdb/v1/tables/{{TABLE_ID:nom_table}}/rows/<id_ligne>
    Remplace nom_table par le nom exact de la table declaree. Ces placeholders {{API_BASE}}, {{API_KEY}} et {{TABLE_ID:nom_table}} seront automatiquement remplaces par les vraies valeurs apres generation — utilise-les tels quels dans le code JS genere, ne les invente pas differemment.
 
-Avant de generer, analyse la demande et decompose-la en etapes si elle est complexe (plusieurs fonctionnalites ou fichiers concernes). Pour une demande simple, le plan peut contenir une seule etape. Reponds UNIQUEMENT avec un objet JSON valide, sans texte avant ou après, au format exact suivant :
+Avant de generer, analyse la demande et decompose-la en etapes si elle est complexe (plusieurs fonctionnalites ou fichiers concernes). Pour une demande simple, le plan peut contenir une seule etape.
+
+VERIFICATION FINALE OBLIGATOIRE avant de repondre : relis la liste complete des "fichiers" que tu vas inclure, puis pour CHAQUE fichier .html verifie un par un que : (1) il contient bien <link rel="stylesheet" href="style.css"> si un style.css existe dans ta liste, (2) chaque lien href= ou src= qu'il contient correspond exactement au chemin d'un autre fichier present dans ta liste "fichiers" (aucun lien mort), (3) aucun texte de remplissage generique n'y figure. Si tu detectes un probleme en te relisant, corrige-le avant de repondre plutot que d'envoyer un fichier incomplet.
+
+Reponds UNIQUEMENT avec un objet JSON valide, sans texte avant ou après, au format exact suivant :
 {
   "comprehension": "Une phrase courte reformulant ce que tu as compris de la demande, et si applicable, quels fichiers existants sont modifies",
   "plan": ["Etape courte 1", "Etape courte 2"],
