@@ -136,7 +136,9 @@ function App() {
   const [attachedImage, setAttachedImage] = useState<{ data: string; mediaType: string; name: string } | null>(null);
   const [showProviderMenu, setShowProviderMenu] = useState(false);
   const [chatProvider, setChatProvider] = useState('claude');
-  const [previewTab, setPreviewTab] = useState<'apercu' | 'code' | 'donnees'>('apercu');
+  const [previewTab, setPreviewTab] = useState<'apercu' | 'code' | 'donnees' | 'memoire'>('apercu');
+  const [memoireDraft, setMemoireDraft] = useState('');
+  const [memoireMsg, setMemoireMsg] = useState('');
   const [appTables, setAppTables] = useState<any[]>([]);
   const [appKeys, setAppKeys] = useState<any[]>([]);
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
@@ -1667,6 +1669,7 @@ ${jsFile.contenu}
           <button className={`preview-tab ${previewTab === 'apercu' ? 'active' : ''}`} onClick={() => setPreviewTab('apercu')}>Aperçu</button>
           <button className={`preview-tab ${previewTab === 'code' ? 'active' : ''}`} onClick={() => setPreviewTab('code')}>Code</button>
           <button className={`preview-tab ${previewTab === 'donnees' ? 'active' : ''}`} onClick={() => { setPreviewTab('donnees'); if (activeProject) { api.listAppTables(activeProject.id).then(setAppTables).catch(() => {}); api.listAppKeys(activeProject.id).then(setAppKeys).catch(() => {}); } }}>Base de donnees</button>
+          <button className={`preview-tab ${previewTab === 'memoire' ? 'active' : ''}`} onClick={() => { setPreviewTab('memoire'); setMemoireDraft(activeProject?.memoire_projet || ''); }}>Memoire</button>
         </div>
 
         {showVersions && (
@@ -1901,6 +1904,38 @@ ${jsFile.contenu}
                     )}
                   </div>
                 </div>
+              </div>
+            ) : previewTab === 'memoire' ? (
+              <div style={{ padding: '1rem', overflow: 'auto', flex: 1 }}>
+                <p style={{ fontSize: '0.8rem', color: '#8a7f68', marginBottom: '0.8rem' }}>
+                  Regles et decisions techniques memorisees pour ce projet. L'IA les respecte automatiquement a chaque generation, et y ajoute elle-meme les decisions importantes qu'elle prend.
+                </p>
+                <textarea
+                  value={memoireDraft}
+                  onChange={(e) => setMemoireDraft(e.target.value)}
+                  rows={12}
+                  style={{ width: '100%', padding: '0.7rem', border: '1px solid #ddd6c7', borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'inherit' }}
+                  placeholder="Aucune regle memorisee pour l'instant."
+                />
+                <button
+                  type="button"
+                  className="btn-publish"
+                  style={{ marginTop: '0.8rem' }}
+                  onClick={async () => {
+                    if (!activeProject) return;
+                    try {
+                      const updated = await api.updateMemoireProjet(activeProject.id, memoireDraft);
+                      setActiveProject(updated);
+                      setMemoireMsg('Memoire enregistree.');
+                      setTimeout(() => setMemoireMsg(''), 2500);
+                    } catch (err: any) {
+                      setMemoireMsg('Erreur: ' + err.message);
+                    }
+                  }}
+                >
+                  Enregistrer
+                </button>
+                {memoireMsg && <p style={{ fontSize: '0.78rem', marginTop: '0.5rem', color: '#166534' }}>{memoireMsg}</p>}
               </div>
             ) : parsedFiles && parsedFiles.fichiers ? (
               <div className="code-editor-layout">
