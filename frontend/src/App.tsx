@@ -1689,13 +1689,40 @@ ${jsFile.contenu}
         {showVersions && (
           <div className="detail-section versions-panel">
             <ul className="versions-list">
-              {versions.map((v) => (
+              {versions.map((v, idx) => {
+                const ancienne = versions[idx + 1];
+                let diffTexte = '';
+                if (v.statut === 'pret' && v.code_genere && ancienne && ancienne.statut === 'pret' && ancienne.code_genere) {
+                  try {
+                    const fichiersActuels: any[] = JSON.parse(v.code_genere).fichiers || [];
+                    const fichiersAnciens: any[] = JSON.parse(ancienne.code_genere).fichiers || [];
+                    const mapAncien = new Map(fichiersAnciens.map((f: any) => [f.chemin, f.contenu]));
+                    const mapActuel = new Map(fichiersActuels.map((f: any) => [f.chemin, f.contenu]));
+                    let ajoutes = 0, modifies = 0, supprimes = 0;
+                    mapActuel.forEach((contenu, chemin) => {
+                      if (!mapAncien.has(chemin)) ajoutes++;
+                      else if (mapAncien.get(chemin) !== contenu) modifies++;
+                    });
+                    mapAncien.forEach((_contenu, chemin) => {
+                      if (!mapActuel.has(chemin)) supprimes++;
+                    });
+                    const parts = [];
+                    if (ajoutes) parts.push(`+${ajoutes} ajoute(s)`);
+                    if (modifies) parts.push(`~${modifies} modifie(s)`);
+                    if (supprimes) parts.push(`-${supprimes} supprime(s)`);
+                    diffTexte = parts.join(', ');
+                  } catch {}
+                }
+                return (
                 <li key={v.id}>
                   <span className={`statut statut-${v.statut}`}>{v.statut}</span>
                   <p>{v.prompt}</p>
                   <span className="version-date">{new Date(v.created_at).toLocaleString('fr-FR')}</span>
                   {v.duree_generation_ms != null && (
                     <span className="version-date" style={{ marginLeft: '0.5rem' }}>({(v.duree_generation_ms / 1000).toFixed(1)}s)</span>
+                  )}
+                  {diffTexte && (
+                    <span className="version-date" style={{ marginLeft: '0.5rem', color: '#6366f1' }}>{diffTexte}</span>
                   )}
                   {v.statut === 'pret' && v.code_genere && (
                     <button
@@ -1720,7 +1747,8 @@ ${jsFile.contenu}
                     </button>
                   )}
                 </li>
-              ))}
+                );
+              })}
               {versions.length === 0 && <p>Aucune version dans l'historique.</p>}
             </ul>
           </div>
