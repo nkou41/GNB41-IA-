@@ -110,6 +110,18 @@ def _verifier_fichiers(fichiers, fichiers_connus=None):
                 if ref not in noms_fichiers:
                     avertissements.append(chemin + ' reference ' + ref + ' qui n\'est pas parmi les fichiers generes')
 
+        motifs_secrets = [
+            'sk-ant-[A-Za-z0-9_-]{10,}',
+            'sk-[A-Za-z0-9]{20,}',
+            'AIza[A-Za-z0-9_-]{20,}',
+            '(?:api[_-]?key|apikey|secret[_-]?key)\\s*[:=]\\s*[' + q + '][A-Za-z0-9_-]{12,}[' + q + ']',
+            'password\\s*[:=]\\s*[' + q + '](?!\\{\\{)[^' + q + ']{4,}[' + q + ']',
+        ]
+        for motif in motifs_secrets:
+            if re.search(motif, contenu, re.IGNORECASE):
+                avertissements.append('Possible secret code en dur detecte dans ' + chemin + ' - a verifier manuellement')
+                break
+
     return avertissements
 
 
@@ -920,6 +932,8 @@ def generate_project_code(prompt: str, provider: str = 'claude', history=None, i
                     elif 'reference' in a and "n'est pas parmi les fichiers generes" in a:
                         trouves.append(a)
                     elif a.startswith('Fichiers presents avant et absents') and not suppression_voulue:
+                        trouves.append(a)
+                    elif a.startswith('Possible secret code en dur'):
                         trouves.append(a)
                 return trouves
 
