@@ -4,6 +4,7 @@ import os
 import io
 import zipfile
 from flask_login import login_required, current_user
+import re
 from app import db, limiter
 from app.models.project import Project
 from app.models.project_version import ProjectVersion
@@ -76,6 +77,16 @@ def _substitute_placeholders(code_genere_json, project, api_key_raw):
     return json_lib.dumps(parsed, ensure_ascii=False, indent=2)
 
 
+def _masquer_secrets(texte):
+    """Empeche toute cle API de fuiter dans un message d'erreur stocke ou affiche."""
+    if not texte:
+        return texte
+    motifs = [r'sk-ant-[A-Za-z0-9\-_]{10,}', r'sk-[A-Za-z0-9]{20,}', r'AIza[A-Za-z0-9_\-]{20,}']
+    for motif in motifs:
+        texte = re.sub(motif, '[CLE_MASQUEE]', texte)
+    return texte
+
+
 def _build_contexte_projet(project):
     import json as json_lib
     morceaux = []
@@ -126,6 +137,8 @@ def _run_generation(project, prompt, provider, history=None, image=None):
     debut_generation = time_lib.time()
     result = generate_project_code(prompt, provider, history=history, image=image, contexte_projet=contexte_projet, fichiers_connus=anciens_fichiers)
     duree_ms = int((time_lib.time() - debut_generation) * 1000)
+    if result.get('message'):
+        result['message'] = _masquer_secrets(result['message'])
 
     if result.get('statut') == 'pret' and result.get('decisions_a_retenir'):
         existantes = (project.memoire_projet or '')
