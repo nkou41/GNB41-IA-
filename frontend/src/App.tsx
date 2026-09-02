@@ -139,6 +139,7 @@ function App() {
   const [previewTab, setPreviewTab] = useState<'apercu' | 'code' | 'donnees' | 'memoire'>('apercu');
   const [memoireDraft, setMemoireDraft] = useState('');
   const [memoireMsg, setMemoireMsg] = useState('');
+  const [erreursPreview, setErreursPreview] = useState<string[]>([]);
   const [appTables, setAppTables] = useState<any[]>([]);
   const [appKeys, setAppKeys] = useState<any[]>([]);
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
@@ -183,6 +184,16 @@ function App() {
 
   useEffect(() => {
     api.me().then(setUser).catch(() => {}).finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const ecouteurErreurs = (event: MessageEvent) => {
+      if (event.data && event.data.source === 'gnb41-preview-error') {
+        setErreursPreview((prev) => [...prev.slice(-9), event.data.message]);
+      }
+    };
+    window.addEventListener('message', ecouteurErreurs);
+    return () => window.removeEventListener('message', ecouteurErreurs);
   }, []);
 
   useEffect(() => {
@@ -1468,6 +1479,25 @@ ${jsFile.contenu}
         }
       });
 
+      const scriptCaptureErreurs = `<script>
+      (function() {
+        function envoyer(message) {
+          try { window.parent.postMessage({ source: 'gnb41-preview-error', message: message }, '*'); } catch (e) {}
+        }
+        window.addEventListener('error', function(e) {
+          envoyer((e && e.message) || 'Erreur inconnue');
+        });
+        window.addEventListener('unhandledrejection', function(e) {
+          envoyer('Promesse rejetee: ' + ((e && e.reason && e.reason.message) || e.reason || 'raison inconnue'));
+        });
+      })();
+      </script>`;
+      if (html.includes('<head>')) {
+        html = html.replace('<head>', '<head>' + scriptCaptureErreurs);
+      } else {
+        html = scriptCaptureErreurs + html;
+      }
+
       return html;
     })();
 
@@ -1860,12 +1890,23 @@ ${jsFile.contenu}
               </div>
             ) : previewTab === 'apercu' ? (
               previewContent ? (
-                <iframe
-                  title="Aperçu"
-                  srcDoc={previewContent}
-                  className="preview-iframe"
-                  sandbox="allow-scripts"
-                />
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                  <iframe
+                    title="Aperçu"
+                    srcDoc={previewContent}
+                    className="preview-iframe"
+                    sandbox="allow-scripts"
+                    onLoad={() => setErreursPreview([])}
+                  />
+                  {erreursPreview.length > 0 && (
+                    <div style={{ padding: '0.6rem 1rem', background: '#fef2f2', borderTop: '1px solid #fecaca', maxHeight: '140px', overflow: 'auto' }}>
+                      <p style={{ fontSize: '0.78rem', fontWeight: 600, color: '#b91c1c', marginBottom: '0.3rem' }}>Erreurs JavaScript detectees dans l'apercu :</p>
+                      {erreursPreview.map((err, i) => (
+                        <p key={i} style={{ fontSize: '0.75rem', color: '#7f1d1d', fontFamily: 'monospace' }}>{err}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="preview-empty">
                   <p>L'aperçu apparaîtra ici une fois l'application générée.</p>
