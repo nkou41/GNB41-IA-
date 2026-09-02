@@ -165,12 +165,18 @@ def _run_generation(project, prompt, provider, history=None, image=None):
     )
     db.session.add(version)
 
+    est_clarification = bool((result.get('comprehension') or '').startswith('CLARIFICATION_NECESSAIRE:'))
+
     project.statut = result['statut']
-    project.prompt_initial = prompt
     project.provider = provider
+    if not est_clarification:
+        project.prompt_initial = prompt
+
     if result['statut'] == 'erreur':
         project.erreur_message = result.get('message')
         project.code_genere = None
+    elif est_clarification:
+        project.erreur_message = None
     else:
         project.code_genere = result.get('code')
         project.erreur_message = None
@@ -409,7 +415,10 @@ def chat_project(project_id):
                     avert_texte = chr(10) + chr(10) + 'A verifier :' + chr(10) + chr(10).join(f'- {a}' for a in avert_liste)
             except (ValueError, TypeError):
                 pass
-        assistant_content = (comprehension + plan_texte + avert_texte) if comprehension else f"J'ai généré l'application : {project.nom}."
+        if comprehension and comprehension.startswith('CLARIFICATION_NECESSAIRE:'):
+            assistant_content = '❓ ' + comprehension.replace('CLARIFICATION_NECESSAIRE:', '', 1).strip()
+        else:
+            assistant_content = (comprehension + plan_texte + avert_texte) if comprehension else f"J'ai généré l'application : {project.nom}."
     else:
         assistant_content = f"Erreur lors de la génération : {project.erreur_message}"
 

@@ -77,6 +77,8 @@ Reponds UNIQUEMENT avec un objet JSON valide, sans texte avant ou après, au for
 }
 
 Le champ "tables" est optionnel (liste vide si l'app n'a pas besoin de stockage persistant). Types de colonnes valides: "texte", "nombre", "booleen", "date".
+
+Si la demande est ambigue au point de bloquer une generation fiable (ex: information essentielle manquante, choix technique non precise qui changerait completement le resultat), ne genere PAS de code au hasard. Renvoie plutot un JSON avec "fichiers": [] et "comprehension" commencant EXACTEMENT par "CLARIFICATION_NECESSAIRE: " suivi de ta question precise. N'utilise ce mecanisme que si c'est reellement bloquant, pas pour des details mineurs que tu peux raisonnablement deduire.
 """
 
 
