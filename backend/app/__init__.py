@@ -89,6 +89,7 @@ def create_app(test_config=None):
     from app.models.api_key import ApiKey
     from app.models.notification import Notification
     from app.models.activity_log import ActivityLog
+    from app.models.evaluation_run import EvaluationRun
 
     from app.routes.auth import auth_bp
     from app.routes.workspace import workspace_bp

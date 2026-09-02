@@ -6,6 +6,10 @@ from app.models.workspace import Workspace, WorkspaceMember
 from app.models.project import Project
 from app.utils_admin import admin_required, superadmin_required
 from app.services.reqres_client import get_users as reqres_get_users, TEST_MODE
+from app.models.evaluation_run import EvaluationRun
+from app.services.generator import generate_project_code
+import time
+import uuid as uuid_lib
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -88,3 +92,75 @@ def admin_stats():
             for plan in ['gratuit', 'pro']
         }
     })
+
+
+# Axe 14 (evaluation) : suite de prompts fixes rejoues periodiquement pour
+# mesurer la qualite du moteur IA dans le temps (comprehension, plan,
+# avertissements, duree), independamment de l'observabilite (Axe 14 duree seule).
+EVALUATION_PROMPTS = [
+    "Cree une landing page pour un cafe avec un formulaire de contact",
+    "Ajoute une todo list avec ajout et suppression de taches en JavaScript",
+    "Cree un portfolio personnel simple avec une section projets",
+]
+
+
+@admin_bp.route('/evaluation/run', methods=['POST'])
+@login_required
+@admin_required
+def run_evaluation():
+    data = request.get_json() or {}
+    provider = data.get('provider', 'claude')
+    suite_id = str(uuid_lib.uuid4())
+    resultats = []
+
+    for prompt in EVALUATION_PROMPTS:
+        debut = time.time()
+        try:
+            result = generate_project_code(prompt, provider=provider)
+            duree_ms = int((time.time() - debut) * 1000)
+            run = EvaluationRun(
+                suite_id=suite_id,
+                prompt=prompt,
+                provider=provider,
+                statut=result.get('statut'),
+                a_comprehension=bool(result.get('comprehension')),
+                a_plan=bool(result.get('plan')),
+                nb_fichiers=len(result.get('fichiers') or []),
+                nb_avertissements=len(result.get('avertissements') or []),
+                duree_ms=duree_ms,
+                erreur=result.get('message') if result.get('statut') == 'erreur' else None,
+            )
+        except Exception as e:
+            duree_ms = int((time.time() - debut) * 1000)
+            run = EvaluationRun(
+                suite_id=suite_id,
+                prompt=prompt,
+                provider=provider,
+                statut='exception',
+                duree_ms=duree_ms,
+                erreur=str(e),
+            )
+        db.session.add(run)
+        resultats.append(run)
+
+    db.session.commit()
+    return jsonify({'suite_id': suite_id, 'resultats': [r.to_dict() for r in resultats]})
+
+
+@admin_bp.route('/evaluation/history', methods=['GET'])
+@login_required
+@admin_required
+def evaluation_history():
+    runs = EvaluationRun.query.order_by(EvaluationRun.created_at.desc()).limit(300).all()
+    suites = {}
+    ordre = []
+    for r in runs:
+        if r.suite_id not in suites:
+            suites[r.suite_id] = []
+            ordre.append(r.suite_id)
+        suites[r.suite_id].append(r.to_dict())
+    resultat = [
+        {'suite_id': sid, 'created_at': suites[sid][-1]['created_at'], 'runs': suites[sid]}
+        for sid in ordre
+    ]
+    return jsonify({'suites': resultat})
