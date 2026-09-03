@@ -940,7 +940,7 @@ def generate_project_code(prompt: str, provider: str = 'claude', history=None, i
             historique_courant = list(history) if history else []
             dernier_prompt_envoye = prompt
             tentatives = 0
-            max_tentatives = 2
+            max_tentatives = 3 if provider == 'mistral' else 2
 
             while True:
                 corrigibles = _extraire_corrigibles(result.get('avertissements', []))
@@ -955,7 +955,10 @@ def generate_project_code(prompt: str, provider: str = 'claude', history=None, i
                 correction_prompt = (
                     'Ta reponse precedente contient des problemes a corriger avant validation:' + chr(10)
                     + chr(10).join('- ' + c for c in corrigibles) + chr(10)
-                    + 'Renvoie une nouvelle reponse JSON complete (meme format) corrigeant ces problemes.'
+                    + 'IMPORTANT: ne te contente pas de decrire la correction dans un texte, effectue-la reellement. '
+                    + 'Renvoie une nouvelle reponse JSON complete (meme format) avec le tableau "fichiers" contenant TOUS les fichiers du projet, '
+                    + 'y compris chaque fichier CSS/JS/image reference par un lien ou une balise dans le HTML (link, script, img). '
+                    + 'Un fichier reference mais absent du tableau "fichiers" est une erreur bloquante.'
                 )
                 historique_courant.append({'role': 'user', 'content': dernier_prompt_envoye})
                 historique_courant.append({'role': 'assistant', 'content': result.get('code', '')})
