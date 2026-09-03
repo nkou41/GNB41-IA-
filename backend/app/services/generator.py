@@ -271,14 +271,21 @@ def _generate_mistral(prompt: str, history=None, image=None) -> dict:
         response = requests.post(
             'https://api.mistral.ai/v1/chat/completions',
             headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
-            json={'model': 'mistral-small-latest', 'messages': messages, 'max_tokens': 8000},
+            json={'model': 'mistral-small-latest', 'messages': messages, 'max_tokens': 16000},
             timeout=180
         )
         data = response.json()
         if 'choices' not in data:
             return {'statut': 'erreur', 'message': f'Erreur API Mistral: {data}'}
+        finish_reason = data['choices'][0].get('finish_reason')
         text = data['choices'][0]['message']['content']
-        return _parse_result(text)
+        resultat = _parse_result(text)
+        if finish_reason == 'length':
+            if resultat.get('statut') == 'erreur':
+                resultat['message'] = 'Reponse tronquee (limite de tokens atteinte) - ' + str(resultat.get('message', ''))
+            elif resultat.get('statut') == 'pret':
+                resultat.setdefault('avertissements', []).append('Reponse IA tronquee (limite de tokens Mistral atteinte) - certains fichiers ou contenus peuvent etre incomplets.')
+        return resultat
     except Exception as e:
         return {'statut': 'erreur', 'message': str(e)}
 
@@ -937,7 +944,8 @@ def generate_project_code(prompt: str, provider: str = 'claude', history=None, i
     try:
         result = func(prompt, history, image)
         if result.get('statut') == 'pret' and 'fichiers' in result:
-            result['avertissements'] = _verifier_fichiers(result['fichiers'], fichiers_connus)
+            avertissements_prealables = result.get('avertissements', [])
+            result['avertissements'] = avertissements_prealables + _verifier_fichiers(result['fichiers'], fichiers_connus)
 
             if fichiers_connus:
                 nouveaux_chemins = {f.get('chemin') for f in result['fichiers']}
