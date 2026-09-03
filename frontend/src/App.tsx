@@ -139,7 +139,7 @@ function App() {
   const [isListening, setIsListening] = useState(false);
   const [attachedImage, setAttachedImage] = useState<{ data: string; mediaType: string; name: string } | null>(null);
   const [showProviderMenu, setShowProviderMenu] = useState(false);
-  const [chatProvider, setChatProvider] = useState('claude');
+  const [chatProvider, setChatProvider] = useState('mistral');
   const [previewTab, setPreviewTab] = useState<'apercu' | 'code' | 'donnees' | 'memoire'>('apercu');
   const [memoireDraft, setMemoireDraft] = useState('');
   const [memoireMsg, setMemoireMsg] = useState('');
@@ -150,7 +150,7 @@ function App() {
   const [selectedTableRows, setSelectedTableRows] = useState<any[]>([]);
   const [newKeyRevealed, setNewKeyRevealed] = useState<string | null>(null);
   const [quickPrompt, setQuickPrompt] = useState('');
-  const [quickProvider, setQuickProvider] = useState('claude');
+  const [quickProvider, setQuickProvider] = useState('mistral');
   const [quickLoading, setQuickLoading] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -168,7 +168,7 @@ function App() {
   const [wsInviteRole, setWsInviteRole] = useState('editeur');
   const [wsInviteError, setWsInviteError] = useState('');
   const [landingPrompt, setLandingPrompt] = useState('');
-  const [landingModel, setLandingModel] = useState('claude');
+  const [landingModel, setLandingModel] = useState('mistral');
   const [recentProjects, setRecentProjects] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 

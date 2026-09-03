@@ -122,7 +122,7 @@ def _build_contexte_projet(project):
 def _run_generation(project, prompt, provider, history=None, image=None):
     import json as json_lib_local
     if provider not in VALID_PROVIDERS:
-        provider = 'claude'
+        provider = 'mistral'
 
     anciens_fichiers = set()
     if project.code_genere:
@@ -209,7 +209,7 @@ def create_project(workspace_id):
     data = request.get_json()
     nom = data.get('nom')
     prompt_initial = data.get('prompt_initial')
-    provider = data.get('provider', 'claude')
+    provider = data.get('provider', 'mistral')
     if not nom or not prompt_initial:
         return jsonify({'error': 'nom et prompt_initial requis'}), 400
 
@@ -276,7 +276,7 @@ def regenerate_project(project_id):
 
     data = request.get_json()
     new_prompt = data.get('prompt')
-    provider = data.get('provider', project.provider or 'claude')
+    provider = data.get('provider', project.provider or 'mistral')
     if not new_prompt:
         return jsonify({'error': 'prompt requis'}), 400
 
@@ -378,7 +378,7 @@ def chat_project(project_id):
 
     data = request.get_json()
     user_message = data.get('message')
-    provider = data.get('provider', project.provider or 'claude')
+    provider = data.get('provider', project.provider or 'mistral')
     image = data.get('image')
     if not user_message:
         return jsonify({'error': 'message requis'}), 400
