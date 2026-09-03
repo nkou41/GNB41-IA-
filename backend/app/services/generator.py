@@ -271,7 +271,7 @@ def _generate_mistral(prompt: str, history=None, image=None) -> dict:
         response = requests.post(
             'https://api.mistral.ai/v1/chat/completions',
             headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
-            json={'model': 'mistral-small-latest', 'messages': messages, 'max_tokens': 16000},
+            json={'model': 'mistral-small-latest', 'messages': messages, 'max_tokens': 8000},
             timeout=180
         )
         data = response.json()
@@ -940,7 +940,7 @@ def generate_project_code(prompt: str, provider: str = 'claude', history=None, i
             historique_courant = list(history) if history else []
             dernier_prompt_envoye = prompt
             tentatives = 0
-            max_tentatives = 3 if provider == 'mistral' else 2
+            max_tentatives = 1 if provider == 'mistral' else 2
 
             while True:
                 corrigibles = _extraire_corrigibles(result.get('avertissements', []))
