@@ -1003,7 +1003,7 @@ function App() {
               disabled={adminEvalRunning}
               onClick={() => {
                 setAdminEvalRunning(true);
-                api.adminRunEvaluation('claude')
+                api.adminRunEvaluation('mistral')
                   .then(() => api.adminEvaluationHistory().then((res) => setAdminEvalSuites(res.suites)))
                   .catch(() => {})
                   .finally(() => setAdminEvalRunning(false));

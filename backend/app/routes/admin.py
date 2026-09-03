@@ -109,7 +109,7 @@ EVALUATION_PROMPTS = [
 @admin_required
 def run_evaluation():
     data = request.get_json() or {}
-    provider = data.get('provider', 'claude')
+    provider = data.get('provider', 'mistral')
     suite_id = str(uuid_lib.uuid4())
     resultats = []
 
