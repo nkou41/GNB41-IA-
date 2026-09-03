@@ -28,6 +28,7 @@ interface Project {
   erreur_message?: string;
   provider?: string;
   est_deploye?: boolean;
+  memoire_projet?: string;
 }
 
 function AnimatedPlaceholder({ text, active }: { text: string; active: boolean }) {
@@ -85,11 +86,14 @@ function App() {
   const [resetStatus, setResetStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [resetMessage, setResetMessage] = useState('');
   const [adminStats, setAdminStats] = useState<any | null>(null);
-  const [adminTab, setAdminTab] = useState<'boutique' | 'utilisateurs' | 'workspaces'>('boutique');
+  const [adminTab, setAdminTab] = useState<'boutique' | 'utilisateurs' | 'workspaces' | 'evaluation'>('boutique');
   const [adminUsers, setAdminUsers] = useState<any[]>([]);
   const [adminWorkspaces, setAdminWorkspaces] = useState<any[]>([]);
   const [adminUsersLoading, setAdminUsersLoading] = useState(false);
   const [adminWorkspacesLoading, setAdminWorkspacesLoading] = useState(false);
+  const [adminEvalSuites, setAdminEvalSuites] = useState<any[]>([]);
+  const [adminEvalLoading, setAdminEvalLoading] = useState(false);
+  const [adminEvalRunning, setAdminEvalRunning] = useState(false);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -363,6 +367,10 @@ function App() {
     if (showAdminDashboard && adminTab === 'workspaces') {
       setAdminWorkspacesLoading(true);
       api.adminListWorkspaces().then((res) => setAdminWorkspaces(res.workspaces)).catch(() => {}).finally(() => setAdminWorkspacesLoading(false));
+    }
+    if (showAdminDashboard && adminTab === 'evaluation') {
+      setAdminEvalLoading(true);
+      api.adminEvaluationHistory().then((res) => setAdminEvalSuites(res.suites)).catch(() => {}).finally(() => setAdminEvalLoading(false));
     }
   }, [showAdminDashboard, adminTab]);
 
@@ -901,6 +909,7 @@ function App() {
           <button onClick={() => setAdminTab('boutique')} className={adminTab === 'boutique' ? 'btn-publish' : 'btn-publish is-cancel'}>Boutique</button>
           <button onClick={() => setAdminTab('utilisateurs')} className={adminTab === 'utilisateurs' ? 'btn-publish' : 'btn-publish is-cancel'}>Utilisateurs</button>
           <button onClick={() => setAdminTab('workspaces')} className={adminTab === 'workspaces' ? 'btn-publish' : 'btn-publish is-cancel'}>Workspaces</button>
+          <button onClick={() => setAdminTab('evaluation')} className={adminTab === 'evaluation' ? 'btn-publish' : 'btn-publish is-cancel'}>Evaluation IA</button>
         </div>
 
         {adminTab === 'boutique' && (
@@ -983,6 +992,48 @@ function App() {
                   </div>
                 ))}
               </div>
+            )}
+          </div>
+        )}
+
+        {adminTab === 'evaluation' && (
+          <div style={{ padding: '0 1.5rem 2rem' }}>
+            <button
+              className="btn-publish"
+              disabled={adminEvalRunning}
+              onClick={() => {
+                setAdminEvalRunning(true);
+                api.adminRunEvaluation('claude')
+                  .then(() => api.adminEvaluationHistory().then((res) => setAdminEvalSuites(res.suites)))
+                  .catch(() => {})
+                  .finally(() => setAdminEvalRunning(false));
+              }}
+              style={{ marginBottom: '1rem' }}
+            >
+              {adminEvalRunning ? 'Execution en cours...' : 'Lancer la suite d\'evaluation'}
+            </button>
+            {adminEvalLoading ? <p>Chargement...</p> : adminEvalSuites.length === 0 ? (
+              <p>Aucune execution pour le moment.</p>
+            ) : (
+              adminEvalSuites.map((suite: any) => (
+                <div key={suite.suite_id} style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: '0.95rem', opacity: 0.7 }}>
+                    {new Date(suite.created_at).toLocaleString('fr-FR')}
+                  </h3>
+                  <div className="admin-sales-table">
+                    {suite.runs.map((r: any) => (
+                      <div key={r.id} className="admin-sales-row">
+                        <span className="admin-sales-titre">{r.prompt}</span>
+                        <span className={`marketplace-badge ${r.statut === 'pret' ? '' : 'admin-badge-pending'}`}>{r.statut}</span>
+                        <span className="admin-sales-sub">
+                          {r.a_comprehension ? 'comprehension ok' : 'comprehension manquante'} · {r.a_plan ? 'plan ok' : 'plan manquant'} · {r.nb_avertissements} avertissement(s)
+                        </span>
+                        <span className="admin-sales-date">{r.duree_ms ? (r.duree_ms / 1000).toFixed(1) + ' s' : '-'}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
             )}
           </div>
         )}
