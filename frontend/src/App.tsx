@@ -1530,6 +1530,28 @@ ${jsFile.contenu}
         }
       });
 
+      const scriptPolyfillStorage = `<script>
+      (function() {
+        function creerStockageMemoire() {
+          var donnees = {};
+          return {
+            getItem: function(cle) { return Object.prototype.hasOwnProperty.call(donnees, cle) ? donnees[cle] : null; },
+            setItem: function(cle, valeur) { donnees[cle] = String(valeur); },
+            removeItem: function(cle) { delete donnees[cle]; },
+            clear: function() { donnees = {}; },
+            key: function(i) { return Object.keys(donnees)[i] || null; },
+            get length() { return Object.keys(donnees).length; }
+          };
+        }
+        try { window.localStorage.getItem('test'); } catch (e) {
+          try { Object.defineProperty(window, 'localStorage', { value: creerStockageMemoire(), configurable: true }); } catch (e2) {}
+        }
+        try { window.sessionStorage.getItem('test'); } catch (e) {
+          try { Object.defineProperty(window, 'sessionStorage', { value: creerStockageMemoire(), configurable: true }); } catch (e2) {}
+        }
+      })();
+      </script>`;
+
       const scriptCaptureErreurs = `<script>
       (function() {
         function envoyer(message) {
@@ -1543,10 +1565,11 @@ ${jsFile.contenu}
         });
       })();
       </script>`;
+      const scriptsInjection = scriptPolyfillStorage + scriptCaptureErreurs;
       if (html.includes('<head>')) {
-        html = html.replace('<head>', '<head>' + scriptCaptureErreurs);
+        html = html.replace('<head>', '<head>' + scriptsInjection);
       } else {
-        html = scriptCaptureErreurs + html;
+        html = scriptsInjection + html;
       }
 
       return html;
