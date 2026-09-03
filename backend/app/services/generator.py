@@ -965,6 +965,10 @@ def generate_project_code(prompt: str, provider: str = 'claude', history=None, i
 
                 result_corrige = func(correction_prompt, historique_courant, None)
                 if result_corrige.get('statut') != 'pret' or 'fichiers' not in result_corrige:
+                    raison = result_corrige.get('message', 'reponse invalide') if result_corrige.get('statut') != 'pret' else 'fichiers absents de la reponse'
+                    result['avertissements'].append(
+                        'Tentative de correction ' + str(tentatives) + ' echouee (' + str(raison)[:200] + ') - verification manuelle recommandee.'
+                    )
                     break
 
                 result_corrige['avertissements'] = _verifier_fichiers(result_corrige['fichiers'], fichiers_connus)
