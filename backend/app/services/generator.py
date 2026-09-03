@@ -886,14 +886,40 @@ PROVIDERS = {
 }
 
 
-def generate_project_code(prompt: str, provider: str = 'claude', history=None, image=None, contexte_projet: str = None, fichiers_connus=None) -> dict:
+SPECIALISATIONS = {
+    'creation': "Tu agis comme un agent specialise en creation de projet complet. Concois une structure de fichiers coherente et complete pour repondre a la demande.",
+    'modification': "Tu agis comme un agent specialise en modification ciblee d'un projet existant. Ne modifie que ce qui est necessaire pour repondre a la demande, laisse le reste du projet inchange autant que possible.",
+    'style': "Tu agis comme un agent specialise en design/CSS. Concentre-toi uniquement sur l'apparence visuelle (couleurs, typographie, mise en page, espacement, animations) via le(s) fichier(s) CSS. Ne modifie la structure HTML ou la logique JS que si strictement indispensable pour appliquer le style demande.",
+    'contenu': "Tu agis comme un agent specialise en redaction de contenu. Concentre-toi sur les textes (titres, paragraphes, descriptions, boutons) dans le HTML. Ne modifie pas la structure, le CSS ou le JS sauf si strictement indispensable.",
+}
+
+MOTS_STYLE = ['style', 'design', 'couleur', 'police', 'theme', 'apparence', 'css', 'esthetique', 'visuel', 'mise en page', 'look']
+MOTS_CONTENU = ['texte', 'contenu', 'redige', 'description', 'titre', 'paragraphe', 'wording', 'copywriting', 'reformule']
+
+
+def _detecter_type_demande(prompt: str, a_fichiers_existants: bool) -> str:
+    p = prompt.lower()
+    if any(m in p for m in MOTS_STYLE):
+        return 'style'
+    if any(m in p for m in MOTS_CONTENU):
+        return 'contenu'
+    if not a_fichiers_existants:
+        return 'creation'
+    return 'modification'
+
+
+def generate_project_code(prompt: str, provider: str = 'claude', history=None, image=None, contexte_projet: str = None, fichiers_connus=None, mode=None) -> dict:
     """Génère une application structurée (multi-fichiers) via le fournisseur IA choisi."""
+    agent_type = mode if mode in SPECIALISATIONS else _detecter_type_demande(prompt, bool(fichiers_connus))
+    entete_agent = "[AGENT SPECIALISE: " + agent_type + "]" + chr(10) + SPECIALISATIONS[agent_type] + chr(10) + chr(10)
     if contexte_projet:
         entete = "[CONTEXTE - PROJET EXISTANT]" + chr(10)
         entete += "Ce projet contient deja les elements suivants. Ne les recree pas inutilement, "
         entete += "reste coherent avec l'existant, et ne modifie que ce qui est necessaire pour repondre a la demande." + chr(10)
         entete += contexte_projet + chr(10) + chr(10) + "[DEMANDE]" + chr(10)
-        prompt = entete + prompt
+        prompt = entete_agent + entete + prompt
+    else:
+        prompt = entete_agent + prompt
     cle_par_provider = {
         'claude': 'ANTHROPIC_API_KEY',
         'openai': 'OPENAI_API_KEY',
@@ -989,6 +1015,8 @@ def generate_project_code(prompt: str, provider: str = 'claude', history=None, i
             msg = str(result.get('message', '')).lower()
             if 'credit' in msg or 'quota' in msg or '429' in msg or 'insufficient' in msg or 'non configurée' in msg:
                 return _generate_demo(prompt, history, image)
+        if result.get('statut') == 'pret':
+            result['agent_type'] = agent_type
         return result
     except json.JSONDecodeError as e:
         return {'statut': 'erreur', 'message': f'Réponse IA invalide (JSON): {str(e)}'}

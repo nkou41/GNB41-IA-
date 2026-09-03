@@ -157,6 +157,9 @@ def create_app(test_config=None):
             if 'duree_generation_ms' not in colonnes:
                 db.session.execute(db.text('ALTER TABLE project_version ADD COLUMN duree_generation_ms INTEGER'))
                 db.session.commit()
+            if 'agent_type' not in colonnes:
+                db.session.execute(db.text('ALTER TABLE project_version ADD COLUMN agent_type VARCHAR(20)'))
+                db.session.commit()
         if 'project' in inspector.get_table_names():
             colonnes_project = [c['name'] for c in inspector.get_columns('project')]
             if 'memoire_projet' not in colonnes_project:

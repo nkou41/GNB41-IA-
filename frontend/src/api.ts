@@ -86,11 +86,11 @@ export const api = {
     request(`/workspaces/${workspaceId}/members/${userId}`, { method: 'DELETE' }),
 
   listProjects: (workspaceId: string) => request(`/projects/workspace/${workspaceId}`),
-  createProject: (workspaceId: string, nom: string, prompt_initial: string, provider: string = 'claude') =>
-    request(`/projects/workspace/${workspaceId}`, { method: 'POST', body: JSON.stringify({ nom, prompt_initial, provider }) }),
+  createProject: (workspaceId: string, nom: string, prompt_initial: string, provider: string = 'claude', mode?: string) =>
+    request(`/projects/workspace/${workspaceId}`, { method: 'POST', body: JSON.stringify({ nom, prompt_initial, provider, mode }) }),
   getProject: (projectId: string) => request(`/projects/${projectId}`),
-  regenerateProject: (projectId: string, prompt: string, provider?: string) =>
-    request(`/projects/${projectId}/regenerate`, { method: 'POST', body: JSON.stringify({ prompt, provider }) }),
+  regenerateProject: (projectId: string, prompt: string, provider?: string, mode?: string) =>
+    request(`/projects/${projectId}/regenerate`, { method: 'POST', body: JSON.stringify({ prompt, provider, mode }) }),
   listVersions: (projectId: string) => request(`/projects/${projectId}/versions`),
   restoreVersion: (projectId: string, versionId: string) => request(`/projects/${projectId}/versions/${versionId}/restore`, { method: 'POST' }),
   updateMemoireProjet: (projectId: string, memoire_projet: string) => request(`/projects/${projectId}/memoire`, { method: 'PUT', body: JSON.stringify({ memoire_projet }) }),
@@ -98,8 +98,8 @@ export const api = {
   exportProjectUrl: (projectId: string) => `${API_BASE}/projects/${projectId}/export`,
   duplicateProject: (projectId: string) => request(`/projects/${projectId}/duplicate`, { method: 'POST' }),
   listMessages: (projectId: string) => request(`/projects/${projectId}/messages`),
-  chatProject: (projectId: string, message: string, provider?: string, image?: { data: string; mediaType: string; name: string }) =>
-    request(`/projects/${projectId}/chat`, { method: 'POST', body: JSON.stringify({ message, provider, image }) }),
+  chatProject: (projectId: string, message: string, provider?: string, image?: { data: string; mediaType: string; name: string }, mode?: string) =>
+    request(`/projects/${projectId}/chat`, { method: 'POST', body: JSON.stringify({ message, provider, image, mode }) }),
   listMarketplace: () => request('/marketplace'),
   getListing: (listingId: string) => request(`/marketplace/${listingId}`),
   myListings: () => request('/marketplace/mine'),

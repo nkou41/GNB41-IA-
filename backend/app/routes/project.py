@@ -119,7 +119,7 @@ def _build_contexte_projet(project):
     return chr(10).join(morceaux)
 
 
-def _run_generation(project, prompt, provider, history=None, image=None):
+def _run_generation(project, prompt, provider, history=None, image=None, mode=None):
     import json as json_lib_local
     if provider not in VALID_PROVIDERS:
         provider = 'mistral'
@@ -135,7 +135,7 @@ def _run_generation(project, prompt, provider, history=None, image=None):
     import time as time_lib
     contexte_projet = _build_contexte_projet(project)
     debut_generation = time_lib.time()
-    result = generate_project_code(prompt, provider, history=history, image=image, contexte_projet=contexte_projet, fichiers_connus=anciens_fichiers)
+    result = generate_project_code(prompt, provider, history=history, image=image, contexte_projet=contexte_projet, fichiers_connus=anciens_fichiers, mode=mode)
     duree_ms = int((time_lib.time() - debut_generation) * 1000)
     if result.get('message'):
         result['message'] = _masquer_secrets(result['message'])
@@ -161,7 +161,8 @@ def _run_generation(project, prompt, provider, history=None, image=None):
         comprehension=result.get('comprehension'),
         plan=plan_json,
         avertissements=avertissements_json,
-        duree_generation_ms=duree_ms
+        duree_generation_ms=duree_ms,
+        agent_type=result.get('agent_type')
     )
     db.session.add(version)
 
@@ -210,6 +211,7 @@ def create_project(workspace_id):
     nom = data.get('nom')
     prompt_initial = data.get('prompt_initial')
     provider = data.get('provider', 'mistral')
+    mode = data.get('mode')
     if not nom or not prompt_initial:
         return jsonify({'error': 'nom et prompt_initial requis'}), 400
 
@@ -226,7 +228,7 @@ def create_project(workspace_id):
     db.session.add(project)
     db.session.commit()
 
-    project = _run_generation(project, prompt_initial, provider)
+    project = _run_generation(project, prompt_initial, provider, mode=mode)
     log_activity(workspace_id, current_user.id, 'project_created', nom)
     db.session.commit()
     return jsonify(project.to_dict()), 201
@@ -277,10 +279,11 @@ def regenerate_project(project_id):
     data = request.get_json()
     new_prompt = data.get('prompt')
     provider = data.get('provider', project.provider or 'mistral')
+    mode = data.get('mode')
     if not new_prompt:
         return jsonify({'error': 'prompt requis'}), 400
 
-    project = _run_generation(project, new_prompt, provider)
+    project = _run_generation(project, new_prompt, provider, mode=mode)
     return jsonify(project.to_dict())
 
 
@@ -380,6 +383,7 @@ def chat_project(project_id):
     user_message = data.get('message')
     provider = data.get('provider', project.provider or 'mistral')
     image = data.get('image')
+    mode = data.get('mode')
     if not user_message:
         return jsonify({'error': 'message requis'}), 400
 
@@ -393,7 +397,7 @@ def chat_project(project_id):
     project.statut = 'en_generation'
     db.session.commit()
 
-    project = _run_generation(project, user_message, provider, history=history, image=image)
+    project = _run_generation(project, user_message, provider, history=history, image=image, mode=mode)
 
     if project.statut == 'pret':
         import json as json_lib

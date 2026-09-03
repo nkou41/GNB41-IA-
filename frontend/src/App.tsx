@@ -139,6 +139,7 @@ function App() {
   const [isListening, setIsListening] = useState(false);
   const [attachedImage, setAttachedImage] = useState<{ data: string; mediaType: string; name: string } | null>(null);
   const [showProviderMenu, setShowProviderMenu] = useState(false);
+  const [showAgentModeMenu, setShowAgentModeMenu] = useState(false);
   const [chatProvider, setChatProvider] = useState('mistral');
   const [previewTab, setPreviewTab] = useState<'apercu' | 'code' | 'donnees' | 'memoire'>('apercu');
   const [memoireDraft, setMemoireDraft] = useState('');
@@ -151,6 +152,7 @@ function App() {
   const [newKeyRevealed, setNewKeyRevealed] = useState<string | null>(null);
   const [quickPrompt, setQuickPrompt] = useState('');
   const [quickProvider, setQuickProvider] = useState('mistral');
+  const [agentMode, setAgentMode] = useState('auto');
   const [quickLoading, setQuickLoading] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -408,7 +410,7 @@ function App() {
         setWorkspaces([targetWorkspace]);
       }
       const nom = quickPrompt.slice(0, 40);
-      const project = await api.createProject(targetWorkspace.id, nom, quickPrompt, quickProvider);
+      const project = await api.createProject(targetWorkspace.id, nom, quickPrompt, quickProvider, agentMode === 'auto' ? undefined : agentMode);
       trackEvent('project_created', { provider: quickProvider });
       setQuickPrompt('');
       setActiveWorkspace(targetWorkspace);
@@ -736,9 +738,17 @@ function App() {
               <button type="button" className="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
               <div className="landing-divider" />
               <select value={landingModel} onChange={(e) => setLandingModel(e.target.value)} className="landing-select">
+                <option value="mistral">Modèle: Mistral</option>
                 <option value="claude">Modèle: Claude</option>
                 <option value="openai">Modèle: GPT</option>
                 <option value="gemini">Modèle: Gemini</option>
+              </select>
+              <select value={agentMode} onChange={(e) => setAgentMode(e.target.value)} className="landing-select">
+                <option value="auto">Agent: Auto</option>
+                <option value="creation">Agent: Création</option>
+                <option value="modification">Agent: Modification</option>
+                <option value="style">Agent: Design/Style</option>
+                <option value="contenu">Agent: Contenu</option>
               </select>
               <select className="landing-select">
                 <option>Créateur</option>
@@ -1469,7 +1479,7 @@ function App() {
       setChatMessages((prev) => [...prev, { role: 'user', content: messageText, created_at: new Date().toISOString(), hasImage: !!imageToSend }]);
       setChatLoading(true);
       try {
-        const result = await api.chatProject(activeProject.id, messageText, chatProvider, imageToSend || undefined);
+        const result = await api.chatProject(activeProject.id, messageText, chatProvider, imageToSend || undefined, agentMode === 'auto' ? undefined : agentMode);
         setActiveProject(result.project);
         setProjects(projects.map((p) => (p.id === result.project.id ? result.project : p)));
         setChatMessages((prev) => [...prev, result.assistant_message]);
@@ -1825,6 +1835,9 @@ ${jsFile.contenu}
                   {v.duree_generation_ms != null && (
                     <span className="version-date" style={{ marginLeft: '0.5rem' }}>({(v.duree_generation_ms / 1000).toFixed(1)}s)</span>
                   )}
+                  {v.agent_type && (
+                    <span className="version-date" style={{ marginLeft: '0.5rem' }}>[{v.agent_type}]</span>
+                  )}
                   {diffTexte && (
                     <span className="version-date" style={{ marginLeft: '0.5rem', color: '#6366f1' }}>{diffTexte}</span>
                   )}
@@ -1933,6 +1946,27 @@ ${jsFile.contenu}
                           key={val}
                           className={`provider-menu-item ${chatProvider === val ? 'active' : ''}`}
                           onClick={() => { setChatProvider(val); setShowProviderMenu(false); }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="provider-dropdown">
+                  <button type="button" className="provider-pill" onClick={() => setShowAgentModeMenu(!showAgentModeMenu)}>
+                    {agentMode === 'creation' ? 'Création' : agentMode === 'modification' ? 'Modification' : agentMode === 'style' ? 'Design' : agentMode === 'contenu' ? 'Contenu' : 'Agent: Auto'}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  {showAgentModeMenu && (
+                    <div className="provider-menu">
+                      {[['auto', 'Auto (detection)'], ['creation', 'Creation'], ['modification', 'Modification'], ['style', 'Design/Style'], ['contenu', 'Contenu']].map(([val, label]) => (
+                        <button
+                          type="button"
+                          key={val}
+                          className={`provider-menu-item ${agentMode === val ? 'active' : ''}`}
+                          onClick={() => { setAgentMode(val); setShowAgentModeMenu(false); }}
                         >
                           {label}
                         </button>
