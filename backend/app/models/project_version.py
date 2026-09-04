@@ -18,6 +18,7 @@ class ProjectVersion(db.Model):
     avertissements = db.Column(db.Text)
     duree_generation_ms = db.Column(db.Integer)
     agent_type = db.Column(db.String(20))
+    suggestions = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
@@ -34,5 +35,6 @@ class ProjectVersion(db.Model):
             'avertissements': self.avertissements,
             'duree_generation_ms': self.duree_generation_ms,
             'agent_type': self.agent_type,
+            'suggestions': self.suggestions,
             'created_at': self.created_at.isoformat()
         }

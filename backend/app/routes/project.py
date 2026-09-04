@@ -150,6 +150,7 @@ def _run_generation(project, prompt, provider, history=None, image=None, mode=No
     import json as json_lib
     plan_json = json_lib.dumps(result.get('plan', []), ensure_ascii=False) if result.get('plan') else None
     avertissements_json = json_lib.dumps(result.get('avertissements', []), ensure_ascii=False) if result.get('avertissements') else None
+    suggestions_json = json_lib.dumps(result.get('suggestions', []), ensure_ascii=False) if result.get('suggestions') else None
 
     version = ProjectVersion(
         project_id=project.id,
@@ -162,7 +163,8 @@ def _run_generation(project, prompt, provider, history=None, image=None, mode=No
         plan=plan_json,
         avertissements=avertissements_json,
         duree_generation_ms=duree_ms,
-        agent_type=result.get('agent_type')
+        agent_type=result.get('agent_type'),
+        suggestions=suggestions_json
     )
     db.session.add(version)
 
@@ -419,10 +421,18 @@ def chat_project(project_id):
                     avert_texte = chr(10) + chr(10) + 'A verifier :' + chr(10) + chr(10).join(f'- {a}' for a in avert_liste)
             except (ValueError, TypeError):
                 pass
+        suggestions_texte = ''
+        if derniere_version and derniere_version.suggestions:
+            try:
+                suggestions_liste = json_lib.loads(derniere_version.suggestions)
+                if suggestions_liste:
+                    suggestions_texte = chr(10) + chr(10) + '💡 ' + chr(10).join(suggestions_liste)
+            except (ValueError, TypeError):
+                pass
         if comprehension and comprehension.startswith('CLARIFICATION_NECESSAIRE:'):
             assistant_content = '❓ ' + comprehension.replace('CLARIFICATION_NECESSAIRE:', '', 1).strip()
         else:
-            assistant_content = (comprehension + plan_texte + avert_texte) if comprehension else f"J'ai généré l'application : {project.nom}."
+            assistant_content = (comprehension + plan_texte + avert_texte + suggestions_texte) if comprehension else f"J'ai généré l'application : {project.nom}."
     else:
         assistant_content = f"Erreur lors de la génération : {project.erreur_message}"
 
