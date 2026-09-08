@@ -27,3 +27,7 @@ backend/backups/
 backend/backups/backup.log
 .vercel
 .env*
+
+# Node modules a la racine (WebContainer)
+node_modules/
+package-lock.json
