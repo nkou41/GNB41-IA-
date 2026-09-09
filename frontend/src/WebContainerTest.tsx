@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from 'react';
 import type { WebContainer } from '@webcontainer/api';
 
@@ -38,13 +39,15 @@ const DEMO_PROJECT_FILES = {
   },
 };
 
-/**
- * Composant de test isole pour valider l'integration WebContainers
- * avant toute connexion au reste de l'application.
- *
- * Ne pas monter ce composant en meme temps que le composant d'apercu
- * existant tant que la validation n'est pas terminee.
- */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error(`Timeout depasse (${ms}ms) sur: ${label}`)), ms);
+    }),
+  ]);
+}
+
 export default function WebContainerTest() {
   const [status, setStatus] = useState<BootStatus>('idle');
   const [logs, setLogs] = useState<string[]>([]);
@@ -61,6 +64,10 @@ export default function WebContainerTest() {
     if (hasBootedRef.current) return;
     hasBootedRef.current = true;
 
+    appendLog(`crossOriginIsolated: ${window.crossOriginIsolated}`);
+    appendLog(`SharedArrayBuffer disponible: ${typeof SharedArrayBuffer !== 'undefined'}`);
+    appendLog(`User agent: ${navigator.userAgent}`);
+
     if (!window.crossOriginIsolated) {
       setStatus('error');
       setErrorMessage(
@@ -75,21 +82,22 @@ export default function WebContainerTest() {
     async function boot() {
       try {
         setStatus('booting');
-        appendLog('Demarrage du WebContainer...');
-
+        appendLog('Import du module @webcontainer/api...');
         const { WebContainer } = await import('@webcontainer/api');
-        const instance = await WebContainer.boot();
+        appendLog('Module importe. Appel de WebContainer.boot()...');
+
+        const instance = await withTimeout(WebContainer.boot(), 20000, 'WebContainer.boot()');
         if (cancelled) return;
         containerRef.current = instance;
         appendLog('WebContainer demarre.');
 
-        await instance.mount(DEMO_PROJECT_FILES);
+        await withTimeout(instance.mount(DEMO_PROJECT_FILES), 10000, 'mount()');
         appendLog('Fichiers de projet montes.');
 
         setStatus('installing');
         appendLog('Installation des dependances (npm install)...');
         const installProcess = await instance.spawn('npm', ['install']);
-        const installExitCode = await installProcess.exit;
+        const installExitCode = await withTimeout(installProcess.exit, 30000, 'npm install');
         if (installExitCode !== 0) {
           throw new Error(`npm install a echoue (code ${installExitCode}).`);
         }

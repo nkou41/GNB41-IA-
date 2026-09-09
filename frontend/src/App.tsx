@@ -133,6 +133,13 @@ function App() {
   const [previewFile, setPreviewFile] = useState<string | null>(null);
   const [liveUrl, setLiveUrl] = useState<string | null>(null);
   const [deployLoading, setDeployLoading] = useState(false);
+  const [showPublishTemplate, setShowPublishTemplate] = useState(false);
+  const [templateNom, setTemplateNom] = useState('');
+  const [templateDesc, setTemplateDesc] = useState('');
+  const [templateCategorie, setTemplateCategorie] = useState('autre');
+  const [templatePublishing, setTemplatePublishing] = useState(false);
+  const [showTemplatesGallery, setShowTemplatesGallery] = useState(false);
+  const [templatesList, setTemplatesList] = useState<any[]>([]);
   const [editorContent, setEditorContent] = useState<string>('');
   const [editorSaving, setEditorSaving] = useState(false);
   const [editorDirty, setEditorDirty] = useState(false);
@@ -834,6 +841,70 @@ function App() {
             {authMode === "login" ? "Pas de compte ? S'inscrire" : "Deja un compte ? Se connecter"}
           </p>
         </form>
+      </div>
+    );
+  }
+
+  // Vue galerie de templates
+  if (showTemplatesGallery) {
+    return (
+      <div className="marketplace-page">
+        <header className="marketplace-header">
+          <h1 onClick={() => { setShowTemplatesGallery(false); navigateTo('/'); }}>← GNB41 IA</h1>
+          <div className="marketplace-header-actions">
+            <span>{user.username}</span>
+            <button onClick={handleLogout}>Déconnexion</button>
+          </div>
+        </header>
+
+        <div className="marketplace-title-row">
+          <div>
+            <h2>Galerie de templates</h2>
+            <p>Demarrez instantanement a partir d'une application deja creee</p>
+          </div>
+        </div>
+
+        {templatesList.length === 0 ? (
+          <div className="marketplace-empty">
+            <p>Aucun template disponible pour le moment.</p>
+          </div>
+        ) : (
+          <div className="marketplace-grid">
+            {templatesList.map((t: any) => (
+              <div key={t.id} className="marketplace-card">
+                <h3>{t.nom}</h3>
+                <p className="marketplace-card-desc">{t.description}</p>
+                <div className="marketplace-card-footer">
+                  <span className="marketplace-badge">{t.categorie}</span>
+                </div>
+                <button
+                  type="button"
+                  className="btn-publish"
+                  style={{ marginTop: '0.5rem', justifyContent: 'center', width: '100%' }}
+                  onClick={async () => {
+                    let targetWorkspace = workspaces[0];
+                    if (!targetWorkspace) {
+                      targetWorkspace = await api.createWorkspace('Mes projets');
+                      setWorkspaces([targetWorkspace]);
+                    }
+                    const nom = window.prompt('Nom du nouveau projet :', t.nom) || t.nom;
+                    try {
+                      const project = await api.useTemplate(t.id, targetWorkspace.id, nom);
+                      setActiveWorkspace(targetWorkspace);
+                      setActiveProject(project);
+                      setShowTemplatesGallery(false);
+                      navigateTo(`/projet/${project.id}`);
+                    } catch (err: any) {
+                      alert(`Erreur: ${err.message}`);
+                    }
+                  }}
+                >
+                  Utiliser ce template
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -1693,6 +1764,9 @@ ${jsFile.contenu}
             >
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={activeProject.est_deploye ? '#22c55e' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
             </button>
+            <button className="toolbar-icon-btn" title="Publier comme template" onClick={() => setShowPublishTemplate(true)}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </button>
             <button className="toolbar-icon-btn" title="Paramètres du workspace" onClick={() => setShowWorkspaceSettings(true)}>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </button>
@@ -2199,6 +2273,55 @@ ${jsFile.contenu}
             )}
           </div>
         </div>
+
+        {showPublishTemplate && (
+          <div className="modal-overlay" onClick={() => setShowPublishTemplate(false)}>
+            <div className="upgrade-modal" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close" onClick={() => setShowPublishTemplate(false)}>×</button>
+              <h2>Publier comme template</h2>
+              <p className="modal-subtitle">Ce template sera visible par tous les utilisateurs dans la galerie.</p>
+              <form
+                className="auth-form"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!activeProject) return;
+                  setTemplatePublishing(true);
+                  try {
+                    await api.publishTemplate(activeProject.id, {
+                      nom: templateNom || activeProject.nom,
+                      description: templateDesc || activeProject.prompt_initial,
+                      categorie: templateCategorie
+                    });
+                    setShowPublishTemplate(false);
+                    setTemplateNom('');
+                    setTemplateDesc('');
+                    setTemplateCategorie('autre');
+                    alert('Template publie avec succes !');
+                  } catch (err: any) {
+                    alert(`Erreur: ${err.message}`);
+                  } finally {
+                    setTemplatePublishing(false);
+                  }
+                }}
+              >
+                <input placeholder="Nom du template" value={templateNom} onChange={(e) => setTemplateNom(e.target.value)} />
+                <textarea placeholder="Description" value={templateDesc} onChange={(e) => setTemplateDesc(e.target.value)} rows={3} />
+                <select value={templateCategorie} onChange={(e) => setTemplateCategorie(e.target.value)}>
+                  <option value="productivite">Productivité</option>
+                  <option value="ecommerce">E-commerce</option>
+                  <option value="jeux">Jeux</option>
+                  <option value="utilitaires">Utilitaires</option>
+                  <option value="education">Éducation</option>
+                  <option value="sante">Santé</option>
+                  <option value="finance">Finance</option>
+                  <option value="social">Social</option>
+                  <option value="autre">Autre</option>
+                </select>
+                <button type="submit" disabled={templatePublishing}>{templatePublishing ? 'Publication...' : 'Publier'}</button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -2276,6 +2399,7 @@ ${jsFile.contenu}
               <button className="side-menu-item" onClick={() => { setShowMenu(false); }}>Accueil</button>
               <button className="side-menu-item" onClick={() => { setShowMenu(false); document.querySelector('.recent-section')?.scrollIntoView({ behavior: 'smooth' }); }}>Projets</button>
               <button className="side-menu-item" onClick={() => { setShowMenu(false); setShowMarketplace(true); setShowSettings(false); navigateTo('/marketplace'); }}>Boutique</button>
+              <button className="side-menu-item" onClick={() => { setShowMenu(false); setShowTemplatesGallery(true); api.listTemplates().then(setTemplatesList).catch(() => {}); navigateTo('/templates'); }}>Galerie de templates</button>
               <button className="side-menu-item" onClick={() => { setShowMenu(false); setShowSettings(true); navigateTo('/parametres'); }}>Paramètres</button>
               <button className="side-menu-item" onClick={() => setDarkMode(!darkMode)}>{darkMode ? '☀️ Mode clair' : '🌙 Mode sombre'}</button>
               <button className="side-menu-item side-menu-logout" onClick={handleLogout}>Déconnexion</button>
