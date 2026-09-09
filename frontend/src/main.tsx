@@ -10,7 +10,7 @@ initAnalytics()
 
 // TEMPORAIRE: test isole de WebContainerTest.
 // Mettre WEBCONTAINER_TEST_MODE a false pour revenir a l'app normale.
-const WEBCONTAINER_TEST_MODE = true
+const WEBCONTAINER_TEST_MODE = false
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
