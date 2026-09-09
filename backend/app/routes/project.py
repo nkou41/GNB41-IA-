@@ -552,7 +552,90 @@ def undeploy_project(project_id):
     return jsonify(project.to_dict())
 
 
+def _extraire_couleur_primaire(fichiers):
+    """Cherche une couleur hex dans le CSS genere pour theme_color/background_color du PWA."""
+    for f in fichiers:
+        if f.get('chemin', '').endswith('.css'):
+            contenu = f.get('contenu', '')
+            match = re.search(r'--color-primary\s*:\s*(#[0-9a-fA-F]{3,6})', contenu)
+            if match:
+                return match.group(1)
+            match = re.search(r'#[0-9a-fA-F]{6}', contenu)
+            if match:
+                return match.group(0)
+    return '#4361ee'
+
+
+def _generer_manifest_pwa(project, parsed):
+    fichiers = parsed.get('fichiers', [])
+    couleur = _extraire_couleur_primaire(fichiers)
+    nom = project.nom or 'Application'
+    description = parsed.get('description') or project.prompt_initial or nom
+    return {
+        'name': nom,
+        'short_name': nom[:12],
+        'description': description[:200],
+        'start_url': './index.html',
+        'display': 'standalone',
+        'background_color': '#ffffff',
+        'theme_color': couleur,
+        'icons': [
+            {'src': 'icon.svg', 'sizes': '192x192', 'type': 'image/svg+xml', 'purpose': 'any'},
+            {'src': 'icon.svg', 'sizes': '512x512', 'type': 'image/svg+xml', 'purpose': 'any'}
+        ]
+    }
+
+
+def _generer_icone_svg(project, parsed):
+    fichiers = parsed.get('fichiers', [])
+    couleur = _extraire_couleur_primaire(fichiers)
+    lettre = (project.nom or 'A').strip()[:1].upper()
+    lignes = [
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">',
+        '<rect width="512" height="512" rx="96" fill="' + couleur + '"/>',
+        '<text x="256" y="330" font-family="Arial, sans-serif" font-size="260" font-weight="bold" fill="#ffffff" text-anchor="middle">' + lettre + '</text>',
+        '</svg>'
+    ]
+    return chr(10).join(lignes)
+
+
+def _generer_service_worker(project_id):
+    lignes = [
+        "const CACHE_NAME = 'gnb41-pwa-" + project_id + "-v1';",
+        "self.addEventListener('install', function(event) { self.skipWaiting(); });",
+        "self.addEventListener('activate', function(event) { event.waitUntil(self.clients.claim()); });",
+        "self.addEventListener('fetch', function(event) {",
+        "  if (event.request.method !== 'GET') return;",
+        "  event.respondWith(",
+        "    caches.match(event.request).then(function(reponse) {",
+        "      if (reponse) return reponse;",
+        "      return fetch(event.request).then(function(reseauReponse) {",
+        "        return caches.open(CACHE_NAME).then(function(cache) {",
+        "          try { cache.put(event.request, reseauReponse.clone()); } catch (e) {}",
+        "          return reseauReponse;",
+        "        });",
+        "      }).catch(function() { return reponse; });",
+        "    })",
+        "  );",
+        "});"
+    ]
+    return chr(10).join(lignes)
+
+
+def _injecter_pwa_dans_html(html, couleur):
+    balises_pwa = (
+        '<link rel="manifest" href="manifest.json">' + chr(10)
+        + '<meta name="theme-color" content="' + couleur + '">' + chr(10)
+        + '<link rel="icon" href="icon.svg" type="image/svg+xml">' + chr(10)
+        + "<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>"
+    )
+    if '<head>' in html:
+        return html.replace('<head>', '<head>' + chr(10) + balises_pwa, 1)
+    return balises_pwa + html
+
+
 @project_bp.route('/<project_id>/live/', defaults={'chemin': 'index.html'}, methods=['GET'])
+
 @project_bp.route('/<project_id>/live/<path:chemin>', methods=['GET'])
 def serve_live(project_id, chemin):
     project = Project.query.get_or_404(project_id)
@@ -565,6 +648,17 @@ def serve_live(project_id, chemin):
         return jsonify({'error': 'Code illisible'}), 500
 
     fichiers = parsed.get('fichiers', [])
+    couleur = _extraire_couleur_primaire(fichiers)
+
+    if chemin == 'manifest.json':
+        return jsonify(_generer_manifest_pwa(project, parsed))
+
+    if chemin == 'icon.svg':
+        return Response(_generer_icone_svg(project, parsed), mimetype='image/svg+xml')
+
+    if chemin == 'sw.js':
+        return Response(_generer_service_worker(project.id), mimetype='application/javascript')
+
     fichier = next((f for f in fichiers if f['chemin'] == chemin), None)
 
     if not fichier and chemin == 'index.html':
@@ -573,4 +667,8 @@ def serve_live(project_id, chemin):
     if not fichier:
         return jsonify({'error': 'Fichier introuvable'}), 404
 
-    return Response(fichier['contenu'], mimetype=_get_file_mimetype(chemin))
+    contenu = fichier['contenu']
+    if chemin.endswith('.html') or (chemin == 'index.html'):
+        contenu = _injecter_pwa_dans_html(contenu, couleur)
+
+    return Response(contenu, mimetype=_get_file_mimetype(chemin))
