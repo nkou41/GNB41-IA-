@@ -194,3 +194,41 @@ def update_me():
 
     db.session.commit()
     return jsonify(current_user.to_dict())
+
+
+@auth_bp.route('/google-play/statut', methods=['GET'])
+@login_required
+def google_play_statut():
+    import os
+    email_compte_service = os.environ.get('GOOGLE_PLAY_SERVICE_ACCOUNT_EMAIL', '')
+    return jsonify({
+        'service_account_email': email_compte_service,
+        'connecte': bool(current_user.google_play_connecte),
+        'connecte_le': current_user.google_play_connecte_le.isoformat() if current_user.google_play_connecte_le else None,
+        'package_name': current_user.google_play_package_name
+    })
+
+
+@auth_bp.route('/google-play/confirmer', methods=['POST'])
+@login_required
+def google_play_confirmer():
+    from datetime import datetime
+    data = request.get_json() or {}
+    package_name = (data.get('package_name') or '').strip()
+    if not package_name:
+        return jsonify({'error': 'package_name requis (ex: com.votresociete.votreapp)'}), 400
+    current_user.google_play_connecte = True
+    current_user.google_play_connecte_le = datetime.utcnow()
+    current_user.google_play_package_name = package_name
+    db.session.commit()
+    return jsonify(current_user.to_dict())
+
+
+@auth_bp.route('/google-play/deconnecter', methods=['POST'])
+@login_required
+def google_play_deconnecter():
+    current_user.google_play_connecte = False
+    current_user.google_play_connecte_le = None
+    current_user.google_play_package_name = None
+    db.session.commit()
+    return jsonify(current_user.to_dict())

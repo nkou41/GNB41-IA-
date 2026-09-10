@@ -20,6 +20,9 @@ class User(UserMixin, db.Model):
     plan = db.Column(db.String(20), default='gratuit')
     plan_expiry = db.Column(db.DateTime, nullable=True)
     role = db.Column(db.String(20), default='user')
+    google_play_connecte = db.Column(db.Boolean, default=False)
+    google_play_connecte_le = db.Column(db.DateTime, nullable=True)
+    google_play_package_name = db.Column(db.String(150), nullable=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -35,7 +38,10 @@ class User(UserMixin, db.Model):
             'created_at': self.created_at.isoformat(),
             'plan': self.plan or 'gratuit',
             'plan_expiry': self.plan_expiry.isoformat() if self.plan_expiry else None,
-            'role': self.role or 'user'
+            'role': self.role or 'user',
+            'google_play_connecte': bool(self.google_play_connecte),
+            'google_play_connecte_le': self.google_play_connecte_le.isoformat() if self.google_play_connecte_le else None,
+            'google_play_package_name': self.google_play_package_name
         }
 
 

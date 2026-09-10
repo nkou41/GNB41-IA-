@@ -172,6 +172,17 @@ def create_app(test_config=None):
             if 'memoire_projet' not in colonnes_project:
                 db.session.execute(db.text('ALTER TABLE project ADD COLUMN memoire_projet TEXT'))
                 db.session.commit()
+        if 'user' in inspector.get_table_names():
+            colonnes_user = [c['name'] for c in inspector.get_columns('user')]
+            if 'google_play_connecte' not in colonnes_user:
+                db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN google_play_connecte BOOLEAN DEFAULT FALSE'))
+                db.session.commit()
+            if 'google_play_connecte_le' not in colonnes_user:
+                db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN google_play_connecte_le TIMESTAMP'))
+                db.session.commit()
+            if 'google_play_package_name' not in colonnes_user:
+                db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN google_play_package_name VARCHAR(150)'))
+                db.session.commit()
 
     from flask_socketio import join_room
     from flask_login import current_user
