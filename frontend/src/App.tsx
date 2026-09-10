@@ -1450,52 +1450,96 @@ function App() {
             <button onClick={handleLogout}>Déconnexion</button>
           </div>
         </header>
-        <main>
-          <h2>Paramètres du compte</h2>
-          <form onSubmit={handleUpdateSettings} className="auth-form" style={{ margin: '1rem 0' }}>
-            <input placeholder="Email" type="email" value={settingsEmail} onChange={(e) => setSettingsEmail(e.target.value)} />
-            <input placeholder="Nouveau mot de passe (optionnel)" type="password" value={settingsPassword} onChange={(e) => setSettingsPassword(e.target.value)} />
-            <input placeholder="Mot de passe actuel (requis)" type="password" value={settingsCurrentPassword} onChange={(e) => setSettingsCurrentPassword(e.target.value)} required />
-            {settingsError && <p className="error">{settingsError}</p>}
-            {settingsMsg && <p className="success">{settingsMsg}</p>}
-            <button type="submit">Enregistrer</button>
-          </form>
+        <main className="settings-page-main">
+          <h2 className="settings-page-title">Paramètres du compte</h2>
+          <p className="settings-page-subtitle">Gérez vos informations personnelles et vos connexions de publication.</p>
 
-          <h2>Publication mobile (Google Play)</h2>
-          {googlePlayLoading ? <p>Chargement...</p> : googlePlayStatut && (
-            googlePlayStatut.connecte ? (
-              <div className="auth-form" style={{ margin: '1rem 0' }}>
-                <p className="success">Compte Google Play connecte pour le package : {googlePlayStatut.package_name}</p>
-                <button
-                  className="btn-publish is-cancel"
-                  onClick={() => { if (confirm('Deconnecter votre compte Google Play ?')) api.googlePlayDeconnecter().then(setGooglePlayStatut).catch(() => {}); }}
-                >
-                  Deconnecter
-                </button>
+          <div className="settings-card">
+            <div className="settings-card-header">
+              <div className="settings-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
               </div>
-            ) : (
-              <div className="auth-form" style={{ margin: '1rem 0' }}>
-                {googlePlayStatut.service_account_email ? (
-                  <>
-                    <p>1. Ouvrez votre Play Console, allez dans "Utilisateurs et autorisations" et invitez cet email avec le role "Gestionnaire de version" :</p>
-                    <p style={{ fontWeight: 'bold', wordBreak: 'break-all' }}>{googlePlayStatut.service_account_email}</p>
-                    <p>2. Une fois l'invitation acceptee, entrez le nom de package de votre app (ex: com.votresociete.votreapp) :</p>
-                    <input placeholder="com.votresociete.votreapp" value={googlePlayPackageInput} onChange={(e) => setGooglePlayPackageInput(e.target.value)} />
-                    <button
-                      onClick={() => {
-                        if (!googlePlayPackageInput.trim()) return;
-                        api.googlePlayConfirmer(googlePlayPackageInput.trim()).then(setGooglePlayStatut).catch(() => {});
-                      }}
-                    >
-                      Confirmer la connexion
-                    </button>
-                  </>
+              <div>
+                <h2>Informations personnelles</h2>
+                <p>Votre email et votre mot de passe de connexion</p>
+              </div>
+            </div>
+            <form onSubmit={handleUpdateSettings}>
+              <label className="settings-field-label">Email</label>
+              <input placeholder="Email" type="email" value={settingsEmail} onChange={(e) => setSettingsEmail(e.target.value)} />
+              <label className="settings-field-label">Nouveau mot de passe (optionnel)</label>
+              <input placeholder="Nouveau mot de passe (optionnel)" type="password" value={settingsPassword} onChange={(e) => setSettingsPassword(e.target.value)} />
+              <label className="settings-field-label">Mot de passe actuel (requis)</label>
+              <input placeholder="Mot de passe actuel (requis)" type="password" value={settingsCurrentPassword} onChange={(e) => setSettingsCurrentPassword(e.target.value)} required />
+              {settingsError && <p className="error">{settingsError}</p>}
+              {settingsMsg && <p className="success">{settingsMsg}</p>}
+              <button type="submit" style={{ marginTop: '1rem' }}>Enregistrer</button>
+            </form>
+          </div>
+
+          <div className="settings-card">
+            <div className="settings-card-header">
+              <div className="settings-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
+              </div>
+              <div>
+                <h2>Publication mobile (Google Play)</h2>
+                <p>Connectez votre compte developpeur pour publier vos apps</p>
+              </div>
+            </div>
+
+            {googlePlayLoading ? <p>Chargement...</p> : googlePlayStatut && (
+              googlePlayStatut.connecte ? (
+                <div>
+                  <span className="settings-status-badge connecte">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    Connecte
+                  </span>
+                  <p style={{ marginTop: '0.8rem', fontSize: '0.9rem', color: '#4a4432' }}>Package : <strong>{googlePlayStatut.package_name}</strong></p>
+                  <button
+                    className="btn-publish is-cancel"
+                    style={{ marginTop: '0.8rem' }}
+                    onClick={() => { if (confirm('Deconnecter votre compte Google Play ?')) api.googlePlayDeconnecter().then(setGooglePlayStatut).catch(() => {}); }}
+                  >
+                    Deconnecter
+                  </button>
+                </div>
+              ) : (
+                googlePlayStatut.service_account_email ? (
+                  <div>
+                    <div className="settings-step">
+                      <div className="settings-step-number">1</div>
+                      <div className="settings-step-content">
+                        <p>Dans votre Play Console, section "Utilisateurs et autorisations", invitez cet email avec le role Gestionnaire de version :</p>
+                        <div className="settings-email-box">{googlePlayStatut.service_account_email}</div>
+                      </div>
+                    </div>
+                    <div className="settings-step">
+                      <div className="settings-step-number">2</div>
+                      <div className="settings-step-content">
+                        <p>Une fois l'invitation acceptee, entrez le nom de package de votre app :</p>
+                        <input placeholder="com.votresociete.votreapp" value={googlePlayPackageInput} onChange={(e) => setGooglePlayPackageInput(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} />
+                        <button
+                          style={{ marginTop: '0.8rem' }}
+                          onClick={() => {
+                            if (!googlePlayPackageInput.trim()) return;
+                            api.googlePlayConfirmer(googlePlayPackageInput.trim()).then(setGooglePlayStatut).catch(() => {});
+                          }}
+                        >
+                          Confirmer la connexion
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
-                  <p>La publication Google Play est en cours de configuration cote plateforme. Revenez bientot.</p>
-                )}
-              </div>
-            )
-          )}
+                  <span className="settings-status-badge deconnecte">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    Bientot disponible
+                  </span>
+                )
+              )
+            )}
+          </div>
         </main>
       </div>
     );
