@@ -189,6 +189,9 @@ function App() {
 
 
   const [settingsEmail, setSettingsEmail] = useState('');
+  const [googlePlayStatut, setGooglePlayStatut] = useState<any | null>(null);
+  const [googlePlayLoading, setGooglePlayLoading] = useState(false);
+  const [googlePlayPackageInput, setGooglePlayPackageInput] = useState('');
   const [settingsPassword, setSettingsPassword] = useState('');
   const [settingsCurrentPassword, setSettingsCurrentPassword] = useState('');
   const [settingsMsg, setSettingsMsg] = useState('');
@@ -361,6 +364,13 @@ function App() {
       api.myPurchases().then(setMyPurchasesList).catch(() => {});
     }
   }, [showMesAchats]);
+
+  useEffect(() => {
+    if (showSettings) {
+      setGooglePlayLoading(true);
+      api.googlePlayStatut().then(setGooglePlayStatut).catch(() => {}).finally(() => setGooglePlayLoading(false));
+    }
+  }, [showSettings]);
 
   useEffect(() => {
     if (showAdminDashboard) {
@@ -1450,6 +1460,42 @@ function App() {
             {settingsMsg && <p className="success">{settingsMsg}</p>}
             <button type="submit">Enregistrer</button>
           </form>
+
+          <h2>Publication mobile (Google Play)</h2>
+          {googlePlayLoading ? <p>Chargement...</p> : googlePlayStatut && (
+            googlePlayStatut.connecte ? (
+              <div className="auth-form" style={{ margin: '1rem 0' }}>
+                <p className="success">Compte Google Play connecte pour le package : {googlePlayStatut.package_name}</p>
+                <button
+                  className="btn-publish is-cancel"
+                  onClick={() => { if (confirm('Deconnecter votre compte Google Play ?')) api.googlePlayDeconnecter().then(setGooglePlayStatut).catch(() => {}); }}
+                >
+                  Deconnecter
+                </button>
+              </div>
+            ) : (
+              <div className="auth-form" style={{ margin: '1rem 0' }}>
+                {googlePlayStatut.service_account_email ? (
+                  <>
+                    <p>1. Ouvrez votre Play Console, allez dans "Utilisateurs et autorisations" et invitez cet email avec le role "Gestionnaire de version" :</p>
+                    <p style={{ fontWeight: 'bold', wordBreak: 'break-all' }}>{googlePlayStatut.service_account_email}</p>
+                    <p>2. Une fois l'invitation acceptee, entrez le nom de package de votre app (ex: com.votresociete.votreapp) :</p>
+                    <input placeholder="com.votresociete.votreapp" value={googlePlayPackageInput} onChange={(e) => setGooglePlayPackageInput(e.target.value)} />
+                    <button
+                      onClick={() => {
+                        if (!googlePlayPackageInput.trim()) return;
+                        api.googlePlayConfirmer(googlePlayPackageInput.trim()).then(setGooglePlayStatut).catch(() => {});
+                      }}
+                    >
+                      Confirmer la connexion
+                    </button>
+                  </>
+                ) : (
+                  <p>La publication Google Play est en cours de configuration cote plateforme. Revenez bientot.</p>
+                )}
+              </div>
+            )
+          )}
         </main>
       </div>
     );

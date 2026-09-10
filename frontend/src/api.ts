@@ -60,6 +60,9 @@ export const api = {
   me: () => request('/auth/me'),
   updateMe: (current_password: string, email?: string, password?: string) =>
     request('/auth/me', { method: 'PUT', body: JSON.stringify({ current_password, email, password }) }),
+  googlePlayStatut: () => request('/auth/google-play/statut'),
+  googlePlayConfirmer: (package_name: string) => request('/auth/google-play/confirmer', { method: 'POST', body: JSON.stringify({ package_name }) }),
+  googlePlayDeconnecter: () => request('/auth/google-play/deconnecter', { method: 'POST' }),
   forgotPassword: (email: string) =>
     request('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) }),
   resetPassword: (token: string, password: string) =>
