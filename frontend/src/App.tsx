@@ -3,7 +3,7 @@ import NotificationBell from './components/NotificationBell';
 import { identifyUser, trackEvent, resetAnalytics } from './analytics';
 import { api } from './api';
 import './App.css';
-import { IconUser, IconSmartphone, IconMail, IconLock, IconSave, IconLink, IconLogOut, IconCheckCircle, IconInfoCircle, IconEye, IconEyeOff, IconArrowRight, IconSettings } from './Icons';
+import { IconUser, IconMail, IconLock, IconSave, IconLink, IconLogOut, IconCheckCircle, IconInfoCircle, IconEye, IconEyeOff, IconArrowRight, IconSettings, IconGooglePlay } from './Icons';
 
 interface User {
   id: string;
@@ -1647,7 +1647,7 @@ function App() {
 
           <div className="settings-card">
             <div className="settings-card-header">
-              <div className="settings-icon-badge gradient"><IconSmartphone /></div>
+              <div className="settings-icon-badge soft"><IconGooglePlay size={26} /></div>
               <div>
                 <h2>Publication mobile (Google Play)</h2>
                 <p>Connectez votre compte developpeur pour publier vos apps</p>

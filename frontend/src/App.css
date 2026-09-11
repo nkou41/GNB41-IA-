@@ -2558,6 +2558,12 @@ body.dark-mode .preview-iframe {
   padding: 0.85rem 2.6rem;
   background: #f7f5f0;
   border: 1px solid #ddd6c7;
+  color: #2b2410;
+  font-size: 1rem;
+}
+
+.settings-input-pill-wrap input::placeholder {
+  color: #a89f8a;
 }
 
 .settings-input-trailing {
