@@ -3,6 +3,7 @@ import NotificationBell from './components/NotificationBell';
 import { identifyUser, trackEvent, resetAnalytics } from './analytics';
 import { api } from './api';
 import './App.css';
+import { IconUser, IconSmartphone, IconMail, IconLock, IconSave, IconLink, IconLogOut, IconCheckCircle, IconInfoCircle } from './Icons';
 
 interface User {
   id: string;
@@ -139,6 +140,8 @@ function App() {
   const [templateCategorie, setTemplateCategorie] = useState('autre');
   const [templatePublishing, setTemplatePublishing] = useState(false);
   const [showTemplatesGallery, setShowTemplatesGallery] = useState(false);
+  const [publicPage, setPublicPage] = useState<'accueil' | 'fonctionnalites' | 'tarifs' | 'apropos' | 'contact' | 'boutique' | null>(null);
+  const [publicListings, setPublicListings] = useState<any[]>([]);
   const [templatesList, setTemplatesList] = useState<any[]>([]);
   const [editorContent, setEditorContent] = useState<string>('');
   const [editorSaving, setEditorSaving] = useState(false);
@@ -725,6 +728,150 @@ function App() {
         </div>
       </div>
     );
+  }
+
+  if (!user && publicPage && publicPage !== 'accueil') {
+    const PublicNav = () => (
+      <div className="public-navbar">
+        <span className="public-navbar-logo" onClick={() => { setPublicPage(null); navigateTo('/'); }}>GNB41 IA</span>
+        <div className="public-navbar-links">
+          <span onClick={() => { setPublicPage(null); navigateTo('/'); }}>Accueil</span>
+          <span onClick={() => { setPublicPage('fonctionnalites'); navigateTo('/fonctionnalites'); }}>Fonctionnalités</span>
+          <span onClick={() => { setPublicPage('tarifs'); navigateTo('/tarifs'); }}>Tarifs</span>
+          <span onClick={() => { setPublicPage('boutique'); api.listMarketplace().then((res) => setPublicListings(res.listings)).catch(() => {}); navigateTo('/boutique'); }}>Boutique</span>
+          <span onClick={() => { setPublicPage('apropos'); navigateTo('/a-propos'); }}>À propos</span>
+          <span onClick={() => { setPublicPage('contact'); navigateTo('/contact'); }}>Contact</span>
+        </div>
+        <button className="public-navbar-cta" onClick={() => { setPublicPage(null); setShowAuth(true); setAuthMode('login'); navigateTo('/'); }}>Se connecter</button>
+      </div>
+    );
+
+    if (publicPage === 'fonctionnalites') {
+      return (
+        <div className="public-page">
+          <PublicNav />
+          <div className="public-page-content">
+            <h1>Fonctionnalités</h1>
+            <div className="landing-features" style={{ marginTop: '2rem' }}>
+              <div className="feature-card">
+                <h3>Génération IA multi-provider</h3>
+                <p>Claude, GPT, Gemini ou Mistral : choisissez le modèle qui génère votre application a partir d'une simple description.</p>
+              </div>
+              <div className="feature-card">
+                <h3>Éditeur de code intégré</h3>
+                <p>Modifiez directement le code généré, fichier par fichier, sans quitter l'application.</p>
+              </div>
+              <div className="feature-card">
+                <h3>Base de données automatique</h3>
+                <p>Vos applications generees obtiennent automatiquement des tables de donnees et une cle API pour stocker de l'information.</p>
+              </div>
+              <div className="feature-card">
+                <h3>Déploiement en un clic</h3>
+                <p>Chaque application generee obtient instantanement une URL publique accessible partout.</p>
+              </div>
+              <div className="feature-card">
+                <h3>Galerie de templates</h3>
+                <p>Demarrez a partir d'une application deja creee par la communaute pour aller plus vite.</p>
+              </div>
+              <div className="feature-card">
+                <h3>Boutique integree</h3>
+                <p>Publiez et vendez vos applications directement sur la plateforme, avec paiement securise.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (publicPage === 'tarifs') {
+      return (
+        <div className="public-page">
+          <PublicNav />
+          <div className="public-page-content">
+            <h1>Tarifs</h1>
+            <div className="plans-grid" style={{ marginTop: '2rem' }}>
+              <div className="plan-card">
+                <h3>Gratuit</h3>
+                <p className="plan-price">0€<span>/mois</span></p>
+                <ul>
+                  <li>3 projets par espace de travail</li>
+                  <li>1 espace de travail</li>
+                  <li>Génération IA limitée</li>
+                </ul>
+                <button className="plan-btn" onClick={() => { setPublicPage(null); setShowAuth(true); setAuthMode('register'); navigateTo('/'); }}>Commencer</button>
+              </div>
+              <div className="plan-card plan-card-highlight">
+                <span className="plan-badge">Populaire</span>
+                <h3>Pro</h3>
+                <p className="plan-price">19€<span>/mois</span></p>
+                <ul>
+                  <li>Projets illimités</li>
+                  <li>Espaces de travail illimités</li>
+                  <li>Génération IA prioritaire</li>
+                </ul>
+                <button className="plan-btn" onClick={() => { setPublicPage(null); setShowAuth(true); setAuthMode('register'); navigateTo('/'); }}>Commencer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (publicPage === 'apropos') {
+      return (
+        <div className="public-page">
+          <PublicNav />
+          <div className="public-page-content">
+            <h1>À propos</h1>
+            <p style={{ marginTop: '1rem', lineHeight: 1.7, maxWidth: '600px' }}>
+              GNB41 IA est une plateforme de generation d'applications par intelligence artificielle.
+              Decrivez votre idee en langage naturel, et obtenez une application complete, professionnelle
+              et prete a etre deployee — sans avoir a ecrire une seule ligne de code.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    if (publicPage === 'contact') {
+      return (
+        <div className="public-page">
+          <PublicNav />
+          <div className="public-page-content">
+            <h1>Contact</h1>
+            <p style={{ marginTop: '1rem' }}>Pour toute question, ecrivez-nous a :</p>
+            <p style={{ fontWeight: 600, marginTop: '0.5rem' }}>contact@gnb41ia.com</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (publicPage === 'boutique') {
+      return (
+        <div className="public-page">
+          <PublicNav />
+          <div className="public-page-content">
+            <h1>Boutique</h1>
+            <p style={{ marginTop: '0.5rem', color: '#8a7f68' }}>Connectez-vous pour acheter ou publier une application.</p>
+            {publicListings.length === 0 ? (
+              <div className="marketplace-empty"><p>Aucune application publiee pour le moment.</p></div>
+            ) : (
+              <div className="marketplace-grid" style={{ marginTop: '1.5rem' }}>
+                {publicListings.map((l: any) => (
+                  <div key={l.id} className="marketplace-card">
+                    <h3>{l.titre}</h3>
+                    <p className="marketplace-card-desc">{l.description}</p>
+                    <div className="marketplace-card-footer">
+                      <span className="marketplace-price">{(l.prix_centimes / 100).toFixed(2)} {l.devise}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
   }
 
   if (!user && !showAuth) {
@@ -1456,9 +1603,7 @@ function App() {
 
           <div className="settings-card">
             <div className="settings-card-header">
-              <div className="settings-card-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-              </div>
+              <div className="settings-card-icon"><IconUser /></div>
               <div>
                 <h2>Informations personnelles</h2>
                 <p>Votre email et votre mot de passe de connexion</p>
@@ -1466,22 +1611,29 @@ function App() {
             </div>
             <form onSubmit={handleUpdateSettings}>
               <label className="settings-field-label">Email</label>
-              <input placeholder="Email" type="email" value={settingsEmail} onChange={(e) => setSettingsEmail(e.target.value)} />
+              <div className="settings-input-wrap">
+                <IconMail size={16} />
+                <input placeholder="Email" type="email" value={settingsEmail} onChange={(e) => setSettingsEmail(e.target.value)} />
+              </div>
               <label className="settings-field-label">Nouveau mot de passe (optionnel)</label>
-              <input placeholder="Nouveau mot de passe (optionnel)" type="password" value={settingsPassword} onChange={(e) => setSettingsPassword(e.target.value)} />
+              <div className="settings-input-wrap">
+                <IconLock size={16} />
+                <input placeholder="Nouveau mot de passe (optionnel)" type="password" value={settingsPassword} onChange={(e) => setSettingsPassword(e.target.value)} />
+              </div>
               <label className="settings-field-label">Mot de passe actuel (requis)</label>
-              <input placeholder="Mot de passe actuel (requis)" type="password" value={settingsCurrentPassword} onChange={(e) => setSettingsCurrentPassword(e.target.value)} required />
+              <div className="settings-input-wrap">
+                <IconLock size={16} />
+                <input placeholder="Mot de passe actuel (requis)" type="password" value={settingsCurrentPassword} onChange={(e) => setSettingsCurrentPassword(e.target.value)} required />
+              </div>
               {settingsError && <p className="error">{settingsError}</p>}
               {settingsMsg && <p className="success">{settingsMsg}</p>}
-              <button type="submit" style={{ marginTop: '1rem' }}>Enregistrer</button>
+              <button type="submit" className="settings-btn-icon" style={{ marginTop: '1rem' }}><IconSave size={16} /> Enregistrer</button>
             </form>
           </div>
 
           <div className="settings-card">
             <div className="settings-card-header">
-              <div className="settings-card-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
-              </div>
+              <div className="settings-card-icon"><IconSmartphone /></div>
               <div>
                 <h2>Publication mobile (Google Play)</h2>
                 <p>Connectez votre compte developpeur pour publier vos apps</p>
@@ -1492,16 +1644,16 @@ function App() {
               googlePlayStatut.connecte ? (
                 <div>
                   <span className="settings-status-badge connecte">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <IconCheckCircle size={16} />
                     Connecte
                   </span>
                   <p style={{ marginTop: '0.8rem', fontSize: '0.9rem', color: '#4a4432' }}>Package : <strong>{googlePlayStatut.package_name}</strong></p>
                   <button
-                    className="btn-publish is-cancel"
+                    className="btn-publish is-cancel settings-btn-icon"
                     style={{ marginTop: '0.8rem' }}
                     onClick={() => { if (confirm('Deconnecter votre compte Google Play ?')) api.googlePlayDeconnecter().then(setGooglePlayStatut).catch(() => {}); }}
                   >
-                    Deconnecter
+                    <IconLogOut size={16} /> Deconnecter
                   </button>
                 </div>
               ) : (
@@ -1520,20 +1672,21 @@ function App() {
                         <p>Une fois l'invitation acceptee, entrez le nom de package de votre app :</p>
                         <input placeholder="com.votresociete.votreapp" value={googlePlayPackageInput} onChange={(e) => setGooglePlayPackageInput(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} />
                         <button
+                          className="settings-btn-icon"
                           style={{ marginTop: '0.8rem' }}
                           onClick={() => {
                             if (!googlePlayPackageInput.trim()) return;
                             api.googlePlayConfirmer(googlePlayPackageInput.trim()).then(setGooglePlayStatut).catch(() => {});
                           }}
                         >
-                          Confirmer la connexion
+                          <IconLink size={16} /> Confirmer la connexion
                         </button>
                       </div>
                     </div>
                   </div>
                 ) : (
                   <span className="settings-status-badge deconnecte">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <IconInfoCircle size={16} />
                     Bientot disponible
                   </span>
                 )
@@ -1544,7 +1697,6 @@ function App() {
       </div>
     );
   }
-
   // Vue détail projet (chat + aperçu live)
   if (activeProject) {
     const handleFileAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
