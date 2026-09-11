@@ -3,7 +3,7 @@ import NotificationBell from './components/NotificationBell';
 import { identifyUser, trackEvent, resetAnalytics } from './analytics';
 import { api } from './api';
 import './App.css';
-import { IconUser, IconSmartphone, IconMail, IconLock, IconSave, IconLink, IconLogOut, IconCheckCircle, IconInfoCircle } from './Icons';
+import { IconUser, IconSmartphone, IconMail, IconLock, IconSave, IconLink, IconLogOut, IconCheckCircle, IconInfoCircle, IconEye, IconEyeOff, IconArrowRight, IconSettings } from './Icons';
 
 interface User {
   id: string;
@@ -195,6 +195,8 @@ function App() {
   const [googlePlayStatut, setGooglePlayStatut] = useState<any | null>(null);
   const [googlePlayLoading, setGooglePlayLoading] = useState(false);
   const [googlePlayPackageInput, setGooglePlayPackageInput] = useState('');
+  const [afficherNouveauMdp, setAfficherNouveauMdp] = useState(false);
+  const [afficherMdpActuel, setAfficherMdpActuel] = useState(false);
   const [settingsPassword, setSettingsPassword] = useState('');
   const [settingsCurrentPassword, setSettingsCurrentPassword] = useState('');
   const [settingsMsg, setSettingsMsg] = useState('');
@@ -1598,42 +1600,54 @@ function App() {
           </div>
         </header>
         <main className="settings-page-main">
-          <h2 className="settings-page-title">Paramètres du compte</h2>
-          <p className="settings-page-subtitle">Gérez vos informations personnelles et vos connexions de publication.</p>
+          <div className="settings-header-card">
+            <div className="settings-icon-badge"><IconSettings /></div>
+            <div>
+              <h2 className="settings-page-title" style={{ marginBottom: 0 }}>Paramètres du compte</h2>
+              <p className="settings-page-subtitle" style={{ marginBottom: 0 }}>Gérez vos informations personnelles et vos connexions de publication.</p>
+            </div>
+          </div>
 
           <div className="settings-card">
             <div className="settings-card-header">
-              <div className="settings-card-icon"><IconUser /></div>
+              <div className="settings-icon-badge soft"><IconUser /></div>
               <div>
                 <h2>Informations personnelles</h2>
                 <p>Votre email et votre mot de passe de connexion</p>
               </div>
             </div>
             <form onSubmit={handleUpdateSettings}>
-              <label className="settings-field-label">Email</label>
-              <div className="settings-input-wrap">
-                <IconMail size={16} />
+              <label className="settings-field-icon-label"><IconMail /> Email</label>
+              <div className="settings-input-pill-wrap">
                 <input placeholder="Email" type="email" value={settingsEmail} onChange={(e) => setSettingsEmail(e.target.value)} />
+                {settingsEmail && <span className="settings-input-trailing ok"><IconCheckCircle size={18} /></span>}
               </div>
-              <label className="settings-field-label">Nouveau mot de passe (optionnel)</label>
-              <div className="settings-input-wrap">
-                <IconLock size={16} />
-                <input placeholder="Nouveau mot de passe (optionnel)" type="password" value={settingsPassword} onChange={(e) => setSettingsPassword(e.target.value)} />
+
+              <label className="settings-field-icon-label"><IconLock /> Nouveau mot de passe (optionnel)</label>
+              <div className="settings-input-pill-wrap">
+                <input placeholder="Entrez un nouveau mot de passe" type={afficherNouveauMdp ? 'text' : 'password'} value={settingsPassword} onChange={(e) => setSettingsPassword(e.target.value)} />
+                <button type="button" className="settings-input-trailing" onClick={() => setAfficherNouveauMdp(!afficherNouveauMdp)}>
+                  {afficherNouveauMdp ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+                </button>
               </div>
-              <label className="settings-field-label">Mot de passe actuel (requis)</label>
-              <div className="settings-input-wrap">
-                <IconLock size={16} />
-                <input placeholder="Mot de passe actuel (requis)" type="password" value={settingsCurrentPassword} onChange={(e) => setSettingsCurrentPassword(e.target.value)} required />
+
+              <label className="settings-field-icon-label"><IconLock /> Mot de passe actuel (requis)</label>
+              <div className="settings-input-pill-wrap">
+                <input placeholder="Entrez votre mot de passe actuel" type={afficherMdpActuel ? 'text' : 'password'} value={settingsCurrentPassword} onChange={(e) => setSettingsCurrentPassword(e.target.value)} required />
+                <button type="button" className="settings-input-trailing" onClick={() => setAfficherMdpActuel(!afficherMdpActuel)}>
+                  {afficherMdpActuel ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+                </button>
               </div>
+
               {settingsError && <p className="error">{settingsError}</p>}
               {settingsMsg && <p className="success">{settingsMsg}</p>}
-              <button type="submit" className="settings-btn-icon" style={{ marginTop: '1rem' }}><IconSave size={16} /> Enregistrer</button>
+              <button type="submit" className="settings-btn-gradient"><IconSave size={18} /> Enregistrer <IconArrowRight size={18} /></button>
             </form>
           </div>
 
           <div className="settings-card">
             <div className="settings-card-header">
-              <div className="settings-card-icon"><IconSmartphone /></div>
+              <div className="settings-icon-badge gradient"><IconSmartphone /></div>
               <div>
                 <h2>Publication mobile (Google Play)</h2>
                 <p>Connectez votre compte developpeur pour publier vos apps</p>
@@ -1643,8 +1657,8 @@ function App() {
             {googlePlayLoading ? <p>Chargement...</p> : googlePlayStatut && (
               googlePlayStatut.connecte ? (
                 <div>
-                  <span className="settings-status-badge connecte">
-                    <IconCheckCircle size={16} />
+                  <span className="settings-status-pill connecte">
+                    <IconCheckCircle />
                     Connecte
                   </span>
                   <p style={{ marginTop: '0.8rem', fontSize: '0.9rem', color: '#4a4432' }}>Package : <strong>{googlePlayStatut.package_name}</strong></p>
@@ -1685,10 +1699,16 @@ function App() {
                     </div>
                   </div>
                 ) : (
-                  <span className="settings-status-badge deconnecte">
-                    <IconInfoCircle size={16} />
-                    Bientot disponible
-                  </span>
+                  <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                    <span className="settings-status-pill deconnecte">
+                      <IconCheckCircle />
+                      Compte non connecte
+                    </span>
+                    <span className="settings-status-pill deconnecte">
+                      <IconInfoCircle />
+                      Bientot disponible
+                    </span>
+                  </div>
                 )
               )
             )}

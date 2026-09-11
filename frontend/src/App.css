@@ -2483,3 +2483,132 @@ body.dark-mode .preview-iframe {
   align-items: center;
   gap: 0.5rem;
 }
+
+/* ===== Enrichissement visuel v2 - Parametres ===== */
+.settings-header-card {
+  position: relative;
+  overflow: hidden;
+  background: #eef2ff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.settings-header-card::before,
+.settings-header-card::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #818cf8, #a78bfa);
+  opacity: 0.35;
+}
+
+.settings-header-card::before { width: 140px; height: 140px; top: -50px; right: -30px; }
+.settings-header-card::after { width: 90px; height: 90px; top: 40px; right: 60px; opacity: 0.25; }
+
+.settings-header-card > * { position: relative; z-index: 1; }
+
+.settings-icon-badge {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #6366f1;
+  color: white;
+}
+
+.settings-icon-badge svg { width: 24px; height: 24px; }
+
+.settings-icon-badge.soft {
+  background: rgba(99, 102, 241, 0.12);
+  color: #6366f1;
+}
+
+.settings-icon-badge.gradient {
+  background: linear-gradient(135deg, #818cf8, #a78bfa);
+  color: white;
+}
+
+.settings-field-icon-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2b2410;
+  margin: 0.9rem 0 0.4rem;
+}
+
+.settings-field-icon-label:first-of-type { margin-top: 0; }
+
+.settings-field-icon-label svg { width: 16px; height: 16px; color: #6366f1; }
+
+.settings-input-pill-wrap { position: relative; }
+
+.settings-input-pill-wrap input {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 999px;
+  padding: 0.85rem 2.6rem;
+  background: #f7f5f0;
+  border: 1px solid #ddd6c7;
+}
+
+.settings-input-trailing {
+  position: absolute;
+  right: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  color: #8a8270;
+}
+
+.settings-input-trailing.ok { color: #16a34a; cursor: default; }
+
+.settings-btn-gradient {
+  position: relative;
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  padding: 0.95rem 1.5rem;
+  margin-top: 1.2rem;
+  background: linear-gradient(90deg, #6366f1, #a78bfa);
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.settings-btn-gradient svg:last-child {
+  position: absolute;
+  right: 1.3rem;
+}
+
+.settings-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.settings-status-pill.connecte { background: rgba(34, 197, 94, 0.1); color: #16a34a; }
+.settings-status-pill.deconnecte { background: #ffffff; color: #6366f1; border-color: #ddd6c7; }
+.settings-status-pill svg { width: 16px; height: 16px; }
