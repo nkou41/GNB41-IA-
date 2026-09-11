@@ -113,6 +113,10 @@ def create_app(test_config=None):
     from app.routes.admin import admin_bp
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
 
+    @app.route('/api/health', methods=['GET'])
+    def health_check():
+        return {'status': 'ok'}, 200
+
     @app.errorhandler(404)
     def not_found(e):
         return jsonify({'error': 'Ressource introuvable'}), 404
