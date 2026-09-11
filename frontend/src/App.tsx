@@ -3,7 +3,7 @@ import NotificationBell from './components/NotificationBell';
 import { identifyUser, trackEvent, resetAnalytics } from './analytics';
 import { api } from './api';
 import './App.css';
-import { IconUser, IconMail, IconLock, IconSave, IconLink, IconLogOut, IconCheckCircle, IconInfoCircle, IconEye, IconEyeOff, IconArrowRight, IconSettings, IconGooglePlay } from './Icons';
+import { IconUser, IconMail, IconLock, IconSave, IconLink, IconLogOut, IconCheckCircle, IconInfoCircle, IconEye, IconEyeOff, IconArrowRight, IconArrowLeft, IconSettings, IconGooglePlay } from './Icons';
 
 interface User {
   id: string;
@@ -1592,7 +1592,10 @@ function App() {
     return (
       <div className="dashboard">
         <header>
-          <h1 onClick={() => { setShowSettings(false); navigateTo('/'); }} style={{ cursor: 'pointer' }}>← GNB41 IA</h1>
+          <button className="app-header-back" onClick={() => { setShowSettings(false); navigateTo('/'); }}>
+            <span className="app-header-back-icon"><IconArrowLeft size={18} /></span>
+            <span className="app-header-back-title">GNB41 IA</span>
+          </button>
           <div>
             <NotificationBell />
             <span>{user.username}</span>

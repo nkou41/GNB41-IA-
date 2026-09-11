@@ -33,3 +33,4 @@ export const IconGooglePlay = ({ size = 20, className = '' }: IconProps) => (
     <path d="M17 9.4L14.4 12l2.6 2.6 3.7-2.1c.6-.4.6-1.4 0-1.8L17 9.4Z" fill="#FFCA00"/>
   </svg>
 );
+export const IconArrowLeft = (props: IconProps) => base(<><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></>, props);
