@@ -2662,3 +2662,421 @@ body.dark-mode .preview-iframe {
   color: #2b2410;
   margin: 0;
 }
+
+/* Override specifique: le bouton retour du header ne doit pas avoir
+   la bordure/le fond generique de .dashboard header button */
+.dashboard header button.app-header-back {
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+.app-header-back-title {
+  white-space: nowrap;
+}
+
+
+/* === Refonte visuelle landing (theme creme/or) === */
+.landing {
+  background: linear-gradient(180deg, #f7efe0 0%, #f0e2c8 100%);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+.public-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 1.2rem;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(6px);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  flex-wrap: wrap;
+}
+.public-navbar-logo {
+  font-weight: 700;
+  color: #1e2b4d;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.public-navbar-links {
+  display: flex;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+}
+.public-navbar-links span {
+  cursor: pointer;
+  color: #55503f;
+  font-size: 0.85rem;
+}
+.public-navbar-links span:hover {
+  color: #b8860b;
+}
+.public-navbar-cta {
+  background: #1e2b4d;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 0.45rem 1rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+@media (max-width: 640px) {
+  .public-navbar-links { display: none; }
+}
+
+.landing-hero {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 2rem 1.2rem 1rem;
+}
+.landing-hero h1 {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #1e2b4d;
+  margin: 0.8rem 0 0.4rem;
+}
+.landing-tagline {
+  color: #6b6250;
+  font-size: 1rem;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.landing-badge {
+  display: inline-block;
+  margin: 1rem auto 0;
+  background: #f3d9a0;
+  color: #7a5a1e;
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+}
+
+.landing-prompt-form {
+  max-width: 520px;
+  margin: 1.6rem auto 0;
+  background: #fff;
+  border-radius: 20px;
+  padding: 1rem;
+  box-shadow: 0 12px 30px rgba(120, 90, 40, 0.12);
+}
+.landing-prompt-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+}
+.landing-select {
+  border: none;
+  background: #f6efe0;
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.8rem;
+  color: #5a5340;
+}
+.landing-send-btn {
+  background: #b8860b;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: auto;
+}
+.landing-login {
+  margin-top: 1rem;
+  color: #6b6250;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.landing-login:hover {
+  color: #b8860b;
+}
+
+.landing-features {
+  max-width: 520px;
+  margin: 2rem auto;
+  padding: 0 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  position: relative;
+  z-index: 2;
+}
+.landing-feature-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 6px 18px rgba(120, 90, 40, 0.08);
+  text-align: left;
+}
+.feature-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.feature-icon-blue { background: #3b6fe0; }
+.feature-icon-purple { background: #8b5cf6; }
+.feature-icon-green { background: #22b07d; }
+.feature-text h3 {
+  margin: 0 0 0.2rem;
+  font-size: 0.95rem;
+  color: #1e2b4d;
+}
+.feature-text p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #7a7461;
+}
+.feature-chevron {
+  margin-left: auto;
+  color: #c9bfa3;
+  font-size: 1.3rem;
+}
+
+.landing-decor-tagline {
+  text-align: center;
+  font-style: italic;
+  color: #b8860b;
+  font-weight: 600;
+  margin: 1.5rem 0;
+  line-height: 1.5;
+}
+
+.landing-float-btn {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.2rem;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #1e2b4d;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(30, 43, 77, 0.35);
+  z-index: 45;
+}
+
+
+/* === Refonte visuelle landing (theme creme/or) === */
+.landing {
+  background: linear-gradient(180deg, #f7efe0 0%, #f0e2c8 100%);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+.public-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 1.2rem;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(6px);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  flex-wrap: wrap;
+}
+.public-navbar-logo {
+  font-weight: 700;
+  color: #1e2b4d;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.public-navbar-links {
+  display: flex;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+}
+.public-navbar-links span {
+  cursor: pointer;
+  color: #55503f;
+  font-size: 0.85rem;
+}
+.public-navbar-links span:hover {
+  color: #b8860b;
+}
+.public-navbar-cta {
+  background: #1e2b4d;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 0.45rem 1rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+@media (max-width: 640px) {
+  .public-navbar-links { display: none; }
+}
+
+.landing-hero {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 2rem 1.2rem 1rem;
+}
+.landing-hero h1 {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #1e2b4d;
+  margin: 0.8rem 0 0.4rem;
+}
+.landing-tagline {
+  color: #6b6250;
+  font-size: 1rem;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.landing-badge {
+  display: inline-block;
+  margin: 1rem auto 0;
+  background: #f3d9a0;
+  color: #7a5a1e;
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+}
+
+.landing-prompt-form {
+  max-width: 520px;
+  margin: 1.6rem auto 0;
+  background: #fff;
+  border-radius: 20px;
+  padding: 1rem;
+  box-shadow: 0 12px 30px rgba(120, 90, 40, 0.12);
+}
+.landing-prompt-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+}
+.landing-select {
+  border: none;
+  background: #f6efe0;
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.8rem;
+  color: #5a5340;
+}
+.landing-send-btn {
+  background: #b8860b;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: auto;
+}
+.landing-login {
+  margin-top: 1rem;
+  color: #6b6250;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.landing-login:hover {
+  color: #b8860b;
+}
+
+.landing-features {
+  max-width: 520px;
+  margin: 2rem auto;
+  padding: 0 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  position: relative;
+  z-index: 2;
+}
+.landing-feature-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 6px 18px rgba(120, 90, 40, 0.08);
+  text-align: left;
+}
+.feature-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.feature-icon-blue { background: #3b6fe0; }
+.feature-icon-purple { background: #8b5cf6; }
+.feature-icon-green { background: #22b07d; }
+.feature-text h3 {
+  margin: 0 0 0.2rem;
+  font-size: 0.95rem;
+  color: #1e2b4d;
+}
+.feature-text p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #7a7461;
+}
+.feature-chevron {
+  margin-left: auto;
+  color: #c9bfa3;
+  font-size: 1.3rem;
+}
+
+.landing-decor-tagline {
+  text-align: center;
+  font-style: italic;
+  color: #b8860b;
+  font-weight: 600;
+  margin: 1.5rem 0;
+  line-height: 1.5;
+}
+
+.landing-float-btn {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.2rem;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #1e2b4d;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(30, 43, 77, 0.35);
+  z-index: 45;
+}
