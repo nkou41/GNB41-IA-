@@ -140,8 +140,9 @@ function App() {
   const [templateCategorie, setTemplateCategorie] = useState('autre');
   const [templatePublishing, setTemplatePublishing] = useState(false);
   const [showTemplatesGallery, setShowTemplatesGallery] = useState(false);
-  const [publicPage, setPublicPage] = useState<'accueil' | 'fonctionnalites' | 'tarifs' | 'apropos' | 'contact' | 'boutique' | null>(null);
+  const [publicPage, setPublicPage] = useState<'accueil' | 'fonctionnalites' | 'tarifs' | 'templates' | 'apropos' | 'contact' | 'boutique' | null>(null);
   const [publicListings, setPublicListings] = useState<any[]>([]);
+  const [showPublicMenu, setShowPublicMenu] = useState(false);
   const [templatesList, setTemplatesList] = useState<any[]>([]);
   const [editorContent, setEditorContent] = useState<string>('');
   const [editorSaving, setEditorSaving] = useState(false);
@@ -734,18 +735,33 @@ function App() {
 
   if (!user && publicPage && publicPage !== 'accueil') {
     const PublicNav = () => (
+      <>
       <div className="public-navbar">
         <span className="public-navbar-logo" onClick={() => { setPublicPage(null); navigateTo('/'); }}>GNB41 IA</span>
         <div className="public-navbar-links">
           <span onClick={() => { setPublicPage(null); navigateTo('/'); }}>Accueil</span>
           <span onClick={() => { setPublicPage('fonctionnalites'); navigateTo('/fonctionnalites'); }}>Fonctionnalités</span>
           <span onClick={() => { setPublicPage('tarifs'); navigateTo('/tarifs'); }}>Tarifs</span>
+          <span onClick={() => { setPublicPage('templates'); api.listTemplates().then(setTemplatesList).catch(() => {}); navigateTo('/templates'); }}>Templates</span>
           <span onClick={() => { setPublicPage('boutique'); api.listMarketplace().then((res) => setPublicListings(res.listings)).catch(() => {}); navigateTo('/boutique'); }}>Boutique</span>
           <span onClick={() => { setPublicPage('apropos'); navigateTo('/a-propos'); }}>À propos</span>
           <span onClick={() => { setPublicPage('contact'); navigateTo('/contact'); }}>Contact</span>
         </div>
         <button className="public-navbar-cta" onClick={() => { setPublicPage(null); setShowAuth(true); setAuthMode('login'); navigateTo('/'); }}>Se connecter</button>
+        <button type="button" className="public-navbar-burger" onClick={() => setShowPublicMenu(!showPublicMenu)}>☰</button>
       </div>
+      {showPublicMenu && (
+        <div className="public-navbar-mobile-menu">
+          <span onClick={() => { setShowPublicMenu(false); setPublicPage(null); navigateTo('/'); }}>Accueil</span>
+          <span onClick={() => { setShowPublicMenu(false); setPublicPage('fonctionnalites'); navigateTo('/fonctionnalites'); }}>Fonctionnalités</span>
+          <span onClick={() => { setShowPublicMenu(false); setPublicPage('tarifs'); navigateTo('/tarifs'); }}>Tarifs</span>
+          <span onClick={() => { setShowPublicMenu(false); setPublicPage('templates'); api.listTemplates().then(setTemplatesList).catch(() => {}); navigateTo('/templates'); }}>Templates</span>
+          <span onClick={() => { setShowPublicMenu(false); setPublicPage('boutique'); api.listMarketplace().then((res) => setPublicListings(res.listings)).catch(() => {}); navigateTo('/boutique'); }}>Boutique</span>
+          <span onClick={() => { setShowPublicMenu(false); setPublicPage('apropos'); navigateTo('/a-propos'); }}>À propos</span>
+          <span onClick={() => { setShowPublicMenu(false); setPublicPage('contact'); navigateTo('/contact'); }}>Contact</span>
+        </div>
+      )}
+      </>
     );
 
     if (publicPage === 'fonctionnalites') {
@@ -848,6 +864,30 @@ function App() {
       );
     }
 
+    if (publicPage === 'templates') {
+      return (
+        <div className="public-page">
+          <PublicNav />
+          <div className="public-page-content">
+            <h1>Galerie de templates</h1>
+            <p style={{ marginTop: '0.5rem', color: '#8a7f68' }}>Connectez-vous pour utiliser un template comme base de votre projet.</p>
+            {templatesList.length === 0 ? (
+              <div className="marketplace-empty"><p>Aucun template disponible pour le moment.</p></div>
+            ) : (
+              <div className="marketplace-grid" style={{ marginTop: '1.5rem' }}>
+                {templatesList.map((t: any) => (
+                  <div key={t.id} className="marketplace-card">
+                    <h3>{t.nom}</h3>
+                    <p className="marketplace-card-desc">{t.description}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     if (publicPage === 'boutique') {
       return (
         <div className="public-page">
@@ -879,10 +919,36 @@ function App() {
   if (!user && !showAuth) {
     return (
       <div className="landing">
+        <div className="public-navbar">
+          <span className="public-navbar-logo" onClick={() => { navigateTo('/'); }}>GNB41 IA</span>
+          <div className="public-navbar-links">
+            <span onClick={() => { navigateTo('/'); }}>Accueil</span>
+            <span onClick={() => { setPublicPage('fonctionnalites'); navigateTo('/fonctionnalites'); }}>Fonctionnalités</span>
+            <span onClick={() => { setPublicPage('tarifs'); navigateTo('/tarifs'); }}>Tarifs</span>
+            <span onClick={() => { setPublicPage('templates'); api.listTemplates().then(setTemplatesList).catch(() => {}); navigateTo('/templates'); }}>Templates</span>
+            <span onClick={() => { setPublicPage('boutique'); api.listMarketplace().then((res) => setPublicListings(res.listings)).catch(() => {}); navigateTo('/boutique'); }}>Boutique</span>
+            <span onClick={() => { setPublicPage('apropos'); navigateTo('/a-propos'); }}>À propos</span>
+            <span onClick={() => { setPublicPage('contact'); navigateTo('/contact'); }}>Contact</span>
+          </div>
+          <button className="public-navbar-cta" onClick={() => { setShowAuth(true); setAuthMode('login'); }}>Se connecter</button>
+          <button type="button" className="public-navbar-burger" onClick={() => setShowPublicMenu(!showPublicMenu)}>☰</button>
+        </div>
+        {showPublicMenu && (
+          <div className="public-navbar-mobile-menu">
+            <span onClick={() => { setShowPublicMenu(false); navigateTo('/'); }}>Accueil</span>
+            <span onClick={() => { setShowPublicMenu(false); setPublicPage('fonctionnalites'); navigateTo('/fonctionnalites'); }}>Fonctionnalités</span>
+            <span onClick={() => { setShowPublicMenu(false); setPublicPage('tarifs'); navigateTo('/tarifs'); }}>Tarifs</span>
+            <span onClick={() => { setShowPublicMenu(false); setPublicPage('templates'); api.listTemplates().then(setTemplatesList).catch(() => {}); navigateTo('/templates'); }}>Templates</span>
+            <span onClick={() => { setShowPublicMenu(false); setPublicPage('boutique'); api.listMarketplace().then((res) => setPublicListings(res.listings)).catch(() => {}); navigateTo('/boutique'); }}>Boutique</span>
+            <span onClick={() => { setShowPublicMenu(false); setPublicPage('apropos'); navigateTo('/a-propos'); }}>À propos</span>
+            <span onClick={() => { setShowPublicMenu(false); setPublicPage('contact'); navigateTo('/contact'); }}>Contact</span>
+          </div>
+        )}
         <div className="landing-hero">
           <img src="/logo.png" alt="GNB41 IA" className="app-logo app-logo-lg" />
           <h1>GNB41 IA</h1>
           <p className="landing-tagline">Décrivez votre application. L'IA la construit pour vous.</p>
+          <div className="landing-badge">⚡ IA &bull; Code &bull; Apps &bull; Web</div>
 
           <form onSubmit={handleLandingSubmit} className="landing-prompt-form">
             <div className="textarea-wrap">
@@ -933,19 +999,41 @@ function App() {
             Déjà un compte ? Se connecter
           </p>
         </div>
+        <button type="button" className="landing-float-btn" title="Assistant" onClick={() => { setShowAuth(true); setAuthMode('register'); }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="8" width="18" height="12" rx="2"/><circle cx="8.5" cy="14" r="1.5" fill="#fff"/><circle cx="15.5" cy="14" r="1.5" fill="#fff"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1" fill="#fff"/></svg>
+        </button>
         <div className="landing-features">
-          <div className="feature-card">
-            <h3>Espaces de travail</h3>
-            <p>Organisez vos projets par équipe ou par thème, avec des collaborateurs invités.</p>
+          <div className="feature-card landing-feature-row">
+            <span className="feature-icon feature-icon-blue">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            </span>
+            <span className="feature-text">
+              <h3>Espaces de travail</h3>
+              <p>Organisez vos projets par équipe ou par thème, avec des collaborateurs invités.</p>
+            </span>
+            <span className="feature-chevron">›</span>
           </div>
-          <div className="feature-card">
-            <h3>Génération IA</h3>
-            <p>Décrivez votre idée en langage naturel, obtenez du code fonctionnel.</p>
+          <div className="feature-card landing-feature-row">
+            <span className="feature-icon feature-icon-purple">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </span>
+            <span className="feature-text">
+              <h3>Génération IA</h3>
+              <p>Décrivez votre idée en langage naturel, obtenez du code fonctionnel.</p>
+            </span>
+            <span className="feature-chevron">›</span>
           </div>
-          <div className="feature-card">
-            <h3>Itération rapide</h3>
-            <p>Régénérez, affinez, gardez un historique complet de chaque version.</p>
+          <div className="feature-card landing-feature-row">
+            <span className="feature-icon feature-icon-green">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </span>
+            <span className="feature-text">
+              <h3>Itération rapide</h3>
+              <p>Régénérez, affinez, gardez un historique complet de chaque version.</p>
+            </span>
+            <span className="feature-chevron">›</span>
           </div>
+          <div className="landing-decor-tagline">Transformez vos idées<br/>en applications !</div>
         </div>
       </div>
     );
