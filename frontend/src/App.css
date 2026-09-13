@@ -138,15 +138,17 @@ main {
 .workspace-card {
   background: #ffffff;
   border: 1px solid #ddd6c7;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 1.2rem;
   cursor: pointer;
-  transition: transform 0.15s, border-color 0.15s;
+  box-shadow: 0 2px 8px rgba(43, 36, 16, 0.04);
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 
 .workspace-card:hover {
   border-color: #6366f1;
   transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.12);
 }
 
 .workspace-card h3 { margin-bottom: 0.4rem; }
@@ -632,17 +634,26 @@ main {
   flex-shrink: 0;
   border-radius: 50%;
   border: none;
-  background: #2b2410;
+  background: linear-gradient(135deg, #6366f1, #a78bfa);
   color: white;
   font-size: 1.1rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
 }
 
 .send-btn:hover {
-  background: #ddd6c7;
+  transform: scale(1.05);
+  box-shadow: 0 6px 14px rgba(99, 102, 241, 0.4);
+}
+
+.send-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
 }
 
 .builder-preview {

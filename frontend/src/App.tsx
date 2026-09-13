@@ -3,7 +3,7 @@ import NotificationBell from './components/NotificationBell';
 import { identifyUser, trackEvent, resetAnalytics } from './analytics';
 import { api } from './api';
 import './App.css';
-import { IconUser, IconMail, IconLock, IconSave, IconLink, IconLogOut, IconCheckCircle, IconInfoCircle, IconEye, IconEyeOff, IconArrowRight, IconArrowLeft, IconSettings, IconGooglePlay } from './Icons';
+import { IconUser, IconMail, IconLock, IconSave, IconLink, IconLogOut, IconCheckCircle, IconInfoCircle, IconEye, IconEyeOff, IconArrowRight, IconArrowLeft, IconSettings, IconGooglePlay, IconPackage } from './Icons';
 
 interface User {
   id: string;
@@ -2817,7 +2817,7 @@ ${jsFile.contenu}
                   navigateTo(`/projet/${p.id}`);
                 }}>
                   <div className="workspace-card-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                    <IconPackage size={22} />
                   </div>
                   <h3>{p.nom}</h3>
                   <div className="workspace-card-footer">
