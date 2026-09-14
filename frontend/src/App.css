@@ -901,7 +901,7 @@ input:focus, textarea:focus, select:focus {
 .toolbar-icon-btn {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #ddd6c7;
   background: #f0ede4;
   color: #2b2410;
@@ -911,11 +911,18 @@ input:focus, textarea:focus, select:focus {
   justify-content: center;
   margin-left: 0.5rem;
   text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .toolbar-icon-btn:hover {
-  background: #e5e0d3;
+  background: #6366f114;
   border-color: #6366f1;
+  color: #6366f1;
+}
+
+.toolbar-icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .preview-tabs {
