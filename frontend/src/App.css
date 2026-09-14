@@ -939,7 +939,7 @@ input:focus, textarea:focus, select:focus {
 
 .preview-tab {
   padding: 0.4rem 1rem;
-  border-radius: 8px;
+  border-radius: 999px;
   border: none;
   background: transparent;
   color: #8a7f68;
@@ -948,6 +948,7 @@ input:focus, textarea:focus, select:focus {
   cursor: pointer;
   flex-shrink: 0;
   white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .preview-tab:hover {
@@ -955,8 +956,9 @@ input:focus, textarea:focus, select:focus {
 }
 
 .preview-tab.active {
-  background: #6366f1;
+  background: linear-gradient(135deg, #6366f1, #a78bfa);
   color: white;
+  box-shadow: 0 3px 10px rgba(99,102,241,0.3);
 }
 
 .versions-panel {
