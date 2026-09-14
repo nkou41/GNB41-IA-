@@ -3181,3 +3181,20 @@ body.dark-mode .preview-iframe {
 .auth-submit-btn:hover {
   transform: scale(1.02);
 }
+
+.memoire-textarea {
+  width: 100%;
+  padding: 0.9rem;
+  border: 1px solid #ede8dc;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(43,36,16,0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+}
+.memoire-textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+}

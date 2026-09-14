@@ -2577,7 +2577,7 @@ ${jsFile.contenu}
                   value={memoireDraft}
                   onChange={(e) => setMemoireDraft(e.target.value)}
                   rows={12}
-                  style={{ width: '100%', padding: '0.7rem', border: '1px solid #ddd6c7', borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'inherit' }}
+                  className="memoire-textarea"
                   placeholder="Aucune regle memorisee pour l'instant."
                 />
                 <button
