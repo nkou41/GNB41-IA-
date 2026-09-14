@@ -3124,3 +3124,11 @@ body.dark-mode .preview-iframe {
 .public-navbar-mobile-menu span:hover {
   color: #b8860b;
 }
+
+.quickstart-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(43,36,16,0.06);
+  border: 1px solid #ede8dc;
+}

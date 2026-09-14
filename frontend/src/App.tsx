@@ -2764,7 +2764,7 @@ ${jsFile.contenu}
       <main className="quickstart-main">
         <h2 className="quickstart-greeting">Bonjour {user.username}. <span className="accent-dot">•</span><br/>Que construirez-vous ensuite ?</h2>
 
-        <form onSubmit={handleQuickStart} className="quickstart-form">
+        <form onSubmit={handleQuickStart} className="quickstart-form quickstart-card">
           <div className="textarea-wrap">
             <textarea
               placeholder=""
@@ -2799,7 +2799,7 @@ ${jsFile.contenu}
 
         {recentProjects.length === 0 && !quickLoading && (
           <div className="empty-state">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
+            <IconPackage size={40} />
             <h3>Aucun projet pour l'instant</h3>
             <p>Décrivez votre idée ci-dessus et l'IA génère votre première application.</p>
           </div>
