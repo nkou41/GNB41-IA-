@@ -1121,7 +1121,10 @@ function App() {
     return (
       <div className="marketplace-page">
         <header className="marketplace-header">
-          <h1 onClick={() => { setShowTemplatesGallery(false); navigateTo('/'); }}>← GNB41 IA</h1>
+          <button type="button" className="app-header-back" onClick={() => { setShowTemplatesGallery(false); navigateTo('/'); }}>
+            <span className="app-header-back-icon"><IconArrowLeft size={18} /></span>
+            <span className="app-header-back-title">GNB41 IA</span>
+          </button>
           <div className="marketplace-header-actions">
             <span>{user.username}</span>
             <button onClick={handleLogout}>Déconnexion</button>
@@ -1185,7 +1188,10 @@ function App() {
     return (
       <div className="marketplace-page">
         <header className="marketplace-header">
-          <h1 onClick={() => { setShowLegal(null); navigateTo('/marketplace'); }}>← Retour</h1>
+          <button type="button" className="app-header-back" onClick={() => { setShowLegal(null); navigateTo('/marketplace'); }}>
+            <span className="app-header-back-icon"><IconArrowLeft size={18} /></span>
+            <span className="app-header-back-title">Retour</span>
+          </button>
         </header>
         <div style={{ padding: '1.5rem', maxWidth: '700px', lineHeight: 1.6 }}>
           {showLegal === 'mentions' ? (
@@ -1242,7 +1248,10 @@ function App() {
     return (
       <div className="marketplace-page">
         <header className="marketplace-header">
-          <h1 onClick={() => { setShowAdminDashboard(false); navigateTo('/marketplace'); }}>← Boutique</h1>
+          <button type="button" className="app-header-back" onClick={() => { setShowAdminDashboard(false); navigateTo('/marketplace'); }}>
+            <span className="app-header-back-icon"><IconArrowLeft size={18} /></span>
+            <span className="app-header-back-title">Boutique</span>
+          </button>
           <div className="marketplace-header-actions">
             <NotificationBell />
             <span>{user.username}</span>
@@ -1400,7 +1409,10 @@ function App() {
     return (
       <div className="marketplace-page">
         <header className="marketplace-header">
-          <h1 onClick={() => { setShowMesAchats(false); navigateTo('/marketplace'); }}>← Boutique</h1>
+          <button type="button" className="app-header-back" onClick={() => { setShowMesAchats(false); navigateTo('/marketplace'); }}>
+            <span className="app-header-back-icon"><IconArrowLeft size={18} /></span>
+            <span className="app-header-back-title">Boutique</span>
+          </button>
           <div className="marketplace-header-actions">
             <NotificationBell />
             <span>{user.username}</span>
@@ -1459,7 +1471,10 @@ function App() {
     return (
       <div className="marketplace-page">
         <header className="marketplace-header">
-          <h1 onClick={() => { setShowMesVentes(false); navigateTo('/marketplace'); }}>← Boutique</h1>
+          <button type="button" className="app-header-back" onClick={() => { setShowMesVentes(false); navigateTo('/marketplace'); }}>
+            <span className="app-header-back-icon"><IconArrowLeft size={18} /></span>
+            <span className="app-header-back-title">Boutique</span>
+          </button>
           <div className="marketplace-header-actions">
             <NotificationBell />
             <span>{user.username}</span>
@@ -1521,7 +1536,10 @@ function App() {
     return (
       <div className="marketplace-page">
         <header className="marketplace-header">
-          <h1 onClick={() => { setShowMarketplace(false); navigateTo('/'); }}>← GNB41 IA</h1>
+          <button type="button" className="app-header-back" onClick={() => { setShowMarketplace(false); navigateTo('/'); }}>
+            <span className="app-header-back-icon"><IconArrowLeft size={18} /></span>
+            <span className="app-header-back-title">GNB41 IA</span>
+          </button>
           <div className="marketplace-header-actions">
             <NotificationBell />
             <span>{user.username}</span>
