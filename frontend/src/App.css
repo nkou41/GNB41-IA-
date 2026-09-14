@@ -540,15 +540,18 @@ main {
 }
 
 .chat-msg-user {
-  background: #6366f1;
+  background: linear-gradient(135deg, #6366f1, #7c7ff2);
   color: white;
   align-self: flex-end;
+  border-radius: 16px 16px 4px 16px;
 }
 
 .chat-msg-assistant {
   background: #ffffff;
-  border: 1px solid #ddd6c7;
+  border: 1px solid #ede8dc;
   align-self: flex-start;
+  border-radius: 16px 16px 16px 4px;
+  box-shadow: 0 2px 8px rgba(43,36,16,0.05);
 }
 
 .chat-input-form {
