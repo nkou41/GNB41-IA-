@@ -1991,7 +1991,7 @@ input:focus, textarea:focus, select:focus {
 
 .ws-settings-panel {
   background: var(--bg, #fff);
-  border-radius: 12px;
+  border-radius: 20px;
   width: 90%;
   max-width: 480px;
   max-height: 80vh;
@@ -2030,8 +2030,8 @@ input:focus, textarea:focus, select:focus {
 }
 
 .ws-settings-tabs button.active {
-  border-bottom-color: var(--accent, #aa3bff);
-  color: var(--accent, #aa3bff);
+  border-bottom-color: #6366f1;
+  color: #6366f1;
   font-weight: 600;
 }
 
