@@ -2043,7 +2043,7 @@ input:focus, textarea:focus, select:focus {
 .side-menu-plan {
   display: block;
   font-size: 12px;
-  color: var(--accent, #aa3bff);
+  color: #6366f1;
   margin-top: 2px;
 }
 
@@ -2087,8 +2087,8 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sidebar-item.active {
-  color: var(--accent, #aa3bff);
-  background: var(--accent-bg, rgba(170, 59, 255, 0.1));
+  color: #6366f1;
+  background: rgba(99,102,241,0.1);
 }
 
 .sidebar-spacer {
@@ -2134,8 +2134,8 @@ body.dark-mode .preview-iframe {
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: var(--accent-bg, rgba(170, 59, 255, 0.1));
-  color: var(--accent, #aa3bff);
+  background: rgba(99,102,241,0.1);
+  color: #6366f1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2297,7 +2297,7 @@ body.dark-mode .preview-iframe {
   height: 40px;
   min-width: 40px;
   border-radius: 50%;
-  background: var(--accent, #aa3bff);
+  background: #6366f1;
   color: #fff;
   display: flex;
   align-items: center;
