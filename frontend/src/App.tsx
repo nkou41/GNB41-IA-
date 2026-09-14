@@ -1053,16 +1053,23 @@ function App() {
     };
     return (
       <div className="auth-container">
-        <h1 onClick={() => { setShowAuth(false); setShowForgotPassword(false); }} style={{ cursor: "pointer" }}>GNB41 IA</h1>
-        <form onSubmit={handleForgotSubmit} className="auth-form">
-          <h2>Mot de passe oublie</h2>
-          <input placeholder="Email" type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} required />
-          {forgotMessage && <p className="error">{forgotMessage}</p>}
-          <button type="submit">Envoyer le lien</button>
-          <p className="switch" onClick={() => { setShowForgotPassword(false); setForgotMessage(""); }}>
-            Retour a la connexion
-          </p>
-        </form>
+        <div className="auth-card">
+          <h1 className="auth-card-logo" onClick={() => { setShowAuth(false); setShowForgotPassword(false); }} style={{ cursor: "pointer" }}>GNB41 IA</h1>
+          <form onSubmit={handleForgotSubmit} className="auth-form auth-form-v2">
+            <h2>Mot de passe oublie</h2>
+            <div className="settings-input-pill-wrap">
+              <label><IconMail size={16} /> Email</label>
+              <input placeholder="Email" type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} required />
+            </div>
+            {forgotMessage && <p className="error">{forgotMessage}</p>}
+            <button type="submit" className="auth-submit-btn">
+              Envoyer le lien <IconArrowRight size={16} />
+            </button>
+            <p className="switch" onClick={() => { setShowForgotPassword(false); setForgotMessage(""); }}>
+              Retour a la connexion
+            </p>
+          </form>
+        </div>
       </div>
     );
   }
