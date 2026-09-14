@@ -338,10 +338,17 @@ main {
 
 .versions-list li {
   background: #ffffff;
-  border: 1px solid #ddd6c7;
-  border-radius: 8px;
-  padding: 0.8rem;
-  margin-bottom: 0.5rem;
+  border: 1px solid #ede8dc;
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.6rem;
+  box-shadow: 0 2px 8px rgba(43,36,16,0.04);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.versions-list li:hover {
+  box-shadow: 0 6px 16px rgba(43,36,16,0.08);
+  transform: translateY(-1px);
 }
 
 .versions-list li p {
