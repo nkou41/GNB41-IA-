@@ -198,6 +198,7 @@ function App() {
   const [googlePlayPackageInput, setGooglePlayPackageInput] = useState('');
   const [afficherNouveauMdp, setAfficherNouveauMdp] = useState(false);
   const [afficherMdpActuel, setAfficherMdpActuel] = useState(false);
+  const [afficherMdpAuth, setAfficherMdpAuth] = useState(false);
   const [settingsPassword, setSettingsPassword] = useState('');
   const [settingsCurrentPassword, setSettingsCurrentPassword] = useState('');
   const [settingsMsg, setSettingsMsg] = useState('');
@@ -1069,25 +1070,41 @@ function App() {
   if (!user) {
     return (
       <div className="auth-container">
-        <h1 onClick={() => setShowAuth(false)} style={{ cursor: "pointer" }}>GNB41 IA</h1>
-        <form onSubmit={handleAuth} className="auth-form">
-          <h2>{authMode === "login" ? "Connexion" : "Inscription"}</h2>
-          <input placeholder="Nom d'utilisateur" value={username} onChange={(e) => setUsername(e.target.value)} required />
-          {authMode === "register" && (
-            <input placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          )}
-          <input placeholder="Mot de passe" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          {authMode === "login" && (
-            <p className="switch" onClick={() => { setShowForgotPassword(true); setForgotMessage(""); }} style={{ textAlign: "right", fontSize: "0.85em" }}>
-              Mot de passe oublie ?
+        <div className="auth-card">
+          <h1 className="auth-card-logo" onClick={() => setShowAuth(false)} style={{ cursor: "pointer" }}>GNB41 IA</h1>
+          <form onSubmit={handleAuth} className="auth-form auth-form-v2">
+            <h2>{authMode === "login" ? "Connexion" : "Inscription"}</h2>
+            <div className="settings-input-pill-wrap">
+              <label><IconUser size={16} /> Nom d'utilisateur</label>
+              <input placeholder="Nom d'utilisateur" value={username} onChange={(e) => setUsername(e.target.value)} required />
+            </div>
+            {authMode === "register" && (
+              <div className="settings-input-pill-wrap">
+                <label><IconMail size={16} /> Email</label>
+                <input placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              </div>
+            )}
+            <div className="settings-input-pill-wrap">
+              <label><IconLock size={16} /> Mot de passe</label>
+              <input placeholder="Mot de passe" type={afficherMdpAuth ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <button type="button" className="settings-input-trailing" onClick={() => setAfficherMdpAuth(!afficherMdpAuth)}>
+                {afficherMdpAuth ? <IconEyeOff size={16} /> : <IconEye size={16} />}
+              </button>
+            </div>
+            {authMode === "login" && (
+              <p className="switch" onClick={() => { setShowForgotPassword(true); setForgotMessage(""); }} style={{ textAlign: "right", fontSize: "0.85em" }}>
+                Mot de passe oublie ?
+              </p>
+            )}
+            {error && <p className="error">{error}</p>}
+            <button type="submit" className="auth-submit-btn">
+              {authMode === "login" ? "Se connecter" : "S'inscrire"} <IconArrowRight size={16} />
+            </button>
+            <p className="switch" onClick={() => setAuthMode(authMode === "login" ? "register" : "login")}>
+              {authMode === "login" ? "Pas de compte ? S'inscrire" : "Deja un compte ? Se connecter"}
             </p>
-          )}
-          {error && <p className="error">{error}</p>}
-          <button type="submit">{authMode === "login" ? "Se connecter" : "S'inscrire"}</button>
-          <p className="switch" onClick={() => setAuthMode(authMode === "login" ? "register" : "login")}>
-            {authMode === "login" ? "Pas de compte ? S'inscrire" : "Deja un compte ? Se connecter"}
-          </p>
-        </form>
+          </form>
+        </div>
       </div>
     );
   }
