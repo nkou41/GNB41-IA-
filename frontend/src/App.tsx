@@ -2065,38 +2065,31 @@ ${jsFile.contenu}
             <h2>Choisissez votre plan</h2>
             <p className="modal-subtitle">Le paiement n'est pas encore disponible — ceci est un aperçu des offres à venir.</p>
             <div className="plans-grid">
-              <div className="plan-card">
-                <h3>Gratuit</h3>
-                <p className="plan-price">0€<span>/mois</span></p>
-                <ul>
-                  <li>3 projets par espace de travail</li>
-                  <li>1 espace de travail</li>
-                  <li>Génération IA limitée</li>
-                </ul>
-                <button className="plan-btn plan-btn-current" disabled>Plan actuel</button>
-              </div>
-              <div className="plan-card plan-card-highlight">
-                <span className="plan-badge">Populaire</span>
-                <h3>Pro</h3>
-                <p className="plan-price">19€<span>/mois</span></p>
-                <ul>
-                  <li>Projets illimités</li>
-                  <li>Espaces de travail illimités</li>
-                  <li>Tous les fournisseurs IA</li>
-                  <li>Support prioritaire</li>
-                </ul>
-                <button className="plan-btn plan-btn-primary" disabled={upgradeLoading} onClick={() => handleUpgrade('pro')}>{upgradeLoading ? 'Redirection...' : 'Passer au Pro'}</button>
-              </div>
-              <div className="plan-card">
-                <h3>Entreprise</h3>
-                <p className="plan-price">Sur devis</p>
-                <ul>
-                  <li>Tout Pro inclus</li>
-                  <li>Déploiement dédié</li>
-                  <li>SLA garanti</li>
-                </ul>
-                <button className="plan-btn" disabled>Nous contacter</button>
-              </div>
+              {plansList.map((p: any) => (
+                <div key={p.id} className={`plan-card ${p.populaire ? 'plan-card-highlight' : ''}`}>
+                  {p.populaire && <span className="plan-badge">Populaire</span>}
+                  <h3>{p.nom}</h3>
+                  <p className="plan-price">
+                    {p.sur_devis ? 'Sur devis' : `${p.prix_usd}$`}
+                    {!p.sur_devis && <span>/mois</span>}
+                  </p>
+                  {!p.sur_devis && p.credits != null && (
+                    <p className="plan-credits">{p.credits} crédits de génération</p>
+                  )}
+                  <ul>
+                    {(p.features || []).map((f: string, i: number) => (
+                      <li key={i}>{f}</li>
+                    ))}
+                  </ul>
+                  {user?.plan === p.slug ? (
+                    <button className="plan-btn plan-btn-current" disabled>Plan actuel</button>
+                  ) : p.sur_devis ? (
+                    <button className="plan-btn" disabled>Nous contacter</button>
+                  ) : (
+                    <button className="plan-btn plan-btn-primary" disabled={upgradeLoading} onClick={() => handleUpgrade(p.slug)}>{upgradeLoading ? 'Redirection...' : `Passer à ${p.nom}`}</button>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -2737,38 +2730,31 @@ ${jsFile.contenu}
             <h2>Choisissez votre plan</h2>
             <p className="modal-subtitle">Le paiement n'est pas encore disponible — ceci est un aperçu des offres à venir.</p>
             <div className="plans-grid">
-              <div className="plan-card">
-                <h3>Gratuit</h3>
-                <p className="plan-price">0€<span>/mois</span></p>
-                <ul>
-                  <li>3 projets par espace de travail</li>
-                  <li>1 espace de travail</li>
-                  <li>Génération IA limitée</li>
-                </ul>
-                <button className="plan-btn plan-btn-current" disabled>Plan actuel</button>
-              </div>
-              <div className="plan-card plan-card-highlight">
-                <span className="plan-badge">Populaire</span>
-                <h3>Pro</h3>
-                <p className="plan-price">19€<span>/mois</span></p>
-                <ul>
-                  <li>Projets illimités</li>
-                  <li>Espaces de travail illimités</li>
-                  <li>Tous les fournisseurs IA</li>
-                  <li>Support prioritaire</li>
-                </ul>
-                <button className="plan-btn plan-btn-primary" disabled={upgradeLoading} onClick={() => handleUpgrade('pro')}>{upgradeLoading ? 'Redirection...' : 'Passer au Pro'}</button>
-              </div>
-              <div className="plan-card">
-                <h3>Entreprise</h3>
-                <p className="plan-price">Sur devis</p>
-                <ul>
-                  <li>Tout Pro inclus</li>
-                  <li>Déploiement dédié</li>
-                  <li>SLA garanti</li>
-                </ul>
-                <button className="plan-btn" disabled>Nous contacter</button>
-              </div>
+              {plansList.map((p: any) => (
+                <div key={p.id} className={`plan-card ${p.populaire ? 'plan-card-highlight' : ''}`}>
+                  {p.populaire && <span className="plan-badge">Populaire</span>}
+                  <h3>{p.nom}</h3>
+                  <p className="plan-price">
+                    {p.sur_devis ? 'Sur devis' : `${p.prix_usd}$`}
+                    {!p.sur_devis && <span>/mois</span>}
+                  </p>
+                  {!p.sur_devis && p.credits != null && (
+                    <p className="plan-credits">{p.credits} crédits de génération</p>
+                  )}
+                  <ul>
+                    {(p.features || []).map((f: string, i: number) => (
+                      <li key={i}>{f}</li>
+                    ))}
+                  </ul>
+                  {user?.plan === p.slug ? (
+                    <button className="plan-btn plan-btn-current" disabled>Plan actuel</button>
+                  ) : p.sur_devis ? (
+                    <button className="plan-btn" disabled>Nous contacter</button>
+                  ) : (
+                    <button className="plan-btn plan-btn-primary" disabled={upgradeLoading} onClick={() => handleUpgrade(p.slug)}>{upgradeLoading ? 'Redirection...' : `Passer à ${p.nom}`}</button>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
