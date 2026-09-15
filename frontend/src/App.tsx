@@ -451,16 +451,16 @@ function App() {
     }
   };
 
-  const [upgradeLoading, setUpgradeLoading] = useState(false);
+  const [upgradingPlan, setUpgradingPlan] = useState<string | null>(null);
 
   const handleUpgrade = async (plan: string) => {
-    setUpgradeLoading(true);
+    setUpgradingPlan(plan);
     try {
       const res = await api.createPayment(plan);
       window.location.href = res.payment_url;
     } catch (err: any) {
       alert(err.message || "Erreur lors de la creation du paiement");
-      setUpgradeLoading(false);
+      setUpgradingPlan(null);
     }
   };
 
@@ -2086,7 +2086,7 @@ ${jsFile.contenu}
                   ) : p.sur_devis ? (
                     <button className="plan-btn" disabled>Nous contacter</button>
                   ) : (
-                    <button className="plan-btn plan-btn-primary" disabled={upgradeLoading} onClick={() => handleUpgrade(p.slug)}>{upgradeLoading ? 'Redirection...' : `Passer à ${p.nom}`}</button>
+                    <button className="plan-btn plan-btn-primary" disabled={upgradingPlan === p.slug} onClick={() => handleUpgrade(p.slug)}>{upgradingPlan === p.slug ? 'Redirection...' : `Passer à ${p.nom}`}</button>
                   )}
                 </div>
               ))}
@@ -2751,7 +2751,7 @@ ${jsFile.contenu}
                   ) : p.sur_devis ? (
                     <button className="plan-btn" disabled>Nous contacter</button>
                   ) : (
-                    <button className="plan-btn plan-btn-primary" disabled={upgradeLoading} onClick={() => handleUpgrade(p.slug)}>{upgradeLoading ? 'Redirection...' : `Passer à ${p.nom}`}</button>
+                    <button className="plan-btn plan-btn-primary" disabled={upgradingPlan === p.slug} onClick={() => handleUpgrade(p.slug)}>{upgradingPlan === p.slug ? 'Redirection...' : `Passer à ${p.nom}`}</button>
                   )}
                 </div>
               ))}
