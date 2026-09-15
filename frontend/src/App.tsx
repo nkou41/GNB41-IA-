@@ -285,7 +285,11 @@ function App() {
       '/parametres': () => setShowSettings(true),
     };
     const action = syncMap[path];
-    if (action) action();
+    if (action) {
+      action();
+    } else if (!path.startsWith('/projet/')) {
+      setActiveProject(null);
+    }
   }, [location.pathname]);
 
   useEffect(() => {
