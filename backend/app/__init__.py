@@ -92,6 +92,7 @@ def create_app(test_config=None):
     from app.models.notification import Notification
     from app.models.activity_log import ActivityLog
     from app.models.evaluation_run import EvaluationRun
+    from app.models.plan import Plan
 
     from app.routes.auth import auth_bp
     from app.routes.workspace import workspace_bp
@@ -99,6 +100,7 @@ def create_app(test_config=None):
     from app.routes.marketplace import marketplace_bp
     from app.routes.appdb import appdb_bp
     from app.routes.templates import templates_bp
+    from app.routes.plans import plans_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(workspace_bp, url_prefix='/api/workspaces')
@@ -106,6 +108,7 @@ def create_app(test_config=None):
     app.register_blueprint(marketplace_bp, url_prefix='/api/marketplace')
     app.register_blueprint(appdb_bp, url_prefix='/api/appdb')
     app.register_blueprint(templates_bp, url_prefix='/api/templates')
+    app.register_blueprint(plans_bp, url_prefix='/api/plans')
     from app.routes.billing import billing_bp
     app.register_blueprint(billing_bp, url_prefix='/api/billing')
     from app.routes.notifications import notifications_bp

@@ -137,4 +137,5 @@ export const api = {
     request(`/templates/from-project/${projectId}`, { method: 'POST', body: JSON.stringify(data) }),
   useTemplate: (templateId: string, workspaceId: string, nom: string) =>
     request(`/templates/${templateId}/use`, { method: 'POST', body: JSON.stringify({ workspace_id: workspaceId, nom }) }),
+  getPlans: () => request('/plans'),
 };

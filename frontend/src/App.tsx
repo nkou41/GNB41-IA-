@@ -144,6 +144,11 @@ function App() {
   const [publicListings, setPublicListings] = useState<any[]>([]);
   const [showPublicMenu, setShowPublicMenu] = useState(false);
   const [templatesList, setTemplatesList] = useState<any[]>([]);
+  const [plansList, setPlansList] = useState<any[]>([]);
+
+  useEffect(() => {
+    api.getPlans().then((res: any) => setPlansList(res.plans || [])).catch(() => {});
+  }, []);
   const [editorContent, setEditorContent] = useState<string>('');
   const [editorSaving, setEditorSaving] = useState(false);
   const [editorDirty, setEditorDirty] = useState(false);
@@ -809,27 +814,27 @@ function App() {
           <div className="public-page-content">
             <h1>Tarifs</h1>
             <div className="plans-grid" style={{ marginTop: '2rem' }}>
-              <div className="plan-card">
-                <h3>Gratuit</h3>
-                <p className="plan-price">0€<span>/mois</span></p>
-                <ul>
-                  <li>3 projets par espace de travail</li>
-                  <li>1 espace de travail</li>
-                  <li>Génération IA limitée</li>
-                </ul>
-                <button className="plan-btn" onClick={() => { setPublicPage(null); setShowAuth(true); setAuthMode('register'); navigateTo('/'); }}>Commencer</button>
-              </div>
-              <div className="plan-card plan-card-highlight">
-                <span className="plan-badge">Populaire</span>
-                <h3>Pro</h3>
-                <p className="plan-price">19€<span>/mois</span></p>
-                <ul>
-                  <li>Projets illimités</li>
-                  <li>Espaces de travail illimités</li>
-                  <li>Génération IA prioritaire</li>
-                </ul>
-                <button className="plan-btn" onClick={() => { setPublicPage(null); setShowAuth(true); setAuthMode('register'); navigateTo('/'); }}>Commencer</button>
-              </div>
+              {plansList.map((p: any) => (
+                <div key={p.id} className={`plan-card ${p.populaire ? 'plan-card-highlight' : ''}`}>
+                  {p.populaire && <span className="plan-badge">Populaire</span>}
+                  <h3>{p.nom}</h3>
+                  <p className="plan-price">
+                    {p.sur_devis ? 'Sur devis' : `${p.prix_usd}$`}
+                    {!p.sur_devis && <span>/mois</span>}
+                  </p>
+                  {!p.sur_devis && p.credits != null && (
+                    <p className="plan-credits">{p.credits} crédits de génération</p>
+                  )}
+                  <ul>
+                    {(p.features || []).map((f: string, i: number) => (
+                      <li key={i}>{f}</li>
+                    ))}
+                  </ul>
+                  <button className="plan-btn" onClick={() => { setPublicPage(null); setShowAuth(true); setAuthMode('register'); navigateTo('/'); }}>
+                    {p.sur_devis ? 'Nous contacter' : 'Commencer'}
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>

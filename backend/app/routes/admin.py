@@ -164,3 +164,60 @@ def evaluation_history():
         for sid in ordre
     ]
     return jsonify({'suites': resultat})
+
+
+@admin_bp.route('/plans', methods=['GET'])
+@login_required
+@admin_required
+def admin_list_plans():
+    from app.models.plan import Plan
+    plans = Plan.query.order_by(Plan.ordre.asc()).all()
+    return jsonify({'plans': [p.to_dict() for p in plans]})
+
+
+@admin_bp.route('/plans/<plan_id>', methods=['PUT'])
+@login_required
+@admin_required
+def admin_update_plan(plan_id):
+    from app.models.plan import Plan
+    import json
+    plan = Plan.query.get(plan_id)
+    if not plan:
+        return jsonify({'error': 'Plan introuvable'}), 404
+    data = request.get_json() or {}
+    for field in ['nom', 'prix_usd', 'prix_xof', 'credits', 'description', 'ordre', 'populaire', 'actif', 'sur_devis']:
+        if field in data:
+            setattr(plan, field, data[field])
+    if 'features' in data:
+        plan.features = json.dumps(data['features'])
+    db.session.commit()
+    return jsonify({'plan': plan.to_dict()})
+
+
+@admin_bp.route('/plans', methods=['POST'])
+@login_required
+@admin_required
+def admin_create_plan():
+    from app.models.plan import Plan
+    import json
+    data = request.get_json() or {}
+    if not data.get('slug') or not data.get('nom'):
+        return jsonify({'error': 'slug et nom requis'}), 400
+    if Plan.query.filter_by(slug=data['slug']).first():
+        return jsonify({'error': 'Ce slug existe deja'}), 400
+    plan = Plan(
+        slug=data['slug'],
+        nom=data['nom'],
+        prix_usd=data.get('prix_usd', 0),
+        prix_xof=data.get('prix_xof', 0),
+        credits=data.get('credits'),
+        description=data.get('description'),
+        features=json.dumps(data.get('features', [])),
+        ordre=data.get('ordre', 0),
+        populaire=data.get('populaire', False),
+        actif=data.get('actif', True),
+        sur_devis=data.get('sur_devis', False),
+    )
+    db.session.add(plan)
+    db.session.commit()
+    return jsonify({'plan': plan.to_dict()}), 201
