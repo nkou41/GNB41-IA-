@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import NotificationBell from './components/NotificationBell';
 import { identifyUser, trackEvent, resetAnalytics } from './analytics';
 import { api } from './api';
@@ -261,17 +262,31 @@ function App() {
     }
   }, [user]);
 
+  const navigate = useNavigate();
+  const location = useLocation();
   const navigateTo = (path: string) => {
-    window.history.pushState({}, '', path);
+    navigate(path);
   };
 
   useEffect(() => {
-    const handlePopState = () => {
-      window.location.reload();
+    const path = location.pathname;
+    const syncMap: Record<string, () => void> = {
+      '/': () => { setPublicPage(null); setShowAdminDashboard(false); setShowMarketplace(false); setShowMesAchats(false); setShowMesVentes(false); setShowSettings(false); },
+      '/a-propos': () => setPublicPage('apropos'),
+      '/fonctionnalites': () => setPublicPage('fonctionnalites'),
+      '/tarifs': () => setPublicPage('tarifs'),
+      '/templates': () => { setPublicPage('templates'); api.listTemplates().then(setTemplatesList).catch(() => {}); },
+      '/boutique': () => { setPublicPage('boutique'); api.listMarketplace().then((res: any) => setPublicListings(res.listings)).catch(() => {}); },
+      '/contact': () => setPublicPage('contact'),
+      '/administration': () => setShowAdminDashboard(true),
+      '/marketplace': () => setShowMarketplace(true),
+      '/mes-achats': () => setShowMesAchats(true),
+      '/mes-ventes': () => setShowMesVentes(true),
+      '/parametres': () => setShowSettings(true),
     };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+    const action = syncMap[path];
+    if (action) action();
+  }, [location.pathname]);
 
   useEffect(() => {
     if (user) {
