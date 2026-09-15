@@ -4,12 +4,9 @@ from flask import Blueprint, request, jsonify, current_app
 from datetime import datetime, timedelta
 from flask_login import login_required, current_user
 from app import db, limiter
+from app.models.plan import Plan
 
 billing_bp = Blueprint('billing', __name__)
-
-PLAN_PRIX = {
-    'pro': 12000,
-}
 
 
 def _fedapay_base_url():
@@ -27,17 +24,20 @@ def _fedapay_headers():
 @limiter.limit('10 per hour')
 def create_payment():
     data = request.get_json()
-    plan = data.get('plan')
-    if plan not in PLAN_PRIX:
+    plan_slug = data.get('plan')
+    plan = Plan.query.filter_by(slug=plan_slug, actif=True).first()
+    if not plan:
         return jsonify({'error': 'Plan invalide'}), 400
+    if plan.sur_devis or not plan.prix_xof:
+        return jsonify({'error': 'Ce plan necessite de nous contacter directement'}), 400
 
     base = _fedapay_base_url()
     headers = _fedapay_headers()
 
     try:
         payload = {
-            'description': f'GNB41 IA - Plan {plan}',
-            'amount': PLAN_PRIX[plan],
+            'description': f'GNB41 IA - Plan {plan.nom}',
+            'amount': plan.prix_xof,
             'currency': {'iso': 'XOF'},
             'customer': {
                 'firstname': current_user.username,
@@ -57,6 +57,10 @@ def create_payment():
             current_app.logger.error(f'FedaPay token {token_res.status_code}: {token_res.text}')
             return jsonify({'error': 'Erreur lors de la creation du paiement', 'detail': token_res.text}), 500
         token_data = token_res.json()
+
+        current_user.pending_plan = plan.slug
+        current_user.pending_transaction_id = transaction_id
+        db.session.commit()
 
         return jsonify({'payment_url': token_data['url'], 'transaction_id': transaction_id})
     except requests.exceptions.RequestException as e:
@@ -78,8 +82,16 @@ def verify_payment(transaction_id):
         transaction = res.json()['v1/transaction']
         status = transaction.get('status')
         if status == 'approved':
-            current_user.plan = 'pro'
+            if current_user.pending_transaction_id != transaction_id or not current_user.pending_plan:
+                return jsonify({'error': 'Transaction non reconnue pour cet utilisateur'}), 400
+            plan = Plan.query.filter_by(slug=current_user.pending_plan, actif=True).first()
+            if not plan:
+                return jsonify({'error': 'Plan introuvable'}), 400
+            current_user.plan = plan.slug
             current_user.plan_expiry = datetime.utcnow() + timedelta(days=30)
+            current_user.credits = plan.credits if plan.credits is not None else current_user.credits
+            current_user.pending_plan = None
+            current_user.pending_transaction_id = None
             db.session.commit()
             return jsonify({'status': 'approved', 'plan': current_user.plan, 'plan_expiry': current_user.plan_expiry.isoformat()})
         return jsonify({'status': status})
