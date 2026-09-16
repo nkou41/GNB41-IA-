@@ -385,7 +385,7 @@ main { flex: 1; padding: 2rem; }
         js = """console.log('Dashboard demo GNB41 IA charge.');"""
         desc = "Tableau de bord administrateur (demo GNB41 IA)"
 
-    elif any(k in p for k in ['boutique', 'e-commerce', 'ecommerce', 'panier', 'catalogue']):
+    elif any(k in p for k in ['boutique', 'e-commerce', 'ecommerce', 'panier', 'catalogue', 'paiement', 'commande', 'restaurant', 'cafeteria', 'cafeterias', 'menu']):
         nav = """<nav class="shop-nav">
     <a href="index.html" class="logo">GNB41 Boutique</a>
     <div class="nav-links">
