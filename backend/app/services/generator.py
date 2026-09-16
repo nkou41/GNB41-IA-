@@ -847,20 +847,41 @@ Prompt d'origine : """ + prompt
 </head>
 <body>
   <div class="landing">
-    <div class="card">
+    <div class="card landing-hero">
+      <div class="landing-badge">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+      </div>
       <h1>Bienvenue sur GNB41 IA</h1>
       <p>Application generee en mode demo (aucune cle API active). Ajoutez une cle ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY ou MISTRAL_API_KEY pour activer la generation IA complete et personnalisee selon votre demande.</p>
       <a href="#" class="btn">En savoir plus</a>
+    </div>
+    <div class="landing-features">
+      <div class="feature">
+        <span class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        <span>Donnees securisees</span>
+      </div>
+      <div class="feature">
+        <span class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+        <span>Generation rapide</span>
+      </div>
+      <div class="feature">
+        <span class="feature-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></span>
+        <span>Evolutif</span>
+      </div>
     </div>
   </div>
   <script src="script.js"></script>
 </body>
 </html>"""
         css = css_base + """
-.landing { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.landing .card { max-width: 560px; text-align: center; }
+.landing { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; gap: 1.5rem; }
+.landing-hero { max-width: 560px; text-align: center; }
+.landing-badge { width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 16px; background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; display: flex; align-items: center; justify-content: center; }
 .landing h1 { margin-bottom: 1rem; }
-.landing p { margin-bottom: 1.5rem; color: #6b6375; }"""
+.landing p { margin-bottom: 1.5rem; color: #6b6375; }
+.landing-features { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+.feature { display: flex; align-items: center; gap: 0.5rem; background: #fff; padding: 0.7rem 1.1rem; border-radius: 999px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); font-size: 0.85rem; font-weight: 600; color: #2b2410; }
+.feature-icon { color: #6366f1; display: flex; }"""
         js = """console.log('GNB41 IA - mode demo charge.');"""
         desc = "GNB41 IA - Application demo (mode sans cle API)"
 
