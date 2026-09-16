@@ -1,7 +1,13 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html {
+  color-scheme: light;
+  forced-color-adjust: none;
+}
+
 body {
   color-scheme: light;
+  forced-color-adjust: none;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #f7f5f0;
   color: #2b2410;
@@ -1090,6 +1096,7 @@ input:focus, textarea:focus, select:focus {
   font-weight: 600;
   margin-bottom: 2rem;
   line-height: 1.4;
+  color: #2b2410;
 }
 
 .accent-dot {
