@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NotificationBell from './components/NotificationBell';
+import PublicNav from './components/PublicNav';
 import { identifyUser, trackEvent, resetAnalytics } from './analytics';
 import { api } from './api';
 import './App.css';
@@ -759,40 +760,10 @@ function App() {
   }
 
   if (!user && publicPage && publicPage !== 'accueil') {
-    const PublicNav = () => (
-      <>
-      <div className="public-navbar">
-        <span className="public-navbar-logo" onClick={() => { setPublicPage(null); navigateTo('/'); }}>GNB41 IA</span>
-        <div className="public-navbar-links">
-          <span onClick={() => { setPublicPage(null); navigateTo('/'); }}>Accueil</span>
-          <span onClick={() => { setPublicPage('fonctionnalites'); navigateTo('/fonctionnalites'); }}>Fonctionnalités</span>
-          <span onClick={() => { setPublicPage('tarifs'); navigateTo('/tarifs'); }}>Tarifs</span>
-          <span onClick={() => { setPublicPage('templates'); api.listTemplates().then(setTemplatesList).catch(() => {}); navigateTo('/templates'); }}>Templates</span>
-          <span onClick={() => { setPublicPage('boutique'); api.listMarketplace().then((res) => setPublicListings(res.listings)).catch(() => {}); navigateTo('/boutique'); }}>Boutique</span>
-          <span onClick={() => { setPublicPage('apropos'); navigateTo('/a-propos'); }}>À propos</span>
-          <span onClick={() => { setPublicPage('contact'); navigateTo('/contact'); }}>Contact</span>
-        </div>
-        <button className="public-navbar-cta" onClick={() => { setPublicPage(null); setShowAuth(true); setAuthMode('login'); navigateTo('/'); }}>Se connecter</button>
-        <button type="button" className="public-navbar-burger" onClick={() => setShowPublicMenu(!showPublicMenu)}>☰</button>
-      </div>
-      {showPublicMenu && (
-        <div className="public-navbar-mobile-menu">
-          <span onClick={() => { setShowPublicMenu(false); setPublicPage(null); navigateTo('/'); }}>Accueil</span>
-          <span onClick={() => { setShowPublicMenu(false); setPublicPage('fonctionnalites'); navigateTo('/fonctionnalites'); }}>Fonctionnalités</span>
-          <span onClick={() => { setShowPublicMenu(false); setPublicPage('tarifs'); navigateTo('/tarifs'); }}>Tarifs</span>
-          <span onClick={() => { setShowPublicMenu(false); setPublicPage('templates'); api.listTemplates().then(setTemplatesList).catch(() => {}); navigateTo('/templates'); }}>Templates</span>
-          <span onClick={() => { setShowPublicMenu(false); setPublicPage('boutique'); api.listMarketplace().then((res) => setPublicListings(res.listings)).catch(() => {}); navigateTo('/boutique'); }}>Boutique</span>
-          <span onClick={() => { setShowPublicMenu(false); setPublicPage('apropos'); navigateTo('/a-propos'); }}>À propos</span>
-          <span onClick={() => { setShowPublicMenu(false); setPublicPage('contact'); navigateTo('/contact'); }}>Contact</span>
-        </div>
-      )}
-      </>
-    );
-
     if (publicPage === 'fonctionnalites') {
       return (
         <div className="public-page">
-          <PublicNav />
+          <PublicNav setPublicPage={setPublicPage} navigateTo={navigateTo} setShowAuth={setShowAuth} setAuthMode={setAuthMode} setTemplatesList={setTemplatesList} setPublicListings={setPublicListings} showPublicMenu={showPublicMenu} setShowPublicMenu={setShowPublicMenu} />
           <div className="public-page-content">
             <h1>Fonctionnalités</h1>
             <div className="landing-features" style={{ marginTop: '2rem' }}>
@@ -829,7 +800,7 @@ function App() {
     if (publicPage === 'tarifs') {
       return (
         <div className="public-page">
-          <PublicNav />
+          <PublicNav setPublicPage={setPublicPage} navigateTo={navigateTo} setShowAuth={setShowAuth} setAuthMode={setAuthMode} setTemplatesList={setTemplatesList} setPublicListings={setPublicListings} showPublicMenu={showPublicMenu} setShowPublicMenu={setShowPublicMenu} />
           <div className="public-page-content">
             <h1>Tarifs</h1>
             <div className="plans-grid" style={{ marginTop: '2rem' }}>
@@ -863,7 +834,7 @@ function App() {
     if (publicPage === 'apropos') {
       return (
         <div className="public-page">
-          <PublicNav />
+          <PublicNav setPublicPage={setPublicPage} navigateTo={navigateTo} setShowAuth={setShowAuth} setAuthMode={setAuthMode} setTemplatesList={setTemplatesList} setPublicListings={setPublicListings} showPublicMenu={showPublicMenu} setShowPublicMenu={setShowPublicMenu} />
           <div className="public-page-content">
             <h1>À propos</h1>
             <p style={{ marginTop: '1rem', lineHeight: 1.7, maxWidth: '600px' }}>
@@ -879,7 +850,7 @@ function App() {
     if (publicPage === 'contact') {
       return (
         <div className="public-page">
-          <PublicNav />
+          <PublicNav setPublicPage={setPublicPage} navigateTo={navigateTo} setShowAuth={setShowAuth} setAuthMode={setAuthMode} setTemplatesList={setTemplatesList} setPublicListings={setPublicListings} showPublicMenu={showPublicMenu} setShowPublicMenu={setShowPublicMenu} />
           <div className="public-page-content">
             <h1>Contact</h1>
             <p style={{ marginTop: '1rem' }}>Pour toute question, ecrivez-nous a :</p>
@@ -892,7 +863,7 @@ function App() {
     if (publicPage === 'templates') {
       return (
         <div className="public-page">
-          <PublicNav />
+          <PublicNav setPublicPage={setPublicPage} navigateTo={navigateTo} setShowAuth={setShowAuth} setAuthMode={setAuthMode} setTemplatesList={setTemplatesList} setPublicListings={setPublicListings} showPublicMenu={showPublicMenu} setShowPublicMenu={setShowPublicMenu} />
           <div className="public-page-content">
             <h1>Galerie de templates</h1>
             <p style={{ marginTop: '0.5rem', color: '#8a7f68' }}>Connectez-vous pour utiliser un template comme base de votre projet.</p>
@@ -916,7 +887,7 @@ function App() {
     if (publicPage === 'boutique') {
       return (
         <div className="public-page">
-          <PublicNav />
+          <PublicNav setPublicPage={setPublicPage} navigateTo={navigateTo} setShowAuth={setShowAuth} setAuthMode={setAuthMode} setTemplatesList={setTemplatesList} setPublicListings={setPublicListings} showPublicMenu={showPublicMenu} setShowPublicMenu={setShowPublicMenu} />
           <div className="public-page-content">
             <h1>Boutique</h1>
             <p style={{ marginTop: '0.5rem', color: '#8a7f68' }}>Connectez-vous pour acheter ou publier une application.</p>
@@ -944,31 +915,7 @@ function App() {
   if (!user && !showAuth) {
     return (
       <div className="landing">
-        <div className="public-navbar">
-          <span className="public-navbar-logo" onClick={() => { navigateTo('/'); }}>GNB41 IA</span>
-          <div className="public-navbar-links">
-            <span onClick={() => { navigateTo('/'); }}>Accueil</span>
-            <span onClick={() => { setPublicPage('fonctionnalites'); navigateTo('/fonctionnalites'); }}>Fonctionnalités</span>
-            <span onClick={() => { setPublicPage('tarifs'); navigateTo('/tarifs'); }}>Tarifs</span>
-            <span onClick={() => { setPublicPage('templates'); api.listTemplates().then(setTemplatesList).catch(() => {}); navigateTo('/templates'); }}>Templates</span>
-            <span onClick={() => { setPublicPage('boutique'); api.listMarketplace().then((res) => setPublicListings(res.listings)).catch(() => {}); navigateTo('/boutique'); }}>Boutique</span>
-            <span onClick={() => { setPublicPage('apropos'); navigateTo('/a-propos'); }}>À propos</span>
-            <span onClick={() => { setPublicPage('contact'); navigateTo('/contact'); }}>Contact</span>
-          </div>
-          <button className="public-navbar-cta" onClick={() => { setShowAuth(true); setAuthMode('login'); }}>Se connecter</button>
-          <button type="button" className="public-navbar-burger" onClick={() => setShowPublicMenu(!showPublicMenu)}>☰</button>
-        </div>
-        {showPublicMenu && (
-          <div className="public-navbar-mobile-menu">
-            <span onClick={() => { setShowPublicMenu(false); navigateTo('/'); }}>Accueil</span>
-            <span onClick={() => { setShowPublicMenu(false); setPublicPage('fonctionnalites'); navigateTo('/fonctionnalites'); }}>Fonctionnalités</span>
-            <span onClick={() => { setShowPublicMenu(false); setPublicPage('tarifs'); navigateTo('/tarifs'); }}>Tarifs</span>
-            <span onClick={() => { setShowPublicMenu(false); setPublicPage('templates'); api.listTemplates().then(setTemplatesList).catch(() => {}); navigateTo('/templates'); }}>Templates</span>
-            <span onClick={() => { setShowPublicMenu(false); setPublicPage('boutique'); api.listMarketplace().then((res) => setPublicListings(res.listings)).catch(() => {}); navigateTo('/boutique'); }}>Boutique</span>
-            <span onClick={() => { setShowPublicMenu(false); setPublicPage('apropos'); navigateTo('/a-propos'); }}>À propos</span>
-            <span onClick={() => { setShowPublicMenu(false); setPublicPage('contact'); navigateTo('/contact'); }}>Contact</span>
-          </div>
-        )}
+        <PublicNav setPublicPage={setPublicPage} navigateTo={navigateTo} setShowAuth={setShowAuth} setAuthMode={setAuthMode} setTemplatesList={setTemplatesList} setPublicListings={setPublicListings} showPublicMenu={showPublicMenu} setShowPublicMenu={setShowPublicMenu} />
         <div className="landing-hero">
           <img src="/logo.png" alt="GNB41 IA" className="app-logo app-logo-lg" />
           <h1>GNB41 IA</h1>
