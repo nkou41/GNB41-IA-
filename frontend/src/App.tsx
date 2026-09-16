@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NotificationBell from './components/NotificationBell';
 import PublicNav from './components/PublicNav';
+import Apropos from './pages/Apropos';
+import Contact from './pages/Contact';
 import { identifyUser, trackEvent, resetAnalytics } from './analytics';
 import { api } from './api';
 import './App.css';
@@ -832,32 +834,11 @@ function App() {
     }
 
     if (publicPage === 'apropos') {
-      return (
-        <div className="public-page">
-          <PublicNav setPublicPage={setPublicPage} navigateTo={navigateTo} setShowAuth={setShowAuth} setAuthMode={setAuthMode} setTemplatesList={setTemplatesList} setPublicListings={setPublicListings} showPublicMenu={showPublicMenu} setShowPublicMenu={setShowPublicMenu} />
-          <div className="public-page-content">
-            <h1>À propos</h1>
-            <p style={{ marginTop: '1rem', lineHeight: 1.7, maxWidth: '600px' }}>
-              GNB41 IA est une plateforme de generation d'applications par intelligence artificielle.
-              Decrivez votre idee en langage naturel, et obtenez une application complete, professionnelle
-              et prete a etre deployee — sans avoir a ecrire une seule ligne de code.
-            </p>
-          </div>
-        </div>
-      );
+      return <Apropos navProps={{ setPublicPage, navigateTo, setShowAuth, setAuthMode, setTemplatesList, setPublicListings, showPublicMenu, setShowPublicMenu }} />;
     }
 
     if (publicPage === 'contact') {
-      return (
-        <div className="public-page">
-          <PublicNav setPublicPage={setPublicPage} navigateTo={navigateTo} setShowAuth={setShowAuth} setAuthMode={setAuthMode} setTemplatesList={setTemplatesList} setPublicListings={setPublicListings} showPublicMenu={showPublicMenu} setShowPublicMenu={setShowPublicMenu} />
-          <div className="public-page-content">
-            <h1>Contact</h1>
-            <p style={{ marginTop: '1rem' }}>Pour toute question, ecrivez-nous a :</p>
-            <p style={{ fontWeight: 600, marginTop: '0.5rem' }}>contact@gnb41ia.com</p>
-          </div>
-        </div>
-      );
+      return <Contact navProps={{ setPublicPage, navigateTo, setShowAuth, setAuthMode, setTemplatesList, setPublicListings, showPublicMenu, setShowPublicMenu }} />;
     }
 
     if (publicPage === 'templates') {
