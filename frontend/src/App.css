@@ -3214,3 +3214,9 @@ body.dark-mode .preview-iframe {
   border-color: #6366f1;
   box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
 }
+
+.app-header-back-title-clip {
+  max-width: 45vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
