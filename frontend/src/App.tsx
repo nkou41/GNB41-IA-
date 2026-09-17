@@ -5,6 +5,7 @@ import PublicNav from './components/PublicNav';
 import Apropos from './pages/Apropos';
 import Contact from './pages/Contact';
 import Fonctionnalites from './pages/Fonctionnalites';
+import Tarifs from './pages/Tarifs';
 import { identifyUser, trackEvent, resetAnalytics } from './analytics';
 import { api } from './api';
 import './App.css';
@@ -768,37 +769,7 @@ function App() {
     }
 
     if (publicPage === 'tarifs') {
-      return (
-        <div className="public-page">
-          <PublicNav setPublicPage={setPublicPage} navigateTo={navigateTo} setShowAuth={setShowAuth} setAuthMode={setAuthMode} setTemplatesList={setTemplatesList} setPublicListings={setPublicListings} showPublicMenu={showPublicMenu} setShowPublicMenu={setShowPublicMenu} />
-          <div className="public-page-content">
-            <h1>Tarifs</h1>
-            <div className="plans-grid" style={{ marginTop: '2rem' }}>
-              {plansList.map((p: any) => (
-                <div key={p.id} className={`plan-card ${p.populaire ? 'plan-card-highlight' : ''}`}>
-                  {p.populaire && <span className="plan-badge">Populaire</span>}
-                  <h3>{p.nom}</h3>
-                  <p className="plan-price">
-                    {p.sur_devis ? 'Sur devis' : `${p.prix_usd}$`}
-                    {!p.sur_devis && <span>/mois</span>}
-                  </p>
-                  {!p.sur_devis && p.credits != null && (
-                    <p className="plan-credits">{p.credits} crédits de génération</p>
-                  )}
-                  <ul>
-                    {(p.features || []).map((f: string, i: number) => (
-                      <li key={i}>{f}</li>
-                    ))}
-                  </ul>
-                  <button className="plan-btn" onClick={() => { setPublicPage(null); setShowAuth(true); setAuthMode('register'); navigateTo('/'); }}>
-                    {p.sur_devis ? 'Nous contacter' : 'Commencer'}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      );
+      return <Tarifs navProps={{ setPublicPage, navigateTo, setShowAuth, setAuthMode, setTemplatesList, setPublicListings, showPublicMenu, setShowPublicMenu }} plansList={plansList} />;
     }
 
     if (publicPage === 'apropos') {
@@ -2011,17 +1982,10 @@ ${jsFile.contenu}
       )}
         <header>
           <div>
-            <nav className="breadcrumb">
-              <button className="breadcrumb-item" onClick={() => { setActiveProject(null); navigateTo('/'); }}>Accueil</button>
-              <span className="breadcrumb-sep">/</span>
-              {activeWorkspace && (
-                <>
-                  <button className="breadcrumb-item" onClick={() => { setActiveProject(null); navigateTo('/'); }}>{activeWorkspace.nom}</button>
-                  <span className="breadcrumb-sep">/</span>
-                </>
-              )}
-              <span className="breadcrumb-current">{activeProject.nom}</span>
-            </nav>
+            <button type="button" className="app-header-back" onClick={() => { setActiveProject(null); navigateTo('/'); }}>
+              <span className="app-header-back-icon"><IconArrowLeft size={18} /></span>
+              <span className="app-header-back-title app-header-back-title-clip">{activeProject.nom}</span>
+            </button>
             <button className="toolbar-icon-btn" title="Partager" onClick={handleShare}>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             </button>
@@ -2031,9 +1995,6 @@ ${jsFile.contenu}
             <button className="toolbar-icon-btn" title="Historique des versions" onClick={toggleVersions}>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
             </button>
-            <a href={api.exportProjectUrl(activeProject.id)} className="toolbar-icon-btn" title="Télécharger (.zip)" download>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            </a>
             <button
               className="toolbar-icon-btn"
               title={activeProject.est_deploye ? "Deployee (cliquer pour voir le lien)" : "Deployer l'application"}
