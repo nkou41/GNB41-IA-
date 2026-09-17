@@ -7,6 +7,7 @@ import Contact from './pages/Contact';
 import Fonctionnalites from './pages/Fonctionnalites';
 import Tarifs from './pages/Tarifs';
 import Templates from './pages/Templates';
+import Boutique from './pages/Boutique';
 import { identifyUser, trackEvent, resetAnalytics } from './analytics';
 import { api } from './api';
 import './App.css';
@@ -786,30 +787,7 @@ function App() {
     }
 
     if (publicPage === 'boutique') {
-      return (
-        <div className="public-page">
-          <PublicNav setPublicPage={setPublicPage} navigateTo={navigateTo} setShowAuth={setShowAuth} setAuthMode={setAuthMode} setTemplatesList={setTemplatesList} setPublicListings={setPublicListings} showPublicMenu={showPublicMenu} setShowPublicMenu={setShowPublicMenu} />
-          <div className="public-page-content">
-            <h1>Boutique</h1>
-            <p style={{ marginTop: '0.5rem', color: '#8a7f68' }}>Connectez-vous pour acheter ou publier une application.</p>
-            {publicListings.length === 0 ? (
-              <div className="marketplace-empty"><p>Aucune application publiee pour le moment.</p></div>
-            ) : (
-              <div className="marketplace-grid" style={{ marginTop: '1.5rem' }}>
-                {publicListings.map((l: any) => (
-                  <div key={l.id} className="marketplace-card">
-                    <h3>{l.titre}</h3>
-                    <p className="marketplace-card-desc">{l.description}</p>
-                    <div className="marketplace-card-footer">
-                      <span className="marketplace-price">{(l.prix_centimes / 100).toFixed(2)} {l.devise}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      );
+      return <Boutique navProps={{ setPublicPage, navigateTo, setShowAuth, setAuthMode, setTemplatesList, setPublicListings, showPublicMenu, setShowPublicMenu }} publicListings={publicListings} />;
     }
   }
 
