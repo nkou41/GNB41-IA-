@@ -6,6 +6,7 @@ import Apropos from './pages/Apropos';
 import Contact from './pages/Contact';
 import Fonctionnalites from './pages/Fonctionnalites';
 import Tarifs from './pages/Tarifs';
+import Templates from './pages/Templates';
 import { identifyUser, trackEvent, resetAnalytics } from './analytics';
 import { api } from './api';
 import './App.css';
@@ -781,27 +782,7 @@ function App() {
     }
 
     if (publicPage === 'templates') {
-      return (
-        <div className="public-page">
-          <PublicNav setPublicPage={setPublicPage} navigateTo={navigateTo} setShowAuth={setShowAuth} setAuthMode={setAuthMode} setTemplatesList={setTemplatesList} setPublicListings={setPublicListings} showPublicMenu={showPublicMenu} setShowPublicMenu={setShowPublicMenu} />
-          <div className="public-page-content">
-            <h1>Galerie de templates</h1>
-            <p style={{ marginTop: '0.5rem', color: '#8a7f68' }}>Connectez-vous pour utiliser un template comme base de votre projet.</p>
-            {templatesList.length === 0 ? (
-              <div className="marketplace-empty"><p>Aucun template disponible pour le moment.</p></div>
-            ) : (
-              <div className="marketplace-grid" style={{ marginTop: '1.5rem' }}>
-                {templatesList.map((t: any) => (
-                  <div key={t.id} className="marketplace-card">
-                    <h3>{t.nom}</h3>
-                    <p className="marketplace-card-desc">{t.description}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      );
+      return <Templates navProps={{ setPublicPage, navigateTo, setShowAuth, setAuthMode, setTemplatesList, setPublicListings, showPublicMenu, setShowPublicMenu }} templatesList={templatesList} />;
     }
 
     if (publicPage === 'boutique') {
