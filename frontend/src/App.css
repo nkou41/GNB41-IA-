@@ -1976,10 +1976,19 @@ input:focus, textarea:focus, select:focus {
   font-size: 15px;
   cursor: pointer;
   width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .side-menu-item:hover {
   background: #f4f3ec;
+}
+
+.side-menu-item-icon {
+  color: #6366f1;
+  display: flex;
+  flex-shrink: 0;
 }
 
 .side-menu-logout {
