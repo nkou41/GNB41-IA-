@@ -3229,3 +3229,10 @@ body.dark-mode .preview-iframe {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.side-menu-credits {
+  display: block;
+  font-size: 11px;
+  color: #8a7f68;
+  margin-top: 2px;
+}

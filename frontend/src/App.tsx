@@ -21,6 +21,7 @@ interface User {
   email: string;
   plan?: string;
   plan_expiry?: string | null;
+  credits?: number;
 }
 
 interface Workspace {
@@ -2475,6 +2476,9 @@ ${jsFile.contenu}
                     <span className="side-menu-plan">Pro jusqu'au {new Date(user.plan_expiry).toLocaleDateString('fr-FR')}</span>
                   ) : (
                     <span className="side-menu-plan side-menu-plan-free">Plan Gratuit</span>
+                  )}
+                  {user.credits != null && (
+                    <span className="side-menu-credits">{user.credits} crédit{user.credits === 1 ? '' : 's'} restant{user.credits === 1 ? '' : 's'}</span>
                   )}
                 </div>
               </div>

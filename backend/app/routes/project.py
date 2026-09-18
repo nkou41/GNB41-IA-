@@ -124,6 +124,14 @@ def _run_generation(project, prompt, provider, history=None, image=None, mode=No
     if provider not in VALID_PROVIDERS:
         provider = 'mistral'
 
+    workspace = Workspace.query.get(project.workspace_id)
+    owner = User.query.get(workspace.owner_id) if workspace else None
+    if owner and owner.credits is not None and owner.role not in ('admin', 'superadmin') and owner.credits <= 0:
+        project.statut = 'erreur'
+        project.erreur_message = "Credits insuffisants pour generer. Passez a un plan superieur pour continuer."
+        db.session.commit()
+        return project
+
     anciens_fichiers = set()
     if project.code_genere:
         try:
@@ -188,6 +196,9 @@ def _run_generation(project, prompt, provider, history=None, image=None, mode=No
         if tables:
             api_key_raw = _provision_database(project, tables)
             project.code_genere = _substitute_placeholders(project.code_genere, project, api_key_raw)
+
+    if owner and owner.credits is not None and result['statut'] != 'erreur' and not est_clarification:
+        owner.credits = max(0, owner.credits - 1)
 
     db.session.commit()
     return project
