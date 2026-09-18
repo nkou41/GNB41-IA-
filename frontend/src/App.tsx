@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, type ReactElement } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NotificationBell from './components/NotificationBell';
 import PublicNav from './components/PublicNav';
@@ -726,36 +726,22 @@ function App() {
     );
   }
 
-  if (!user && publicPage && publicPage !== 'accueil') {
-    if (publicPage === 'fonctionnalites') {
-      return <Fonctionnalites navProps={{ setPublicPage, navigateTo, setShowAuth, setAuthMode, setTemplatesList, setPublicListings, showPublicMenu, setShowPublicMenu }} />;
-    }
-
-    if (publicPage === 'tarifs') {
-      return <Tarifs navProps={{ setPublicPage, navigateTo, setShowAuth, setAuthMode, setTemplatesList, setPublicListings, showPublicMenu, setShowPublicMenu }} plansList={plansList} />;
-    }
-
-    if (publicPage === 'apropos') {
-      return <Apropos navProps={{ setPublicPage, navigateTo, setShowAuth, setAuthMode, setTemplatesList, setPublicListings, showPublicMenu, setShowPublicMenu }} />;
-    }
-
-    if (publicPage === 'contact') {
-      return <Contact navProps={{ setPublicPage, navigateTo, setShowAuth, setAuthMode, setTemplatesList, setPublicListings, showPublicMenu, setShowPublicMenu }} />;
-    }
-
-    if (publicPage === 'templates') {
-      return <Templates navProps={{ setPublicPage, navigateTo, setShowAuth, setAuthMode, setTemplatesList, setPublicListings, showPublicMenu, setShowPublicMenu }} templatesList={templatesList} />;
-    }
-
-    if (publicPage === 'boutique') {
-      return <Boutique navProps={{ setPublicPage, navigateTo, setShowAuth, setAuthMode, setTemplatesList, setPublicListings, showPublicMenu, setShowPublicMenu }} publicListings={publicListings} />;
-    }
-  }
-
   if (!user && !showAuth) {
+    const navProps = { setPublicPage, navigateTo, setShowAuth, setAuthMode, setTemplatesList, setPublicListings, showPublicMenu, setShowPublicMenu };
+    const publicPageRegistry: Record<string, ReactElement> = {
+      fonctionnalites: <Fonctionnalites navProps={navProps} />,
+      tarifs: <Tarifs navProps={navProps} plansList={plansList} />,
+      templates: <Templates navProps={navProps} templatesList={templatesList} />,
+      boutique: <Boutique navProps={navProps} publicListings={publicListings} />,
+      apropos: <Apropos navProps={navProps} />,
+      contact: <Contact navProps={navProps} />,
+    };
+    if (publicPage && publicPageRegistry[publicPage]) {
+      return publicPageRegistry[publicPage];
+    }
     return (
       <Accueil
-        navProps={{ setPublicPage, navigateTo, setShowAuth, setAuthMode, setTemplatesList, setPublicListings, showPublicMenu, setShowPublicMenu }}
+        navProps={navProps}
         landingPrompt={landingPrompt}
         setLandingPrompt={setLandingPrompt}
         landingModel={landingModel}
