@@ -75,6 +75,17 @@ body {
 
 .auth-form button:hover { background: #4f46e5; }
 
+.auth-form .settings-input-trailing {
+  background: none;
+  border: none;
+  color: #8a8270;
+  padding: 0;
+  border-radius: 0;
+  font-weight: normal;
+}
+
+.auth-form .settings-input-trailing:hover { background: none; }
+
 .switch {
   text-align: center;
   color: #8a7f68;
