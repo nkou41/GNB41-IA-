@@ -3198,6 +3198,11 @@ body.dark-mode .preview-iframe {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  width: 100%;
+  background: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
 }
 .auth-submit-btn {
   background: linear-gradient(135deg, #6366f1, #a78bfa);
