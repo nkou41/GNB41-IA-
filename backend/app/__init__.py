@@ -114,7 +114,10 @@ def create_app(test_config=None):
     from app.routes.notifications import notifications_bp
     app.register_blueprint(notifications_bp, url_prefix='/api/notifications')
     from app.routes.admin import admin_bp
+    from app.routes.studio import studio_bp, studio_public_bp
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
+    app.register_blueprint(studio_bp, url_prefix='/api/studio')
+    app.register_blueprint(studio_public_bp, url_prefix='/v1')
 
     @app.route('/api/health', methods=['GET'])
     def health_check():
