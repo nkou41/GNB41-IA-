@@ -118,6 +118,7 @@ def create_app(test_config=None):
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
     app.register_blueprint(studio_bp, url_prefix='/api/studio')
     app.register_blueprint(studio_public_bp, url_prefix='/v1')
+    csrf.exempt(studio_public_bp)
 
     @app.route('/api/health', methods=['GET'])
     def health_check():
