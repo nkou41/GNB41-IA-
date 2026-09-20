@@ -6,6 +6,7 @@ import Apropos from './pages/Apropos';
 import Contact from './pages/Contact';
 import Fonctionnalites from './pages/Fonctionnalites';
 import Tarifs from './pages/Tarifs';
+import Studio from './pages/Studio';
 import Templates from './pages/Templates';
 import Boutique from './pages/Boutique';
 import Accueil from './pages/Accueil';
@@ -13,7 +14,7 @@ import AnimatedPlaceholder from './components/AnimatedPlaceholder';
 import { identifyUser, trackEvent, resetAnalytics } from './analytics';
 import { api } from './api';
 import './App.css';
-import { IconUser, IconMail, IconLock, IconSave, IconLink, IconLogOut, IconCheckCircle, IconInfoCircle, IconEye, IconEyeOff, IconArrowRight, IconArrowLeft, IconSettings, IconGooglePlay, IconPackage, IconHome, IconStore, IconGrid, IconMoon, IconSun } from './Icons';
+import { IconUser, IconMail, IconLock, IconSave, IconLink, IconLogOut, IconCheckCircle, IconInfoCircle, IconEye, IconEyeOff, IconArrowRight, IconArrowLeft, IconSettings, IconGooglePlay, IconPackage, IconHome, IconStore, IconGrid, IconMoon, IconSun, IconKey } from './Icons';
 
 interface User {
   id: string;
@@ -71,6 +72,7 @@ function App() {
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showMarketplace, setShowMarketplace] = useState(false);
+  const [showStudio, setShowStudio] = useState(false);
   const [marketplaceListings, setMarketplaceListings] = useState<any[]>([]);
   const [showMesVentes, setShowMesVentes] = useState(false);
   const [myListingsList, setMyListingsList] = useState<any[]>([]);
@@ -249,6 +251,7 @@ function App() {
       '/contact': () => setPublicPage('contact'),
       '/administration': () => setShowAdminDashboard(true),
       '/marketplace': () => setShowMarketplace(true),
+      '/studio': () => setShowStudio(true),
       '/mes-achats': () => setShowMesAchats(true),
       '/mes-ventes': () => setShowMesVentes(true),
       '/parametres': () => setShowSettings(true),
@@ -1230,6 +1233,14 @@ function App() {
   }
 
   // Vue boutique
+  if (showStudio) {
+    return <Studio user={user} onBack={() => { setShowStudio(false); navigateTo('/'); }} />;
+  }
+
+  if (showStudio) {
+    return <Studio user={user} onBack={() => { setShowStudio(false); navigateTo('/'); }} />;
+  }
+
   if (showMarketplace) {
     const sourceIcon = (type: string) => {
       if (type === 'externe_zip') {
@@ -2487,6 +2498,7 @@ ${jsFile.contenu}
               <button className="side-menu-item" onClick={() => { setShowMenu(false); }}><span className="side-menu-item-icon"><IconHome size={18} /></span>Accueil</button>
               <button className="side-menu-item" onClick={() => { setShowMenu(false); document.querySelector('.recent-section')?.scrollIntoView({ behavior: 'smooth' }); }}><span className="side-menu-item-icon"><IconPackage size={18} /></span>Projets</button>
               <button className="side-menu-item" onClick={() => { setShowMenu(false); setShowMarketplace(true); setShowSettings(false); navigateTo('/marketplace'); }}><span className="side-menu-item-icon"><IconStore size={18} /></span>Boutique</button>
+              <button className="side-menu-item" onClick={() => { setShowMenu(false); setShowStudio(true); navigateTo('/studio'); }}><span className="side-menu-item-icon"><IconKey size={18} /></span>Studio</button>
               <button className="side-menu-item" onClick={() => { setShowMenu(false); setShowTemplatesGallery(true); api.listTemplates().then(setTemplatesList).catch(() => {}); navigateTo('/templates'); }}><span className="side-menu-item-icon"><IconGrid size={18} /></span>Galerie de templates</button>
               <button className="side-menu-item" onClick={() => { setShowMenu(false); setShowSettings(true); navigateTo('/parametres'); }}><span className="side-menu-item-icon"><IconSettings size={18} /></span>Paramètres</button>
               <button className="side-menu-item" onClick={() => setDarkMode(!darkMode)}><span className="side-menu-item-icon">{darkMode ? <IconSun size={18} /> : <IconMoon size={18} />}</span>{darkMode ? 'Mode clair' : 'Mode sombre'}</button>

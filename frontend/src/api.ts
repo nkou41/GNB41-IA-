@@ -138,4 +138,11 @@ export const api = {
   useTemplate: (templateId: string, workspaceId: string, nom: string) =>
     request(`/templates/${templateId}/use`, { method: 'POST', body: JSON.stringify({ workspace_id: workspaceId, nom }) }),
   getPlans: () => request('/plans'),
+
+  studioOverview: () => request('/studio/overview'),
+  studioListKeys: () => request('/studio/keys'),
+  studioCreateKey: (nom: string, environnement: string) =>
+    request('/studio/keys', { method: 'POST', body: JSON.stringify({ nom, environnement }) }),
+  studioRevokeKey: (keyId: string) => request(`/studio/keys/${keyId}`, { method: 'DELETE' }),
+  studioKeyUsage: (keyId: string) => request(`/studio/keys/${keyId}/usage`),
 };
