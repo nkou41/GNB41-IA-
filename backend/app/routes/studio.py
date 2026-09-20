@@ -159,12 +159,16 @@ def public_generate_project():
     statut_http = 201 if project.statut != 'erreur' else 500
     _log_usage(key, '/v1/projects/generate', statut_http)
 
-    return jsonify({
+    reponse = {
         'id': project.id,
         'statut': project.statut,
         'nom': project.nom,
         'download_url': f"/v1/projects/{project.id}/download",
-    }), statut_http
+    }
+    if project.statut == 'erreur' and project.erreur_message:
+        reponse['error'] = {'type': 'generation_error', 'message': project.erreur_message}
+
+    return jsonify(reponse), statut_http
 
 
 @studio_public_bp.route('/projects/<project_id>/download', methods=['GET'])
