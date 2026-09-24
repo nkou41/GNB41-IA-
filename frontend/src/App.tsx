@@ -429,8 +429,7 @@ function App() {
         targetWorkspace = await api.createWorkspace('Mes projets');
         setWorkspaces([targetWorkspace]);
       }
-      const nom = quickPrompt.slice(0, 40);
-      const project = await api.createProject(targetWorkspace.id, nom, quickPrompt, quickProvider, agentMode === 'auto' ? undefined : agentMode);
+      const project = await api.createProject(targetWorkspace.id, '', quickPrompt, quickProvider, agentMode === 'auto' ? undefined : agentMode);
       trackEvent('project_created', { provider: quickProvider });
       setQuickPrompt('');
       setActiveWorkspace(targetWorkspace);

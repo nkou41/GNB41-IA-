@@ -12,7 +12,7 @@ from app.models.project_message import ProjectMessage
 from app.models.workspace import Workspace, WorkspaceMember
 from app.models.user import User
 from app.utils.permissions import get_role, can_edit, log_activity, get_plan_limits
-from app.services.generator import generate_project_code
+from app.services.generator import generate_project_code, generate_project_name
 
 project_bp = Blueprint('project', __name__)
 
@@ -225,8 +225,11 @@ def create_project(workspace_id):
     prompt_initial = data.get('prompt_initial')
     provider = data.get('provider', 'mistral')
     mode = data.get('mode')
-    if not nom or not prompt_initial:
-        return jsonify({'error': 'nom et prompt_initial requis'}), 400
+    if not prompt_initial:
+        return jsonify({'error': 'prompt_initial requis'}), 400
+    if not nom:
+        nom_result = generate_project_name(prompt_initial, provider)
+        nom = nom_result.get('nom') if nom_result.get('statut') == 'pret' else prompt_initial[:40]
 
     workspace = Workspace.query.get(workspace_id)
     owner = User.query.get(workspace.owner_id) if workspace else None

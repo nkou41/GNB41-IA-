@@ -296,6 +296,144 @@ def _generate_mistral(prompt: str, history=None, image=None) -> dict:
         return {'statut': 'erreur', 'message': str(e)}
 
 
+def generate_project_name(prompt: str, provider: str = 'mistral') -> dict:
+    """Demande a l'IA de proposer un nom de projet court et professionnel (max 6 mots)."""
+    cle_par_provider = {
+        'claude': 'ANTHROPIC_API_KEY',
+        'openai': 'OPENAI_API_KEY',
+        'gemini': 'GEMINI_API_KEY',
+        'mistral': 'MISTRAL_API_KEY',
+    }
+    var_cle = cle_par_provider.get(provider, 'MISTRAL_API_KEY')
+    api_key = os.environ.get(var_cle, '').strip()
+    if not api_key:
+        for fallback_provider, fallback_var in cle_par_provider.items():
+            fallback_key = os.environ.get(fallback_var, '').strip()
+            if fallback_key:
+                provider = fallback_provider
+                api_key = fallback_key
+                break
+    if not api_key:
+        return {'statut': 'erreur', 'message': 'Aucune cle API disponible pour generer un nom.'}
+
+    consigne = (
+        "Propose un nom de projet professionnel et concis (maximum 6 mots) pour l'application suivante. "
+        "Reponds uniquement avec le nom, sans guillemets, sans ponctuation finale, sans explication.\n\n"
+        "Description de l'application: " + prompt
+    )
+
+    try:
+        if provider == 'claude':
+            client = anthropic.Anthropic(api_key=api_key, timeout=30.0)
+            response = client.messages.create(
+                model='claude-sonnet-4-5', max_tokens=30,
+                messages=[{'role': 'user', 'content': consigne}]
+            )
+            texte = response.content[0].text
+        elif provider == 'openai':
+            client = openai.OpenAI(api_key=api_key, timeout=30.0)
+            response = client.chat.completions.create(
+                model='gpt-4o', max_tokens=30,
+                messages=[{'role': 'user', 'content': consigne}]
+            )
+            texte = response.choices[0].message.content
+        elif provider == 'gemini':
+            url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}'
+            resp = requests.post(url, json={'contents': [{'role': 'user', 'parts': [{'text': consigne}]}]}, timeout=30)
+            data = resp.json()
+            if 'candidates' not in data:
+                return {'statut': 'erreur', 'message': f'Erreur API Gemini: {data}'}
+            texte = data['candidates'][0]['content']['parts'][0]['text']
+        else:
+            resp = requests.post(
+                'https://api.mistral.ai/v1/chat/completions',
+                headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
+                json={'model': 'mistral-small-latest', 'messages': [{'role': 'user', 'content': consigne}], 'max_tokens': 30},
+                timeout=30,
+            )
+            data = resp.json()
+            if 'choices' not in data:
+                return {'statut': 'erreur', 'message': f'Erreur API Mistral: {data}'}
+            texte = data['choices'][0]['message']['content']
+
+        nom = texte.strip().strip('\"').strip("'").strip('.').strip()
+        nom = ' '.join(nom.split('\n')[0].split()[:6])
+        if not nom:
+            return {'statut': 'erreur', 'message': 'Reponse vide.'}
+        return {'statut': 'pret', 'nom': nom}
+    except Exception as e:
+        return {'statut': 'erreur', 'message': str(e)}
+
+
+def generate_project_name(prompt: str, provider: str = 'mistral') -> dict:
+    """Demande a l'IA de proposer un nom de projet court et professionnel (max 6 mots)."""
+    cle_par_provider = {
+        'claude': 'ANTHROPIC_API_KEY',
+        'openai': 'OPENAI_API_KEY',
+        'gemini': 'GEMINI_API_KEY',
+        'mistral': 'MISTRAL_API_KEY',
+    }
+    var_cle = cle_par_provider.get(provider, 'MISTRAL_API_KEY')
+    api_key = os.environ.get(var_cle, '').strip()
+    if not api_key:
+        for fallback_provider, fallback_var in cle_par_provider.items():
+            fallback_key = os.environ.get(fallback_var, '').strip()
+            if fallback_key:
+                provider = fallback_provider
+                api_key = fallback_key
+                break
+    if not api_key:
+        return {'statut': 'erreur', 'message': 'Aucune cle API disponible pour generer un nom.'}
+
+    consigne = (
+        "Propose un nom de projet professionnel et concis (maximum 6 mots) pour l'application suivante. "
+        "Reponds uniquement avec le nom, sans guillemets, sans ponctuation finale, sans explication.\n\n"
+        "Description de l'application: " + prompt
+    )
+
+    try:
+        if provider == 'claude':
+            client = anthropic.Anthropic(api_key=api_key, timeout=30.0)
+            response = client.messages.create(
+                model='claude-sonnet-4-5', max_tokens=30,
+                messages=[{'role': 'user', 'content': consigne}]
+            )
+            texte = response.content[0].text
+        elif provider == 'openai':
+            client = openai.OpenAI(api_key=api_key, timeout=30.0)
+            response = client.chat.completions.create(
+                model='gpt-4o', max_tokens=30,
+                messages=[{'role': 'user', 'content': consigne}]
+            )
+            texte = response.choices[0].message.content
+        elif provider == 'gemini':
+            url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}'
+            resp = requests.post(url, json={'contents': [{'role': 'user', 'parts': [{'text': consigne}]}]}, timeout=30)
+            data = resp.json()
+            if 'candidates' not in data:
+                return {'statut': 'erreur', 'message': f'Erreur API Gemini: {data}'}
+            texte = data['candidates'][0]['content']['parts'][0]['text']
+        else:
+            resp = requests.post(
+                'https://api.mistral.ai/v1/chat/completions',
+                headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
+                json={'model': 'mistral-small-latest', 'messages': [{'role': 'user', 'content': consigne}], 'max_tokens': 30},
+                timeout=30,
+            )
+            data = resp.json()
+            if 'choices' not in data:
+                return {'statut': 'erreur', 'message': f'Erreur API Mistral: {data}'}
+            texte = data['choices'][0]['message']['content']
+
+        nom = texte.strip().strip('\"').strip("'").strip('.').strip()
+        nom = ' '.join(nom.split('\n')[0].split()[:6])
+        if not nom:
+            return {'statut': 'erreur', 'message': 'Reponse vide.'}
+        return {'statut': 'pret', 'nom': nom}
+    except Exception as e:
+        return {'statut': 'erreur', 'message': str(e)}
+
+
 PROVIDERS = {
     'claude': _with_retry(_generate_claude),
     'openai': _with_retry(_generate_openai),
