@@ -3329,3 +3329,7 @@ body.dark-mode .preview-iframe {
 .home-card-go:disabled{cursor:default}
 .home-card-go.is-opening{width:auto;padding:0 20px;font-size:15px;font-weight:600}
 .home-card-go:focus-visible{outline:2px solid var(--h-primary);outline-offset:2px}
+
+.home-card,.home-card *{-webkit-tap-highlight-color:transparent}
+.home-card:active,.home-card:focus,.home-card:focus:not(:focus-visible){background:transparent;outline:none}
+.home-card-go:active{transform:scale(.96)}
