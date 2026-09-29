@@ -2508,7 +2508,10 @@ ${jsFile.contenu}
       </header>
 
       <main className="quickstart-main">
-        <h2 className="quickstart-greeting">Bonjour {user.username}. <span className="accent-dot">•</span><br/>Que construirez-vous ensuite ?</h2>
+        <div className="home-hero">
+          <p className="home-hello">Bonjour {user.username}</p>
+          <h2 className="home-title">Que construirez-vous ensuite ?</h2>
+        </div>
 
         <form onSubmit={handleQuickStart} className="quickstart-form quickstart-card">
           <div className="textarea-wrap">
@@ -2552,30 +2555,36 @@ ${jsFile.contenu}
         )}
 
         {recentProjects.length > 0 && (
-          <div className="recent-section">
-            <h3>Récents</h3>
-            <div className="workspace-grid">
-              {recentProjects.map((p: any) => (
-                <div key={p.id} className="workspace-card" onClick={() => {
+          <section className="home-recents">
+            <h3 className="home-section-title">Projets récents</h3>
+            <div className="home-grid">
+              {recentProjects.map((p: any) => {
+                const st = p.statut === 'genere' ? ['ok', 'Prêt']
+                  : p.statut === 'en_generation' ? ['info', 'En cours']
+                  : p.statut === 'erreur' ? ['warn', 'Échec de génération']
+                  : ['info', p.statut];
+                const ouvrir = () => {
                   const ws = workspaces.find((w) => w.id === p.parentWorkspaceId);
                   if (ws) setActiveWorkspace(ws);
                   setActiveProject(p);
                   navigateTo(`/projet/${p.id}`);
-                }}>
-                  <div className="workspace-card-icon">
-                    <IconPackage size={22} />
+                };
+                return (
+                  <div key={p.id} className="home-card" role="button" tabIndex={0} onClick={ouvrir} onKeyDown={(e) => { if (e.key === 'Enter') ouvrir(); }}>
+                    <div className="home-card-icon">
+                      <IconPackage size={26} />
+                      {p.apercu && <img src={p.apercu} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />}
+                    </div>
+                    <h4 className="home-card-name">{p.nom}</h4>
+                    <div className="home-card-meta">
+                      <span className={`home-badge home-badge-${st[0]}`}>{st[1]}</span>
+                      <span className="home-card-date">{new Date(p.created_at).toLocaleDateString('fr-FR')}</span>
+                    </div>
                   </div>
-                  <h3>{p.nom}</h3>
-                  <div className="workspace-card-footer">
-                    <span className={`statut-badge statut-badge-${p.statut}`}>
-                      {p.statut === 'genere' ? 'Prêt' : p.statut === 'en_generation' ? 'En cours' : p.statut === 'erreur' ? 'Erreur' : p.statut}
-                    </span>
-                    <span className="workspace-card-date">{new Date(p.created_at).toLocaleDateString('fr-FR')}</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
-          </div>
+          </section>
         )}
       </main>
     </div>
