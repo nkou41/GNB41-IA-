@@ -2559,26 +2559,40 @@ ${jsFile.contenu}
             <h3 className="home-section-title">Projets récents</h3>
             <div className="home-grid">
               {recentProjects.map((p: any) => {
-                const st = p.statut === 'genere' ? ['ok', 'Prêt']
+                const st = (p.statut === 'genere' || p.statut === 'pret') ? ['ok', 'Prêt']
                   : p.statut === 'en_generation' ? ['info', 'En cours']
                   : p.statut === 'erreur' ? ['warn', 'Échec de génération']
-                  : ['info', p.statut];
+                  : ['info', String(p.statut || 'Brouillon').replace(/_/g, ' ').replace(/^./, (c: string) => c.toUpperCase())];
                 const ouvrir = () => {
                   const ws = workspaces.find((w) => w.id === p.parentWorkspaceId);
                   if (ws) setActiveWorkspace(ws);
                   setActiveProject(p);
                   navigateTo(`/projet/${p.id}`);
                 };
+                const depuis = (iso: string) => {
+                  const d = (new Date(iso).getTime() - Date.now()) / 1000;
+                  const rtf = new Intl.RelativeTimeFormat('fr', { numeric: 'auto' });
+                  const u: [Intl.RelativeTimeFormatUnit, number][] = [['year', 31536000], ['month', 2592000], ['day', 86400], ['hour', 3600], ['minute', 60]];
+                  for (const [k, v] of u) { if (Math.abs(d) >= v) return rtf.format(Math.round(d / v), k); }
+                  return "à l'instant";
+                };
                 return (
                   <div key={p.id} className="home-card" role="button" tabIndex={0} onClick={ouvrir} onKeyDown={(e) => { if (e.key === 'Enter') ouvrir(); }}>
-                    <div className="home-card-icon">
-                      <IconPackage size={26} />
+                    <div className="home-thumb">
+                      <div className="home-thumb-fallback"><IconPackage size={40} /></div>
                       {p.apercu && <img src={p.apercu} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />}
+                      {st[0] !== 'ok' && <span className={`home-badge home-badge-${st[0]}`}>{st[1]}</span>}
                     </div>
-                    <h4 className="home-card-name">{p.nom}</h4>
-                    <div className="home-card-meta">
-                      <span className={`home-badge home-badge-${st[0]}`}>{st[1]}</span>
-                      <span className="home-card-date">{new Date(p.created_at).toLocaleDateString('fr-FR')}</span>
+                    <div className="home-card-row">
+                      <div className="home-card-text">
+                        <h4 className="home-card-name">
+                          <span className="home-card-title">{p.nom}</span>
+                          {p.est_deploye && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>}
+                        </h4>
+                        <p className="home-card-author">par {user.username}</p>
+                        <p className="home-card-date">{depuis(p.created_at)}</p>
+                      </div>
+                      <span className="home-card-go" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
                     </div>
                   </div>
                 );
