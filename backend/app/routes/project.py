@@ -265,9 +265,33 @@ def delete_project(project_id):
     project = Project.query.get_or_404(project_id)
     if not _check_edit_access(project.workspace_id):
         return jsonify({'error': 'Non autorisé'}), 403
-    log_activity(project.workspace_id, current_user.id, 'project_deleted', project.nom)
-    db.session.delete(project)
-    db.session.commit()
+
+    from flask import current_app
+    from app.models.listing import Listing
+    from app.models.api_key import ApiKey
+    from app.models.app_table import AppTable
+    from app.models.app_row import AppRow
+
+    if Listing.query.filter_by(project_id=project_id).first():
+        return jsonify({'error': "Ce projet a une annonce sur le marketplace. Retirez d'abord l'annonce."}), 409
+
+    workspace_id = project.workspace_id
+    nom = project.nom
+    try:
+        table_ids = [t.id for t in AppTable.query.filter_by(project_id=project_id).all()]
+        if table_ids:
+            AppRow.query.filter(AppRow.table_id.in_(table_ids)).delete(synchronize_session=False)
+        AppTable.query.filter_by(project_id=project_id).delete(synchronize_session=False)
+        ApiKey.query.filter_by(project_id=project_id).delete(synchronize_session=False)
+        ProjectMessage.query.filter_by(project_id=project_id).delete(synchronize_session=False)
+        ProjectVersion.query.filter_by(project_id=project_id).delete(synchronize_session=False)
+        db.session.delete(project)
+        log_activity(workspace_id, current_user.id, 'project_deleted', nom)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.exception('Suppression du projet %s impossible: %s', project_id, e)
+        return jsonify({'error': 'Suppression impossible. Réessayez ou contactez le support.'}), 500
     return jsonify({'success': True})
 
 
