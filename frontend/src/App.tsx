@@ -203,6 +203,7 @@ function App() {
   const [showMenu, setShowMenu] = useState(false);
   const [darkMode, setDarkMode] = useState<boolean>(() => localStorage.getItem('theme') === 'dark');
   const [ouvertureId, setOuvertureId] = useState<string | number | null>(null);
+  const [menuProjetId, setMenuProjetId] = useState<string | number | null>(null);
 
   useEffect(() => {
     document.body.classList.toggle('dark-mode', darkMode);
@@ -2641,6 +2642,40 @@ ${jsFile.contenu}
                       {p.statut !== 'erreur' && <MiniatureApp code={p.code_genere} />}
                       {p.apercu && <img src={p.apercu} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />}
                       {st[0] !== 'ok' && <span className={`home-badge home-badge-${st[0]}`}>{st[1]}</span>}
+                    </div>
+                    <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                      <button type="button" className="home-menu-btn" aria-label="Actions du projet" aria-expanded={menuProjetId === p.id} onClick={() => setMenuProjetId(menuProjetId === p.id ? null : p.id)}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                      </button>
+                      {menuProjetId === p.id && (
+                        <>
+                          <div className="home-menu-overlay" onClick={() => setMenuProjetId(null)} />
+                          <div className="home-menu" role="menu">
+                            <button type="button" role="menuitem" onClick={async () => {
+                              setMenuProjetId(null);
+                              try {
+                                const res: any = await api.duplicateProject(p.id);
+                                const np = res?.project || res;
+                                if (np && np.id) setRecentProjects((prev) => [{ ...np, parentWorkspaceId: p.parentWorkspaceId }, ...prev].slice(0, 6));
+                              } catch (err: any) { alert(`Erreur: ${err.message}`); }
+                            }}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+                              Dupliquer
+                            </button>
+                            <button type="button" role="menuitem" className="danger" onClick={async () => {
+                              setMenuProjetId(null);
+                              if (!window.confirm(`Supprimer « ${p.nom} » ? Cette action est définitive.`)) return;
+                              try {
+                                await api.deleteProject(p.id);
+                                setRecentProjects((prev) => prev.filter((x: any) => x.id !== p.id));
+                              } catch (err: any) { alert(`Erreur: ${err.message}`); }
+                            }}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>
+                              Supprimer
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                     <div className="home-card-row">
                       <div className="home-card-text">
