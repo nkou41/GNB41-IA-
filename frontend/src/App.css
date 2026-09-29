@@ -3324,3 +3324,8 @@ body.dark-mode .preview-iframe {
 .home-card-go{flex:none;width:44px;height:44px;border-radius:var(--h-r-ctl);background:var(--h-ink);color:var(--h-surface);display:grid;place-items:center}
 
 .home-card-go{background:linear-gradient(135deg,var(--h-primary),var(--h-primary2));color:#fff;box-shadow:0 4px 12px rgba(91,91,214,.3)}
+
+.home-card-go{border:0;cursor:pointer;font:inherit;transition:width .25s ease,padding .25s ease}
+.home-card-go:disabled{cursor:default}
+.home-card-go.is-opening{width:auto;padding:0 20px;font-size:15px;font-weight:600}
+.home-card-go:focus-visible{outline:2px solid var(--h-primary);outline-offset:2px}

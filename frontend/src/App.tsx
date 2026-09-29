@@ -145,6 +145,7 @@ function App() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [darkMode, setDarkMode] = useState<boolean>(() => localStorage.getItem('theme') === 'dark');
+  const [ouvertureId, setOuvertureId] = useState<string | number | null>(null);
 
   useEffect(() => {
     document.body.classList.toggle('dark-mode', darkMode);
@@ -2592,7 +2593,20 @@ ${jsFile.contenu}
                         <p className="home-card-author">par {user.username}</p>
                         <p className="home-card-date">{depuis(p.created_at)}</p>
                       </div>
-                      <span className="home-card-go" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                      <button
+                        type="button"
+                        className={`home-card-go ${ouvertureId === p.id ? 'is-opening' : ''}`}
+                        disabled={ouvertureId !== null}
+                        aria-label={`Ouvrir ${p.nom}`}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOuvertureId(p.id);
+                          setTimeout(() => { setOuvertureId(null); ouvrir(); }, 700);
+                        }}
+                      >
+                        {ouvertureId === p.id ? 'Modifier' : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>}
+                      </button>
                     </div>
                   </div>
                 );
