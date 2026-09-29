@@ -3322,3 +3322,5 @@ body.dark-mode .preview-iframe {
 .home-card-author{margin:2px 0 10px;font-size:15px;color:var(--h-muted)}
 .home-card .home-card-date{margin:0;font-size:14px;color:var(--h-ink)}
 .home-card-go{flex:none;width:44px;height:44px;border-radius:var(--h-r-ctl);background:var(--h-ink);color:var(--h-surface);display:grid;place-items:center}
+
+.home-card-go{background:linear-gradient(135deg,var(--h-primary),var(--h-primary2));color:#fff;box-shadow:0 4px 12px rgba(91,91,214,.3)}
