@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type ReactElement } from 'react';
+import { useState, useEffect, useRef, type ReactElement, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NotificationBell from './components/NotificationBell';
 import PublicNav from './components/PublicNav';
@@ -43,6 +43,63 @@ interface Project {
   est_deploye?: boolean;
   memoire_projet?: string;
 }
+
+const echapperRegex = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+function construireMiniature(code: any): string | null {
+  if (!code || typeof code !== 'string') return null;
+  const brut = code.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+  let data: any = null;
+  try { data = JSON.parse(brut); } catch {}
+  let h: string | null = null;
+  if (data && Array.isArray(data.fichiers)) {
+    const fichiers: any[] = data.fichiers;
+    const page = fichiers.find((f) => typeof f.chemin === 'string' && f.chemin.endsWith('.html'));
+    if (!page || typeof page.contenu !== 'string') return null;
+    h = page.contenu as string;
+    const nom = (f: any) => echapperRegex(String(f.chemin).split('/').pop() || '');
+    fichiers.filter((f) => String(f.chemin).endsWith('.css')).forEach((f) => {
+      const lien = new RegExp(`<link[^>]+href=["'][^"']*${nom(f)}["'][^>]*>`, 'i');
+      const balise = `<style>\n${f.contenu}\n</style>`;
+      h = lien.test(h as string) ? (h as string).replace(lien, () => balise) : (h as string).replace('</head>', () => balise + '</head>');
+    });
+    fichiers.filter((f) => String(f.chemin).endsWith('.js')).forEach((f) => {
+      const src = new RegExp(`<script[^>]+src=["'][^"']*${nom(f)}["'][^>]*></script>`, 'i');
+      const balise = `<script>\n${f.contenu}\n</script>`;
+      h = src.test(h as string) ? (h as string).replace(src, () => balise) : (h as string).replace('</body>', () => balise + '</body>');
+    });
+  } else if (/<html|<!doctype/i.test(brut)) {
+    h = brut;
+  }
+  if (!h) return null;
+  const polyfill = '<script>try{window.localStorage.getItem("t")}catch(e){var m=function(){var d={};return{getItem:function(k){return d.hasOwnProperty(k)?d[k]:null},setItem:function(k,v){d[k]=String(v)},removeItem:function(k){delete d[k]},clear:function(){d={}},key:function(i){return Object.keys(d)[i]||null},get length(){return Object.keys(d).length}}};try{Object.defineProperty(window,"localStorage",{value:m(),configurable:true})}catch(x){}try{Object.defineProperty(window,"sessionStorage",{value:m(),configurable:true})}catch(x){}}</script>';
+  return h.includes('<head>') ? h.replace('<head>', () => '<head>' + polyfill) : polyfill + h;
+}
+
+function MiniatureApp({ code }: { code: any }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0);
+  const [visible, setVisible] = useState(false);
+  const html = useMemo(() => construireMiniature(code), [code]);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const maj = () => setScale(el.clientWidth / 1280);
+    maj();
+    const ro = new ResizeObserver(maj);
+    ro.observe(el);
+    const io = new IntersectionObserver((e) => { if (e[0].isIntersecting) { setVisible(true); io.disconnect(); } }, { rootMargin: '200px' });
+    io.observe(el);
+    return () => { ro.disconnect(); io.disconnect(); };
+  }, [html]);
+  if (!html) return null;
+  return (
+    <div ref={ref} className="home-thumb-frame" aria-hidden="true">
+      {visible && scale > 0 && <iframe title="" tabIndex={-1} sandbox="allow-scripts" srcDoc={html} style={{ transform: `scale(${scale})` }} />}
+    </div>
+  );
+}
+
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -2581,6 +2638,7 @@ ${jsFile.contenu}
                   <div key={p.id} className="home-card" role="button" tabIndex={0} onClick={ouvrir} onKeyDown={(e) => { if (e.key === 'Enter') ouvrir(); }}>
                     <div className="home-thumb">
                       <div className="home-thumb-fallback"><IconPackage size={40} /></div>
+                      {p.statut !== 'erreur' && <MiniatureApp code={p.code_genere} />}
                       {p.apercu && <img src={p.apercu} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />}
                       {st[0] !== 'ok' && <span className={`home-badge home-badge-${st[0]}`}>{st[1]}</span>}
                     </div>

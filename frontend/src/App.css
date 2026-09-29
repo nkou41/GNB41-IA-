@@ -3333,3 +3333,6 @@ body.dark-mode .preview-iframe {
 .home-card,.home-card *{-webkit-tap-highlight-color:transparent}
 .home-card:active,.home-card:focus,.home-card:focus:not(:focus-visible){background:transparent;outline:none}
 .home-card-go:active{transform:scale(.96)}
+
+.home-thumb-frame{position:absolute;inset:0;overflow:hidden;background:#fff;pointer-events:none}
+.home-thumb-frame iframe{position:absolute;top:0;left:0;width:1280px;height:720px;border:0;background:#fff;transform-origin:0 0;pointer-events:none}
