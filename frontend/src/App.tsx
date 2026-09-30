@@ -2653,6 +2653,25 @@ ${jsFile.contenu}
                           <div className="home-menu" role="menu">
                             <button type="button" role="menuitem" onClick={async () => {
                               setMenuProjetId(null);
+                              const saisie = window.prompt('Nouveau nom du projet', p.nom);
+                              if (saisie === null) return;
+                              const nom = saisie.trim();
+                              if (!nom || nom === p.nom) return;
+                              if (nom.length > 120) { alert('Le nom est trop long (120 caractères maximum).'); return; }
+                              const ancien = p.nom;
+                              setRecentProjects((prev) => prev.map((x: any) => x.id === p.id ? { ...x, nom } : x));
+                              try {
+                                await api.renameProject(p.id, nom);
+                              } catch (err: any) {
+                                setRecentProjects((prev) => prev.map((x: any) => x.id === p.id ? { ...x, nom: ancien } : x));
+                                alert(`Erreur: ${err.message}`);
+                              }
+                            }}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                              Renommer
+                            </button>
+                            <button type="button" role="menuitem" onClick={async () => {
+                              setMenuProjetId(null);
                               try {
                                 const res: any = await api.duplicateProject(p.id);
                                 const np = res?.project || res;
