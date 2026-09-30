@@ -232,6 +232,7 @@ function App() {
   const [darkMode, setDarkMode] = useState<boolean>(() => localStorage.getItem('theme') === 'dark');
   const [ouvertureId, setOuvertureId] = useState<string | number | null>(null);
   const [menuProjetId, setMenuProjetId] = useState<string | number | null>(null);
+  const [vueMobile, setVueMobile] = useState<'chat' | 'apercu'>('chat');
 
   useEffect(() => {
     document.body.classList.toggle('dark-mode', darkMode);
@@ -1862,7 +1863,7 @@ ${jsFile.contenu}
     })();
 
     return (
-      <div className="workspace-builder">
+      <div className={`workspace-builder studio-vue-${vueMobile}`}>
       {showUpgradeModal && (
         <div className="modal-overlay" onClick={() => setShowUpgradeModal(false)}>
           <div className="upgrade-modal" onClick={(e) => e.stopPropagation()}>
@@ -2055,11 +2056,16 @@ ${jsFile.contenu}
           </div>
         )}
 
+        <div className="studio-switch" role="tablist" aria-label="Affichage du projet">
+          <button type="button" role="tab" aria-selected={vueMobile === 'chat'} className={vueMobile === 'chat' ? 'active' : ''} onClick={() => setVueMobile('chat')}>Chat IA</button>
+          <button type="button" role="tab" aria-selected={vueMobile === 'apercu'} className={vueMobile === 'apercu' ? 'active' : ''} onClick={() => setVueMobile('apercu')}>Aperçu</button>
+        </div>
+
         <div className="preview-tabs">
           <button className={`preview-tab ${previewTab === 'apercu' ? 'active' : ''}`} onClick={() => setPreviewTab('apercu')}>Aperçu</button>
           <button className={`preview-tab ${previewTab === 'code' ? 'active' : ''}`} onClick={() => setPreviewTab('code')}>Code</button>
-          <button className={`preview-tab ${previewTab === 'donnees' ? 'active' : ''}`} onClick={() => { setPreviewTab('donnees'); if (activeProject) { api.listAppTables(activeProject.id).then(setAppTables).catch(() => {}); api.listAppKeys(activeProject.id).then(setAppKeys).catch(() => {}); } }}>Base de donnees</button>
-          <button className={`preview-tab ${previewTab === 'memoire' ? 'active' : ''}`} onClick={() => { setPreviewTab('memoire'); setMemoireDraft(activeProject?.memoire_projet || ''); }}>Memoire</button>
+          <button className={`preview-tab ${previewTab === 'donnees' ? 'active' : ''}`} onClick={() => { setPreviewTab('donnees'); if (activeProject) { api.listAppTables(activeProject.id).then(setAppTables).catch(() => {}); api.listAppKeys(activeProject.id).then(setAppKeys).catch(() => {}); } }}>Base de données</button>
+          <button className={`preview-tab ${previewTab === 'memoire' ? 'active' : ''}`} onClick={() => { setPreviewTab('memoire'); setMemoireDraft(activeProject?.memoire_projet || ''); }}>Mémoire</button>
         </div>
 
         {showVersions && (
@@ -2135,7 +2141,7 @@ ${jsFile.contenu}
 
         <div className="builder-layout">
           <div className="builder-chat">
-            <p className={`statut statut-${activeProject.statut}`}>{activeProject.statut}</p>
+            <p className={`statut statut-${activeProject.statut} studio-statut`}>{({ pret: 'Prêt', genere: 'Prêt', en_generation: 'En cours', en_attente: 'En attente', erreur: 'Échec de génération' } as Record<string, string>)[activeProject.statut] || activeProject.statut}</p>
 
             <div className="chat-messages">
               <div className="chat-msg chat-msg-user">

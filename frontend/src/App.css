@@ -3591,3 +3591,39 @@ body.dark-mode .acv-page{--h-bg:#16141F;--h-surface:#1F1C2C;--h-line:#2E2A40;--h
 .acv-btn{height:48px;margin-top:4px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--h-primary),var(--h-primary2));color:#fff;font:inherit;font-size:16px;font-weight:600;box-shadow:0 4px 12px rgba(91,91,214,.3);cursor:pointer}
 .acv-btn:active{transform:scale(.98)}
 .acv-empty{margin:8px 20px 0;padding:32px 20px;text-align:center;border:1px dashed var(--h-line);border-radius:20px;color:var(--h-muted)}
+
+/* ===== Studio: style commun et vue mobile ===== */
+.workspace-builder{--h-bg:#F7F5EF;--h-surface:#fff;--h-line:#E7E2D6;--h-ink:#211D33;--h-muted:#7B7591;--h-primary:#5B5BD6;--h-primary2:#7C6CF0;--h-soft:#EEEDFB;--h-ok:#1F7A5A;--h-ok-bg:#E4F3EC;--h-warn:#A5480B;--h-warn-bg:#FDEBDD;--h-info:#3B5BDB;--h-info-bg:#E7EDFF;--h-shadow:0 1px 2px rgba(33,29,51,.04),0 8px 24px rgba(33,29,51,.06);background:var(--h-bg);color:var(--h-ink)}
+body.dark-mode .workspace-builder{--h-bg:#16141F;--h-surface:#1F1C2C;--h-line:#2E2A40;--h-ink:#F1EFF8;--h-muted:#A29DB8;--h-primary:#8B8BF2;--h-primary2:#A08FFF;--h-soft:#2A2850;--h-ok:#6FD3A8;--h-ok-bg:#173629;--h-warn:#F5B27A;--h-warn-bg:#3A2415;--h-info:#9DB4FF;--h-info-bg:#1D2748;--h-shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3)}
+
+.workspace-builder > header{background:var(--h-bg);border-bottom:1px solid var(--h-line);padding:10px 12px;gap:8px;min-width:0;color:var(--h-ink)}
+.workspace-builder > header > div{min-width:0;overflow-x:auto;scrollbar-width:none}
+.workspace-builder > header > div::-webkit-scrollbar{display:none}
+.workspace-builder > header button:not(.app-header-back){flex:none;width:44px;height:44px;min-width:44px;padding:0;display:grid;place-items:center;border:1px solid var(--h-line);border-radius:14px;background:var(--h-surface);color:var(--h-ink);cursor:pointer}
+.workspace-builder > header button:not(.app-header-back) svg{width:20px;height:20px}
+
+.workspace-builder .preview-tabs{gap:8px;padding:10px 16px;border-bottom:0;scrollbar-width:none}
+.workspace-builder .preview-tabs::-webkit-scrollbar{display:none}
+.workspace-builder .preview-tab{height:40px;padding:0 16px;border:1px solid var(--h-line);border-radius:999px;background:var(--h-surface);color:var(--h-muted);font-size:15px}
+.workspace-builder .preview-tab:hover{background:var(--h-soft)}
+.workspace-builder .preview-tab.active{border-color:transparent;background:linear-gradient(135deg,var(--h-primary),var(--h-primary2));color:#fff;box-shadow:0 4px 12px rgba(91,91,214,.3)}
+
+.builder-chat p.studio-statut{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;height:28px;margin:0 0 10px;padding:0 12px;border-radius:999px;background:var(--h-ok-bg);color:var(--h-ok);font-size:14px;font-weight:500;text-align:left}
+.builder-chat p.studio-statut::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.builder-chat p.studio-statut.statut-erreur{background:var(--h-warn-bg);color:var(--h-warn)}
+.builder-chat p.studio-statut.statut-en_generation,.builder-chat p.studio-statut.statut-en_attente{background:var(--h-info-bg);color:var(--h-info)}
+
+.studio-switch{display:none}
+@media (max-width:767px){
+  .workspace-builder{height:100dvh}
+  .studio-switch{display:grid;grid-template-columns:1fr 1fr;gap:4px;flex:none;margin:10px 16px 2px;padding:4px;border-radius:14px;background:var(--h-soft)}
+  .studio-switch button{height:40px;border:0;border-radius:10px;background:transparent;color:var(--h-muted);font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+  .studio-switch button.active{background:var(--h-surface);color:var(--h-ink);box-shadow:0 1px 4px rgba(33,29,51,.12)}
+  .studio-vue-chat .preview-tabs,.studio-vue-chat .builder-preview{display:none}
+  .studio-vue-apercu .builder-chat{display:none}
+  .builder-layout{min-height:0}
+  .builder-chat{min-height:0}
+  .builder-chat .chat-messages{flex:1;min-height:0;overflow-y:auto}
+  .builder-chat .chat-input-form{flex:none}
+  .studio-vue-apercu .builder-preview{flex:1;min-height:0;padding:8px 12px 16px}
+}
