@@ -234,6 +234,7 @@ function App() {
   const [menuProjetId, setMenuProjetId] = useState<string | number | null>(null);
   const [vueMobile, setVueMobile] = useState<'chat' | 'apercu'>('apercu');
   useEffect(() => { if (activeProject?.id) setVueMobile('apercu'); }, [activeProject?.id]); // studio-ouvre-apercu
+  const [menuStudio, setMenuStudio] = useState(false);
 
   useEffect(() => {
     document.body.classList.toggle('dark-mode', darkMode);
@@ -1902,23 +1903,15 @@ ${jsFile.contenu}
         </div>
       )}
         <header>
-          <div>
+          <div className="studio-bar">
             <button type="button" className="app-header-back" onClick={() => { setActiveProject(null); navigateTo('/'); }}>
               <span className="app-header-back-icon"><IconArrowLeft size={18} /></span>
               <span className="app-header-back-title app-header-back-title-clip">{activeProject.nom}</span>
             </button>
-            <button className="toolbar-icon-btn" title="Partager" onClick={handleShare}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            </button>
-            <button className="toolbar-icon-btn" title="Dupliquer" onClick={handleDuplicate}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            </button>
-            <button className="toolbar-icon-btn" title="Historique des versions" onClick={toggleVersions}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-            </button>
-            <button
-              className="toolbar-icon-btn"
-              title={activeProject.est_deploye ? "Deployee (cliquer pour voir le lien)" : "Deployer l'application"}
+            <div className="studio-actions">
+              <button
+              className={`toolbar-icon-btn studio-publish${activeProject.est_deploye ? ' is-live' : ''}`}
+              title={activeProject.est_deploye ? "Déployée (toucher pour voir le lien)" : "Publier l'application"}
               disabled={deployLoading}
               onClick={async () => {
                 if (activeProject.est_deploye) {
@@ -1952,14 +1945,40 @@ ${jsFile.contenu}
                 }
               }}
             >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={activeProject.est_deploye ? '#22c55e' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-            </button>
-            <button className="toolbar-icon-btn" title="Publier comme template" onClick={() => setShowPublishTemplate(true)}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            </button>
-            <button className="toolbar-icon-btn" title="Paramètres du workspace" onClick={() => setShowWorkspaceSettings(true)}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            </button>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={activeProject.est_deploye ? '#22c55e' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg><span>{deployLoading ? 'Publication…' : activeProject.est_deploye ? 'En ligne' : 'Publier'}</span></button>
+              <div className="studio-menu-wrap">
+              <button type="button" className="toolbar-icon-btn studio-more" aria-label="Plus d'actions" aria-expanded={menuStudio} onClick={() => setMenuStudio(!menuStudio)}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+              </button>
+              {menuStudio && (
+                <>
+                  <div className="studio-overlay" onClick={() => setMenuStudio(false)} />
+                  <div className="studio-menu" role="menu">
+                    <button type="button" role="menuitem" onClick={(e) => { setMenuStudio(false); (handleShare as any)(e); }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                      Partager
+                    </button>
+                    <button type="button" role="menuitem" onClick={(e) => { setMenuStudio(false); (handleDuplicate as any)(e); }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                      Dupliquer
+                    </button>
+                    <button type="button" role="menuitem" onClick={(e) => { setMenuStudio(false); (toggleVersions as any)(e); }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                      Historique des versions
+                    </button>
+                    <button type="button" role="menuitem" onClick={() => { setMenuStudio(false); setShowPublishTemplate(true); }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                      Publier dans les templates
+                    </button>
+                    <button type="button" role="menuitem" onClick={() => { setMenuStudio(false); setShowWorkspaceSettings(true); }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
+                      Paramètres de l'espace
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+            </div>
           </div>
         </header>
 
