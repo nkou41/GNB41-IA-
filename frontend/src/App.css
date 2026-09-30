@@ -3500,3 +3500,10 @@ body.dark-mode .public-page{--l-bg:#16141F;--l-surface:#1F1C2C;--l-line:#2E2A40;
 .public-page .contact-card{display:flex;flex-direction:column;gap:14px;max-width:480px;margin-top:24px;padding:22px;text-align:left;background:var(--l-surface);border:1px solid var(--l-line);border-radius:20px;box-shadow:var(--l-shadow)}
 .public-page .contact-card p{margin:0;font-size:16px;color:var(--l-muted)}
 .public-page .contact-mail{display:inline-flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;text-decoration:none;word-break:break-all}
+
+/* ===== Menu mobile des pages publiques ===== */
+.public-page .public-navbar-mobile-menu,.landing-home .public-navbar-mobile-menu{gap:0;padding:6px 12px 10px;background:var(--l-bg);border-bottom:1px solid var(--l-line);box-shadow:var(--l-shadow)}
+.public-page .public-navbar-mobile-menu span,.landing-home .public-navbar-mobile-menu span{display:flex;align-items:center;min-height:48px;padding:0 12px;border-bottom:1px solid var(--l-line);border-radius:0;font-size:16px;font-weight:500;color:var(--l-ink);-webkit-tap-highlight-color:transparent}
+.public-page .public-navbar-mobile-menu span:last-child,.landing-home .public-navbar-mobile-menu span:last-child{border-bottom:0}
+.public-page .public-navbar-mobile-menu span:hover,.landing-home .public-navbar-mobile-menu span:hover{color:var(--l-primary);background:transparent}
+.public-page .public-navbar-mobile-menu span:active,.landing-home .public-navbar-mobile-menu span:active{background:var(--l-soft);color:var(--l-primary);border-radius:12px}
