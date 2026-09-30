@@ -101,6 +101,13 @@ function MiniatureApp({ code }: { code: any }) {
 }
 
 
+function messageAuth(msg: string): string {
+  if (/failed to fetch|networkerror|load failed|network request failed/i.test(msg)) {
+    return "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez dans un instant.";
+  }
+  return msg;
+}
+
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true); // TODO: nettoyage complet prévu plus tard
@@ -878,7 +885,7 @@ function App() {
                 Mot de passe oublie ?
               </p>
             )}
-            {error && <p className="error">{error}</p>}
+            {error && <p className="auth-error" role="alert">{messageAuth(String(error))}</p>}
             <button type="submit" className="auth-submit-btn">
               {authMode === "login" ? "Se connecter" : "S'inscrire"} <IconArrowRight size={16} />
             </button>
