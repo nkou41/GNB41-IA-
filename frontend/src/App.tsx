@@ -1578,7 +1578,7 @@ function App() {
               <div className="settings-icon-badge soft"><IconGooglePlay size={26} /></div>
               <div>
                 <h2>Publication mobile (Google Play)</h2>
-                <p>Connectez votre compte developpeur pour publier vos apps</p>
+                <p>Connectez votre compte développeur pour publier vos apps</p>
               </div>
             </div>
 
@@ -1630,7 +1630,7 @@ function App() {
                   <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
                     <span className="settings-status-pill deconnecte">
                       <IconCheckCircle />
-                      Compte non connecte
+                      Compte non connecté
                     </span>
                     <span className="settings-status-pill deconnecte">
                       <IconInfoCircle />

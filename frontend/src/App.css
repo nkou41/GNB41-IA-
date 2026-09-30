@@ -3549,3 +3549,12 @@ body.dark-mode .dashboard:has(> .settings-page-main){--s-bg:#16141F;--s-surface:
 .settings-page-main p.success{margin:14px 0 0;padding:10px 12px;border-radius:12px;background:var(--s-ok-bg);color:var(--s-ok);font-size:14px;line-height:1.4;text-align:left}
 .settings-page-main p[style]{color:var(--s-muted)!important}
 .settings-page-main p[style] strong{color:var(--s-ink)}
+
+/* ===== Paramètres: cloche et étiquettes de statut ===== */
+.dashboard:has(> .settings-page-main) > header > div > :first-child,
+.dashboard:has(> .settings-page-main) > header > div > :first-child > button{width:44px;height:44px;min-width:44px;padding:0;display:grid;place-items:center;border-radius:14px}
+.dashboard:has(> .settings-page-main) > header > div > :first-child > button{border:1px solid var(--s-line);background:var(--s-surface);color:var(--s-ink)}
+.dashboard:has(> .settings-page-main) > header > div > :first-child :is(button svg,> svg){width:20px;height:20px}
+
+.settings-page-main .settings-status-pill{border:0;background:var(--s-line);color:var(--s-muted);margin:0 8px 8px 0}
+.settings-page-main .settings-status-pill.connecte{background:var(--s-ok-bg);color:var(--s-ok)}
