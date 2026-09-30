@@ -3439,3 +3439,32 @@ body.dark-mode .landing.landing-home{--l-bg:#16141F;--l-surface:#1F1C2C;--l-line
 .landing-home .public-navbar-burger{position:relative;box-sizing:border-box;flex:none;align-self:center;width:44px;height:44px;min-width:44px;min-height:0;margin:0;padding:0;font-size:0;line-height:0;color:transparent;overflow:hidden}
 .landing-home .public-navbar-burger::before{content:"";position:absolute;left:50%;top:50%;width:20px;height:2px;border-radius:2px;background:var(--l-ink);transform:translate(-50%,-50%);box-shadow:0 -6px 0 var(--l-ink),0 6px 0 var(--l-ink)}
 .landing-home .public-navbar-cta{box-sizing:border-box;align-self:center;height:44px;min-height:0;padding:0 18px;line-height:1}
+
+/* ===== Pages publiques: fond, barre du haut, titres, tarifs ===== */
+.public-page{--l-bg:#F7F5EF;--l-surface:#fff;--l-line:#E7E2D6;--l-ink:#211D33;--l-muted:#7B7591;--l-primary:#5B5BD6;--l-primary2:#7C6CF0;--l-soft:#EEEDFB;--l-shadow:0 1px 2px rgba(33,29,51,.04),0 8px 24px rgba(33,29,51,.06);background:var(--l-bg);color:var(--l-ink);min-height:100dvh}
+body.dark-mode .public-page{--l-bg:#16141F;--l-surface:#1F1C2C;--l-line:#2E2A40;--l-ink:#F1EFF8;--l-muted:#A29DB8;--l-primary:#8B8BF2;--l-primary2:#A08FFF;--l-soft:#2A2850;--l-shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3)}
+
+.public-page .public-navbar{align-items:center;background:var(--l-bg);border-bottom:1px solid var(--l-line)}
+.public-page .public-navbar-logo{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:21px;letter-spacing:-.01em;color:var(--l-ink)}
+.public-page .public-navbar-links span{color:var(--l-muted);font-weight:500}
+.public-page .public-navbar-links span:hover{color:var(--l-primary)}
+.public-page .public-navbar-cta{box-sizing:border-box;align-self:center;height:44px;min-height:0;padding:0 18px;line-height:1;border:0;border-radius:14px;background:linear-gradient(135deg,var(--l-primary),var(--l-primary2));color:#fff;font:inherit;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(91,91,214,.3);cursor:pointer}
+.public-page .public-navbar-burger{position:relative;box-sizing:border-box;flex:none;align-self:center;width:44px;height:44px;min-width:44px;min-height:0;margin:0;padding:0;border:1px solid var(--l-line);border-radius:14px;background:var(--l-surface);font-size:0;line-height:0;color:transparent;overflow:hidden;cursor:pointer}
+.public-page .public-navbar-burger::before{content:"";position:absolute;left:50%;top:50%;width:20px;height:2px;border-radius:2px;background:var(--l-ink);transform:translate(-50%,-50%);box-shadow:0 -6px 0 var(--l-ink),0 6px 0 var(--l-ink)}
+
+.public-page .public-page-content{max-width:1040px;margin:0 auto;padding:28px 20px 56px;box-sizing:border-box}
+.public-page .public-page-content h1{margin:0;text-align:left;font-family:Fraunces,Georgia,serif;font-weight:600;font-size:clamp(30px,8vw,40px);line-height:1.15;letter-spacing:-.01em;color:var(--l-ink)}
+
+.public-page .plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:14px}
+.public-page .plan-card{position:relative;display:flex;flex-direction:column;gap:10px;text-align:left;background:var(--l-surface);border:1px solid var(--l-line);border-radius:20px;box-shadow:var(--l-shadow);padding:22px}
+.public-page .plan-card-highlight{border-color:var(--l-primary);box-shadow:0 0 0 1px var(--l-primary),var(--l-shadow)}
+.public-page .plan-badge{position:absolute;top:16px;right:16px;left:auto;transform:none;display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;background:linear-gradient(135deg,var(--l-primary),var(--l-primary2));color:#fff;font-size:13px;font-weight:600}
+.public-page .plan-card h3{margin:0;font-size:18px;font-weight:600;color:var(--l-ink)}
+.public-page .plan-price{margin:0;font-family:Fraunces,Georgia,serif;font-weight:600;font-size:34px;line-height:1.1;color:var(--l-ink)}
+.public-page .plan-price span{margin-left:4px;font-family:Inter,system-ui,sans-serif;font-size:15px;font-weight:500;color:var(--l-muted)}
+.public-page .plan-credits{margin:0;font-size:14px;color:var(--l-muted)}
+.public-page .plan-card ul{list-style:none;margin:6px 0 12px;padding:0;display:grid;gap:8px}
+.public-page .plan-card li{position:relative;padding-left:26px;font-size:14px;line-height:1.45;color:var(--l-ink)}
+.public-page .plan-card li::before{content:"\2713";position:absolute;left:0;top:1px;width:18px;height:18px;border-radius:50%;background:var(--l-soft);color:var(--l-primary);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.public-page .plan-btn{margin-top:auto;height:48px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--l-primary),var(--l-primary2));color:#fff;font:inherit;font-size:16px;font-weight:600;box-shadow:0 4px 12px rgba(91,91,214,.3);cursor:pointer}
+.public-page .plan-btn:active{transform:scale(.98)}
