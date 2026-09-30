@@ -3433,3 +3433,9 @@ body.dark-mode .landing.landing-home{--l-bg:#16141F;--l-surface:#1F1C2C;--l-line
 
 .landing-home .landing-login{text-decoration:none;color:var(--l-primary);font-weight:500}
 .landing-home .landing-features{padding-bottom:96px}
+
+/* ===== Accueil public: bouton menu et alignement de la barre ===== */
+.landing-home .public-navbar{align-items:center}
+.landing-home .public-navbar-burger{position:relative;box-sizing:border-box;flex:none;align-self:center;width:44px;height:44px;min-width:44px;min-height:0;margin:0;padding:0;font-size:0;line-height:0;color:transparent;overflow:hidden}
+.landing-home .public-navbar-burger::before{content:"";position:absolute;left:50%;top:50%;width:20px;height:2px;border-radius:2px;background:var(--l-ink);transform:translate(-50%,-50%);box-shadow:0 -6px 0 var(--l-ink),0 6px 0 var(--l-ink)}
+.landing-home .public-navbar-cta{box-sizing:border-box;align-self:center;height:44px;min-height:0;padding:0 18px;line-height:1}
