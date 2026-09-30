@@ -3665,3 +3665,12 @@ body.dark-mode .workspace-builder{--h-bg:#16141F;--h-surface:#1F1C2C;--h-line:#2
 .workspace-builder .preview-empty{color:var(--h-muted)}
 .workspace-builder .detail-section.error-box{background:var(--h-warn-bg);border:1px solid var(--h-line);border-radius:20px;color:var(--h-warn)}
 .workspace-builder .detail-section.error-box h3{color:var(--h-warn)}
+
+/* ===== Studio mobile: bouton flottant façon Base44 ===== */
+.studio-fab{display:none}
+@media (max-width:767px){
+  .studio-vue-apercu .studio-fab{position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:20;display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 20px;border:0;border-radius:999px;background:#16141F;color:#fff;font:inherit;font-size:15px;font-weight:600;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.25);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  body.dark-mode .studio-vue-apercu .studio-fab{background:#F1EFF8;color:#16141F}
+  .studio-vue-apercu .studio-fab:active{transform:translateX(-50%) scale(.97)}
+  .studio-vue-apercu .builder-preview{padding-bottom:88px}
+}
