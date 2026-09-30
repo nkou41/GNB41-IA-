@@ -3561,3 +3561,33 @@ body.dark-mode .dashboard:has(> .settings-page-main){--s-bg:#16141F;--s-surface:
 
 .settings-page-main .settings-card > div:has(> .settings-status-pill){display:flex;flex-wrap:wrap;gap:8px}
 .settings-page-main .settings-card > div:has(> .settings-status-pill) > .settings-status-pill{margin:0}
+
+/* ===== Mes achats / Mes ventes ===== */
+.acv-page{--h-bg:#F7F5EF;--h-surface:#fff;--h-line:#E7E2D6;--h-ink:#211D33;--h-muted:#7B7591;--h-primary:#5B5BD6;--h-primary2:#7C6CF0;--h-soft:#EEEDFB;--h-ok:#1F7A5A;--h-ok-bg:#E4F3EC;--h-warn:#A5480B;--h-warn-bg:#FDEBDD;--h-info:#3B5BDB;--h-info-bg:#E7EDFF;--h-shadow:0 1px 2px rgba(33,29,51,.04),0 8px 24px rgba(33,29,51,.06);background:var(--h-bg);color:var(--h-ink);min-height:100dvh}
+body.dark-mode .acv-page{--h-bg:#16141F;--h-surface:#1F1C2C;--h-line:#2E2A40;--h-ink:#F1EFF8;--h-muted:#A29DB8;--h-primary:#8B8BF2;--h-primary2:#A08FFF;--h-soft:#2A2850;--h-ok:#6FD3A8;--h-ok-bg:#173629;--h-warn:#F5B27A;--h-warn-bg:#3A2415;--h-info:#9DB4FF;--h-info-bg:#1D2748;--h-shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3)}
+.acv-page .marketplace-header{background:transparent;border-bottom:1px solid var(--h-line)}
+.acv-page .marketplace-header-actions{display:flex;align-items:center;gap:10px;color:var(--h-ink)}
+.acv-page .marketplace-header-actions > button:last-child{height:40px;padding:0 14px;border:1px solid var(--h-line);border-radius:12px;background:var(--h-surface);color:var(--h-ink);font:inherit;font-size:14px;font-weight:500;cursor:pointer}
+.acv-page .marketplace-header-actions > :first-child,.acv-page .marketplace-header-actions > :first-child > button{width:44px;height:44px;min-width:44px;padding:0;display:grid;place-items:center;border-radius:14px}
+.acv-page .marketplace-header-actions > :first-child > button{border:1px solid var(--h-line);background:var(--h-surface);color:var(--h-ink)}
+.acv-page .marketplace-title-row{justify-content:flex-start;text-align:left;padding:24px 20px 12px}
+.acv-page .marketplace-title-row h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:30px;line-height:1.15;letter-spacing:-.01em;color:var(--h-ink);text-align:left}
+.acv-page .marketplace-title-row p{margin-top:6px;font-size:15px;color:var(--h-muted);text-align:left}
+.acv-grid{display:grid;grid-template-columns:1fr;gap:12px;padding:8px 20px 40px}
+@media (min-width:640px){.acv-grid{grid-template-columns:repeat(2,1fr)}}
+.acv-card{display:flex;flex-direction:column;gap:10px;text-align:left;background:var(--h-surface);border:1px solid var(--h-line);border-radius:20px;box-shadow:var(--h-shadow);padding:18px}
+.acv-title{margin:0;font-size:19px;font-weight:600;color:var(--h-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acv-desc{margin:0;font-size:14px;line-height:1.45;color:var(--h-muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.acv-date{margin:0;font-size:14px;color:var(--h-muted)}
+.acv-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.acv-price{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:24px;color:var(--h-ink)}
+.acv-badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:500}
+.acv-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.acv-badge-ok{background:var(--h-ok-bg);color:var(--h-ok)}
+.acv-badge-warn{background:var(--h-warn-bg);color:var(--h-warn)}
+.acv-badge-info{background:var(--h-info-bg);color:var(--h-info)}
+.acv-stats{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:2px;padding-top:12px;border-top:1px solid var(--h-line);font-size:14px;color:var(--h-muted)}
+.acv-stats strong{font-size:15px;color:var(--h-ink)}
+.acv-btn{height:48px;margin-top:4px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--h-primary),var(--h-primary2));color:#fff;font:inherit;font-size:16px;font-weight:600;box-shadow:0 4px 12px rgba(91,91,214,.3);cursor:pointer}
+.acv-btn:active{transform:scale(.98)}
+.acv-empty{margin:8px 20px 0;padding:32px 20px;text-align:center;border:1px dashed var(--h-line);border-radius:20px;color:var(--h-muted)}

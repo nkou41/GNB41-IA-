@@ -108,6 +108,22 @@ function messageAuth(msg: string): string {
   return msg;
 }
 
+const LIBELLES_STATUT: Record<string, string> = { en_attente: 'En attente', paye: 'Payé', complete: 'Terminé', termine: 'Terminé', publie: 'Publié', brouillon: 'Brouillon', retire: 'Retiré', echoue: 'Échoué', annule: 'Annulé', erreur: 'Erreur' };
+
+function libelleStatut(statut: string): string {
+  const cle = String(statut || '').toLowerCase();
+  if (LIBELLES_STATUT[cle]) return LIBELLES_STATUT[cle];
+  const t = cle.replace(/_/g, ' ');
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+function tonStatut(statut: string): string {
+  const cle = String(statut || '').toLowerCase();
+  if (['en_attente', 'echoue', 'annule', 'erreur'].includes(cle)) return 'warn';
+  if (['paye', 'complete', 'termine', 'publie', 'actif', 'active', 'livre'].includes(cle)) return 'ok';
+  return 'info';
+}
+
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true); // TODO: nettoyage complet prévu plus tard
@@ -1194,7 +1210,7 @@ function App() {
     const totalDepense = myPurchasesList.reduce((sum, p) => sum + p.prix_paye_centimes, 0);
 
     return (
-      <div className="marketplace-page">
+      <div className="marketplace-page acv-page">
         <header className="marketplace-header">
           <button type="button" className="app-header-back" onClick={() => { setShowMesAchats(false); navigateTo('/marketplace'); }}>
             <span className="app-header-back-icon"><IconArrowLeft size={18} /></span>
@@ -1215,31 +1231,30 @@ function App() {
         </div>
 
         {myPurchasesList.length === 0 ? (
-          <div className="marketplace-empty">
+          <div className="acv-empty">
             <p>Vous n'avez encore rien acheté.</p>
           </div>
         ) : (
-          <div className="marketplace-grid">
+          <div className="acv-grid">
             {myPurchasesList.map((p) => (
-              <div key={p.id} className="marketplace-card">
-                <div className="marketplace-card-footer">
-                  <span className="marketplace-price">{(p.prix_paye_centimes / 100).toFixed(2)} EUR</span>
-                  <span className="marketplace-badge">{p.statut}</span>
+              <div key={p.id} className="acv-card">
+                <div className="acv-top">
+                  <span className="acv-price">{(p.prix_paye_centimes / 100).toFixed(2)} EUR</span>
+                  <span className={`acv-badge acv-badge-${tonStatut(p.statut)}`}>{libelleStatut(p.statut)}</span>
                 </div>
-                <p className="marketplace-card-desc">
+                <p className="acv-date">
                   Acheté le {new Date(p.created_at).toLocaleDateString('fr-FR')}
                 </p>
                 {p.statut === 'en_attente' && (
                   <button
                     type="button"
-                    className="btn-publish"
-                    style={{ marginTop: '0.5rem', justifyContent: 'center', width: '100%' }}
+                    className="acv-btn"
                     onClick={async () => {
                       const res = await api.verifyPurchase(p.id);
                       setMyPurchasesList((prev) => prev.map((x) => (x.id === p.id ? res : x)));
                     }}
                   >
-                    Verifier le paiement
+                    Vérifier le paiement
                   </button>
                 )}
               </div>
@@ -1256,7 +1271,7 @@ function App() {
     const totalVentes = myListingsList.reduce((sum, l) => sum + (l.nb_ventes || 0), 0);
 
     return (
-      <div className="marketplace-page">
+      <div className="marketplace-page acv-page">
         <header className="marketplace-header">
           <button type="button" className="app-header-back" onClick={() => { setShowMesVentes(false); navigateTo('/marketplace'); }}>
             <span className="app-header-back-icon"><IconArrowLeft size={18} /></span>
@@ -1277,22 +1292,22 @@ function App() {
         </div>
 
         {myListingsList.length === 0 ? (
-          <div className="marketplace-empty">
+          <div className="acv-empty">
             <p>Vous n'avez publié aucune application pour le moment.</p>
           </div>
         ) : (
-          <div className="marketplace-grid">
+          <div className="acv-grid">
             {myListingsList.map((l) => (
-              <div key={l.id} className="marketplace-card">
-                <h3>{l.titre}</h3>
-                <p className="marketplace-card-desc">{l.description}</p>
-                <div className="marketplace-card-footer">
-                  <span className="marketplace-price">{(l.prix_centimes / 100).toFixed(2)} {l.devise}</span>
-                  <span className="marketplace-badge">{l.statut}</span>
+              <div key={l.id} className="acv-card">
+                <h3 className="acv-title">{l.titre}</h3>
+                <p className="acv-desc">{l.description}</p>
+                <div className="acv-top">
+                  <span className="acv-price">{(l.prix_centimes / 100).toFixed(2)} {l.devise}</span>
+                  <span className={`acv-badge acv-badge-${tonStatut(l.statut)}`}>{libelleStatut(l.statut)}</span>
                 </div>
-                <div className="marketplace-card-footer" style={{ borderTop: 'none', paddingTop: 0 }}>
-                  <span style={{ fontSize: '0.8rem', color: '#8a7f68' }}>{l.nb_ventes || 0} vente{l.nb_ventes !== 1 ? 's' : ''}</span>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{((l.revenus_centimes || 0) / 100).toFixed(2)} EUR</span>
+                <div className="acv-stats">
+                  <span>{l.nb_ventes || 0} vente{l.nb_ventes !== 1 ? 's' : ''}</span>
+                  <strong>{((l.revenus_centimes || 0) / 100).toFixed(2)} EUR</strong>
                 </div>
               </div>
             ))}
