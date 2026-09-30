@@ -232,7 +232,8 @@ function App() {
   const [darkMode, setDarkMode] = useState<boolean>(() => localStorage.getItem('theme') === 'dark');
   const [ouvertureId, setOuvertureId] = useState<string | number | null>(null);
   const [menuProjetId, setMenuProjetId] = useState<string | number | null>(null);
-  const [vueMobile, setVueMobile] = useState<'chat' | 'apercu'>('chat');
+  const [vueMobile, setVueMobile] = useState<'chat' | 'apercu'>('apercu');
+  useEffect(() => { if (activeProject?.id) setVueMobile('apercu'); }, [activeProject?.id]); // studio-ouvre-apercu
 
   useEffect(() => {
     document.body.classList.toggle('dark-mode', darkMode);

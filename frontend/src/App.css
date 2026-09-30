@@ -3674,3 +3674,8 @@ body.dark-mode .workspace-builder{--h-bg:#16141F;--h-surface:#1F1C2C;--h-line:#2
   .studio-vue-apercu .studio-fab:active{transform:translateX(-50%) scale(.97)}
   .studio-vue-apercu .builder-preview{padding-bottom:88px}
 }
+
+/* ===== Studio mobile: ouverture sur l'aperçu, sans sélecteur ===== */
+@media (max-width:767px){
+  .studio-vue-apercu .studio-switch{display:none}
+}
