@@ -295,6 +295,30 @@ def delete_project(project_id):
     return jsonify({'success': True})
 
 
+@project_bp.route('/<project_id>', methods=['PUT'])
+@login_required
+def rename_project(project_id):
+    project = Project.query.get_or_404(project_id)
+    if not _check_edit_access(project.workspace_id):
+        return jsonify({'error': 'Non autorisé'}), 403
+    data = request.get_json(silent=True) or {}
+    nom = (data.get('nom') or '').strip()
+    if not nom:
+        return jsonify({'error': 'Le nom ne peut pas être vide'}), 400
+    if len(nom) > 120:
+        return jsonify({'error': 'Le nom est trop long (120 caractères maximum)'}), 400
+    from flask import current_app
+    try:
+        project.nom = nom
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.exception('Renommage du projet %s impossible: %s', project_id, e)
+        return jsonify({'error': 'Renommage impossible. Réessayez.'}), 500
+    log_activity(project.workspace_id, current_user.id, 'project_renamed', nom)
+    return jsonify(project.to_dict())
+
+
 @project_bp.route('/<project_id>/memoire', methods=['PUT'])
 @login_required
 def update_memoire_projet(project_id):
