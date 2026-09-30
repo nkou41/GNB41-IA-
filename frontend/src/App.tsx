@@ -901,7 +901,7 @@ function App() {
   // Vue galerie de templates
   if (showTemplatesGallery) {
     return (
-      <div className="marketplace-page">
+      <div className="marketplace-page tpl-page">
         <header className="marketplace-header">
           <button type="button" className="app-header-back" onClick={() => { setShowTemplatesGallery(false); navigateTo('/'); }}>
             <span className="app-header-back-icon"><IconArrowLeft size={18} /></span>
@@ -925,40 +925,40 @@ function App() {
             <p>Aucun template disponible pour le moment.</p>
           </div>
         ) : (
-          <div className="marketplace-grid">
-            {templatesList.map((t: any) => (
-              <div key={t.id} className="marketplace-card">
-                <h3>{t.nom}</h3>
-                <p className="marketplace-card-desc">{t.description}</p>
-                <div className="marketplace-card-footer">
-                  <span className="marketplace-badge">{t.categorie}</span>
+          <div className="tpl-grid">
+            {templatesList.map((t: any) => {
+              const utiliser = async () => {
+                let targetWorkspace = workspaces[0];
+                if (!targetWorkspace) {
+                  targetWorkspace = await api.createWorkspace('Mes projets');
+                  setWorkspaces([targetWorkspace]);
+                }
+                const nom = window.prompt('Nom du nouveau projet :', t.nom) || t.nom;
+                try {
+                  const project = await api.useTemplate(t.id, targetWorkspace.id, nom);
+                  setActiveWorkspace(targetWorkspace);
+                  setActiveProject(project);
+                  setShowTemplatesGallery(false);
+                  navigateTo(`/projet/${project.id}`);
+                } catch (err: any) {
+                  alert(`Erreur: ${err.message}`);
+                }
+              };
+              return (
+                <div key={t.id} className="home-card tpl-card">
+                  <div className="home-thumb">
+                    <div className="home-thumb-fallback"><IconGrid size={40} /></div>
+                    <MiniatureApp code={t.code_genere ?? t.code ?? t.contenu} />
+                    {t.categorie && <span className="home-badge home-badge-info">{t.categorie}</span>}
+                  </div>
+                  <div className="tpl-body">
+                    <h3 className="home-card-name">{t.nom}</h3>
+                    {t.description && <p className="tpl-desc">{t.description}</p>}
+                    <button type="button" className="tpl-use" onClick={utiliser}>Utiliser ce template</button>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  className="btn-publish"
-                  style={{ marginTop: '0.5rem', justifyContent: 'center', width: '100%' }}
-                  onClick={async () => {
-                    let targetWorkspace = workspaces[0];
-                    if (!targetWorkspace) {
-                      targetWorkspace = await api.createWorkspace('Mes projets');
-                      setWorkspaces([targetWorkspace]);
-                    }
-                    const nom = window.prompt('Nom du nouveau projet :', t.nom) || t.nom;
-                    try {
-                      const project = await api.useTemplate(t.id, targetWorkspace.id, nom);
-                      setActiveWorkspace(targetWorkspace);
-                      setActiveProject(project);
-                      setShowTemplatesGallery(false);
-                      navigateTo(`/projet/${project.id}`);
-                    } catch (err: any) {
-                      alert(`Erreur: ${err.message}`);
-                    }
-                  }}
-                >
-                  Utiliser ce template
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

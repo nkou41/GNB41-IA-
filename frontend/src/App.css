@@ -3364,3 +3364,18 @@ body.dark-mode .auth-container{--a-bg:#16141F;--a-surface:#1F1C2C;--a-line:#2E2A
 .auth-container .auth-form-v2 .switch{margin:0;padding:8px 0;text-align:center;color:var(--a-muted);font-size:14px;cursor:pointer}
 .auth-container .auth-form-v2 .switch:hover{color:var(--a-primary)}
 .auth-container .auth-error{margin:0;padding:10px 12px;border-radius:12px;background:var(--a-warn-bg);color:var(--a-warn);font-size:14px;line-height:1.4;text-align:left}
+
+/* ===== Galerie de templates ===== */
+.tpl-page{--h-bg:#F7F5EF;--h-surface:#fff;--h-line:#E7E2D6;--h-ink:#211D33;--h-muted:#7B7591;--h-primary:#5B5BD6;--h-primary2:#7C6CF0;--h-soft:#EEEDFB;--h-info:#3B5BDB;--h-info-bg:#E7EDFF;--h-shadow:0 1px 2px rgba(33,29,51,.04),0 8px 24px rgba(33,29,51,.06);--h-r-card:20px;--h-r-ctl:14px}
+body.dark-mode .tpl-page{--h-surface:#1F1C2C;--h-line:#2E2A40;--h-ink:#F1EFF8;--h-muted:#A29DB8;--h-primary:#8B8BF2;--h-primary2:#A08FFF;--h-soft:#2A2850;--h-info:#9DB4FF;--h-info-bg:#1D2748;--h-shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3)}
+.tpl-grid{display:grid;grid-template-columns:1fr;gap:16px;padding:8px 16px 40px}
+@media (min-width:640px){.tpl-grid{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:1024px){.tpl-grid{grid-template-columns:repeat(3,1fr)}}
+.tpl-page .tpl-card{cursor:default;background:var(--h-surface);border:1px solid var(--h-line);border-radius:var(--h-r-card);padding:14px;box-shadow:var(--h-shadow);gap:14px}
+.tpl-page .tpl-card:active{background:var(--h-surface)}
+.tpl-body{display:flex;flex-direction:column;gap:6px}
+.tpl-page .tpl-card .home-card-name{width:auto;text-align:left;font-size:19px;margin:0}
+.tpl-desc{margin:0 0 8px;font-size:14px;line-height:1.45;color:var(--h-muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tpl-use{height:48px;border:0;border-radius:var(--h-r-ctl);background:linear-gradient(135deg,var(--h-primary),var(--h-primary2));color:#fff;font:inherit;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(91,91,214,.3)}
+.tpl-use:active{transform:scale(.98)}
+.tpl-use:focus-visible{outline:2px solid var(--h-primary);outline-offset:2px}
