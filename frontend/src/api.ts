@@ -134,6 +134,7 @@ export const api = {
   deployProject: (projectId: string) => request(`/projects/${projectId}/deploy`, { method: 'POST' }),
   undeployProject: (projectId: string) => request(`/projects/${projectId}/undeploy`, { method: 'POST' }),
   listTemplates: () => request('/templates'),
+  listTemplatePreviews: () => request('/templates/previews'),
   publishTemplate: (projectId: string, data: { nom: string; description: string; categorie: string }) =>
     request(`/templates/from-project/${projectId}`, { method: 'POST', body: JSON.stringify(data) }),
   useTemplate: (templateId: string, workspaceId: string, nom: string) =>

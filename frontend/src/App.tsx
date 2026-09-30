@@ -180,6 +180,11 @@ function App() {
   const [publicListings, setPublicListings] = useState<any[]>([]);
   const [showPublicMenu, setShowPublicMenu] = useState(false);
   const [templatesList, setTemplatesList] = useState<any[]>([]);
+  const [templatePreviews, setTemplatePreviews] = useState<Record<string, string>>({});
+  useEffect(() => {
+    if (!showTemplatesGallery || Object.keys(templatePreviews).length > 0) return;
+    api.listTemplatePreviews().then((d: any) => { if (d && typeof d === 'object') setTemplatePreviews(d); }).catch(() => {});
+  }, [showTemplatesGallery]);
   const [plansList, setPlansList] = useState<any[]>([]);
 
   useEffect(() => {
@@ -948,7 +953,7 @@ function App() {
                 <div key={t.id} className="home-card tpl-card">
                   <div className="home-thumb">
                     <div className="home-thumb-fallback"><IconGrid size={40} /></div>
-                    <MiniatureApp code={t.code_genere ?? t.code ?? t.contenu} />
+                    <MiniatureApp code={templatePreviews[t.id]} />
                     {t.categorie && <span className="home-badge home-badge-info">{t.categorie}</span>}
                   </div>
                   <div className="tpl-body">
