@@ -18,6 +18,14 @@ def list_templates():
     return jsonify([t.to_dict() for t in templates])
 
 
+@templates_bp.route('/previews', methods=['GET'])
+@login_required
+def list_template_previews():
+    taille_max = 150000
+    templates = Template.query.order_by(Template.created_at.desc()).limit(24).all()
+    return jsonify({t.id: t.code_genere for t in templates if t.code_genere and len(t.code_genere) <= taille_max})
+
+
 @templates_bp.route('/<template_id>', methods=['GET'])
 def get_template(template_id):
     template = Template.query.get_or_404(template_id)
