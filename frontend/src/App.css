@@ -3414,3 +3414,22 @@ body.dark-mode .landing.landing-home{--l-bg:#16141F;--l-surface:#1F1C2C;--l-line
 .landing-home .feature-chevron{color:var(--l-muted)}
 .landing-home .landing-decor-tagline{font-family:Fraunces,Georgia,serif;font-weight:600;color:var(--l-ink);letter-spacing:-.01em}
 .landing-home .landing-float-btn{width:52px;height:52px;border-radius:16px;border:0;display:grid;place-items:center;background:linear-gradient(135deg,var(--l-primary),var(--l-primary2));box-shadow:0 6px 16px rgba(91,91,214,.35)}
+
+/* ===== Accueil public: barre du haut, barre d'outils, espacement ===== */
+.landing-home .public-navbar{background:var(--l-bg);border-bottom:1px solid var(--l-line)}
+.landing-home .public-navbar-logo{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:21px;letter-spacing:-.01em;color:var(--l-ink)}
+.landing-home .public-navbar-cta{height:44px;padding:0 18px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--l-primary),var(--l-primary2));color:#fff;font:inherit;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(91,91,214,.3);cursor:pointer}
+.landing-home .public-navbar-burger{width:44px;height:44px;padding:0;border:1px solid var(--l-line);border-radius:14px;background:var(--l-surface);color:var(--l-ink);font-size:20px;line-height:42px;text-align:center;cursor:pointer}
+
+.landing-home .landing-prompt-toolbar{display:grid;grid-template-columns:44px minmax(0,1fr) 44px 44px;gap:8px;align-items:center}
+.landing-home .landing-prompt-toolbar .toolbar-spacer,.landing-home .landing-prompt-toolbar .landing-divider{display:none}
+.landing-home .landing-prompt-toolbar > button:nth-of-type(1){grid-area:1/1}
+.landing-home .landing-prompt-toolbar > select:nth-of-type(1){grid-area:1/2}
+.landing-home .landing-prompt-toolbar > button:nth-of-type(2){grid-area:1/3}
+.landing-home .landing-prompt-toolbar > button:nth-of-type(3){grid-area:1/4}
+.landing-home .landing-prompt-toolbar > select:nth-of-type(2){grid-area:2/1/3/3}
+.landing-home .landing-prompt-toolbar > select:nth-of-type(3){grid-area:2/3/3/5}
+.landing-home .landing-prompt-toolbar .landing-select{width:100%;min-width:0;text-overflow:ellipsis}
+
+.landing-home .landing-login{text-decoration:none;color:var(--l-primary);font-weight:500}
+.landing-home .landing-features{padding-bottom:96px}
