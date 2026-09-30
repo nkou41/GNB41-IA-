@@ -3468,3 +3468,20 @@ body.dark-mode .public-page{--l-bg:#16141F;--l-surface:#1F1C2C;--l-line:#2E2A40;
 .public-page .plan-card li::before{content:"\2713";position:absolute;left:0;top:1px;width:18px;height:18px;border-radius:50%;background:var(--l-soft);color:var(--l-primary);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .public-page .plan-btn{margin-top:auto;height:48px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--l-primary),var(--l-primary2));color:#fff;font:inherit;font-size:16px;font-weight:600;box-shadow:0 4px 12px rgba(91,91,214,.3);cursor:pointer}
 .public-page .plan-btn:active{transform:scale(.98)}
+
+/* ===== Boutique publique ===== */
+.public-page .shop-sub{margin:8px 0 0;font-size:16px;line-height:1.5;color:var(--l-muted);text-align:left}
+.public-page .shop-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:24px}
+@media (min-width:640px){.public-page .shop-grid{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:1024px){.public-page .shop-grid{grid-template-columns:repeat(3,1fr)}}
+.public-page .shop-card{display:flex;flex-direction:column;gap:14px;background:var(--l-surface);border:1px solid var(--l-line);border-radius:20px;box-shadow:var(--l-shadow);padding:14px;text-align:left}
+.public-page .shop-thumb{aspect-ratio:16/9;border:1px solid var(--l-line);border-radius:14px;background:linear-gradient(135deg,var(--l-soft),var(--l-surface));display:grid;place-items:center}
+.public-page .shop-thumb span{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:48px;line-height:1;color:var(--l-primary)}
+.public-page .shop-body{display:flex;flex-direction:column;gap:6px;padding:0 4px 4px}
+.public-page .shop-title{margin:0;font-size:19px;font-weight:600;color:var(--l-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.public-page .shop-desc{margin:0;font-size:14px;line-height:1.45;color:var(--l-muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.public-page .shop-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px}
+.public-page .shop-price{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:22px;color:var(--l-ink)}
+.public-page .shop-buy{height:44px;padding:0 20px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--l-primary),var(--l-primary2));color:#fff;font:inherit;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(91,91,214,.3);cursor:pointer}
+.public-page .shop-buy:active{transform:scale(.97)}
+.public-page .shop-empty{margin-top:24px;padding:32px 20px;text-align:center;border:1px dashed var(--l-line);border-radius:20px;color:var(--l-muted)}
