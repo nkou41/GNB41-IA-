@@ -6,8 +6,10 @@ export default function Contact({ navProps }: { navProps: any }) {
       <PublicNav {...navProps} />
       <div className="public-page-content">
         <h1>Contact</h1>
-        <p style={{ marginTop: '1rem' }}>Pour toute question, ecrivez-nous a :</p>
-        <p style={{ fontWeight: 600, marginTop: '0.5rem' }}>contact@gnb41ia.com</p>
+        <div className="contact-card">
+          <p>Pour toute question, écrivez-nous à :</p>
+          <a className="shop-buy contact-mail" href="mailto:contact@gnb41ia.com">contact@gnb41ia.com</a>
+        </div>
       </div>
     </div>
   );

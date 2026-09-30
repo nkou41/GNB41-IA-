@@ -3485,3 +3485,18 @@ body.dark-mode .public-page{--l-bg:#16141F;--l-surface:#1F1C2C;--l-line:#2E2A40;
 .public-page .shop-buy{height:44px;padding:0 20px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--l-primary),var(--l-primary2));color:#fff;font:inherit;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(91,91,214,.3);cursor:pointer}
 .public-page .shop-buy:active{transform:scale(.97)}
 .public-page .shop-empty{margin-top:24px;padding:32px 20px;text-align:center;border:1px dashed var(--l-line);border-radius:20px;color:var(--l-muted)}
+
+/* ===== Pages publiques: Fonctionnalités, Templates, À propos, Contact ===== */
+.public-page .page-text{margin:16px 0 0;max-width:60ch;font-size:17px;line-height:1.7;color:var(--l-ink);text-align:left}
+.public-page .fx-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:24px}
+@media (min-width:640px){.public-page .fx-grid{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:1024px){.public-page .fx-grid{grid-template-columns:repeat(3,1fr)}}
+.public-page .fx-card{display:flex;flex-direction:column;gap:8px;text-align:left;background:var(--l-surface);border:1px solid var(--l-line);border-radius:20px;padding:20px}
+.public-page .fx-num{width:44px;height:44px;border-radius:14px;background:var(--l-soft);color:var(--l-primary);display:grid;place-items:center;font-family:Fraunces,Georgia,serif;font-weight:600;font-size:18px}
+.public-page .fx-card h3{margin:6px 0 0;font-size:18px;font-weight:600;color:var(--l-ink)}
+.public-page .fx-card p{margin:0;font-size:15px;line-height:1.5;color:var(--l-muted)}
+.public-page .shop-tag{align-self:flex-start;display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;background:var(--l-soft);color:var(--l-primary);font-size:13px;font-weight:500}
+.public-page .shop-buy-full{width:100%}
+.public-page .contact-card{display:flex;flex-direction:column;gap:14px;max-width:480px;margin-top:24px;padding:22px;text-align:left;background:var(--l-surface);border:1px solid var(--l-line);border-radius:20px;box-shadow:var(--l-shadow)}
+.public-page .contact-card p{margin:0;font-size:16px;color:var(--l-muted)}
+.public-page .contact-mail{display:inline-flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;text-decoration:none;word-break:break-all}
