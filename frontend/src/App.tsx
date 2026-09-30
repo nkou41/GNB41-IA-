@@ -1587,15 +1587,15 @@ function App() {
                 <div>
                   <span className="settings-status-pill connecte">
                     <IconCheckCircle />
-                    Connecte
+                    Connecté
                   </span>
                   <p style={{ marginTop: '0.8rem', fontSize: '0.9rem', color: '#4a4432' }}>Package : <strong>{googlePlayStatut.package_name}</strong></p>
                   <button
                     className="btn-publish is-cancel settings-btn-icon"
                     style={{ marginTop: '0.8rem' }}
-                    onClick={() => { if (confirm('Deconnecter votre compte Google Play ?')) api.googlePlayDeconnecter().then(setGooglePlayStatut).catch(() => {}); }}
+                    onClick={() => { if (confirm('Déconnecter votre compte Google Play ?')) api.googlePlayDeconnecter().then(setGooglePlayStatut).catch(() => {}); }}
                   >
-                    <IconLogOut size={16} /> Deconnecter
+                    <IconLogOut size={16} /> Déconnecter
                   </button>
                 </div>
               ) : (
@@ -1634,7 +1634,7 @@ function App() {
                     </span>
                     <span className="settings-status-pill deconnecte">
                       <IconInfoCircle />
-                      Bientot disponible
+                      Bientôt disponible
                     </span>
                   </div>
                 )
