@@ -3627,3 +3627,9 @@ body.dark-mode .workspace-builder{--h-bg:#16141F;--h-surface:#1F1C2C;--h-line:#2
   .builder-chat .chat-input-form{flex:none}
   .studio-vue-apercu .builder-preview{flex:1;min-height:0;padding:8px 12px 16px}
 }
+
+/* ===== Studio: puces (alignement et survol tactile) ===== */
+.workspace-builder .preview-tabs{padding-inline:16px;scroll-padding-inline:16px}
+.workspace-builder .preview-tabs::after{content:"";flex:0 0 4px}
+.workspace-builder .preview-tab:not(.active):hover{background:var(--h-surface)}
+@media (hover:hover){.workspace-builder .preview-tab:not(.active):hover{background:var(--h-soft)}}
