@@ -3379,3 +3379,13 @@ body.dark-mode .tpl-page{--h-surface:#1F1C2C;--h-line:#2E2A40;--h-ink:#F1EFF8;--
 .tpl-use{height:48px;border:0;border-radius:var(--h-r-ctl);background:linear-gradient(135deg,var(--h-primary),var(--h-primary2));color:#fff;font:inherit;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(91,91,214,.3)}
 .tpl-use:active{transform:scale(.98)}
 .tpl-use:focus-visible{outline:2px solid var(--h-primary);outline-offset:2px}
+
+/* ===== Galerie: en-tête et fond ===== */
+body.dark-mode .tpl-page{--h-bg:#16141F}
+.tpl-page{background:var(--h-bg);min-height:100dvh}
+.tpl-page .marketplace-header{background:transparent;border-bottom:1px solid var(--h-line)}
+.tpl-page .marketplace-header-actions{gap:10px;align-items:center;color:var(--h-ink)}
+.tpl-page .marketplace-header-actions button{height:40px;padding:0 14px;border:1px solid var(--h-line);border-radius:12px;background:var(--h-surface);color:var(--h-ink);font:inherit;font-size:14px;font-weight:500;cursor:pointer}
+.tpl-page .marketplace-title-row{justify-content:flex-start;text-align:left;padding:24px 20px 12px}
+.tpl-page .marketplace-title-row h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:30px;line-height:1.15;letter-spacing:-.01em;color:var(--h-ink);text-align:left}
+.tpl-page .marketplace-title-row p{margin-top:6px;font-size:15px;color:var(--h-muted);text-align:left}

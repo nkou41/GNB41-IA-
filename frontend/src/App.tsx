@@ -916,7 +916,7 @@ function App() {
         <div className="marketplace-title-row">
           <div>
             <h2>Galerie de templates</h2>
-            <p>Demarrez instantanement a partir d'une application deja creee</p>
+            <p>Démarrez instantanément à partir d'une application déjà créée</p>
           </div>
         </div>
 
