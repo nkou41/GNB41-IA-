@@ -3389,3 +3389,28 @@ body.dark-mode .tpl-page{--h-bg:#16141F}
 .tpl-page .marketplace-title-row{justify-content:flex-start;text-align:left;padding:24px 20px 12px}
 .tpl-page .marketplace-title-row h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:30px;line-height:1.15;letter-spacing:-.01em;color:var(--h-ink);text-align:left}
 .tpl-page .marketplace-title-row p{margin-top:6px;font-size:15px;color:var(--h-muted);text-align:left}
+
+/* ===== Page d'accueil publique ===== */
+.landing.landing-home{--l-bg:#F7F5EF;--l-surface:#fff;--l-line:#E7E2D6;--l-ink:#211D33;--l-muted:#7B7591;--l-primary:#5B5BD6;--l-primary2:#7C6CF0;--l-soft:#EEEDFB;--l-shadow:0 1px 2px rgba(33,29,51,.04),0 8px 24px rgba(33,29,51,.06);background:var(--l-bg);color:var(--l-ink)}
+body.dark-mode .landing.landing-home{--l-bg:#16141F;--l-surface:#1F1C2C;--l-line:#2E2A40;--l-ink:#F1EFF8;--l-muted:#A29DB8;--l-primary:#8B8BF2;--l-primary2:#A08FFF;--l-soft:#2A2850;--l-shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3)}
+.landing-home .landing-hero h1{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:clamp(34px,9vw,48px);line-height:1.1;letter-spacing:-.015em;background:linear-gradient(135deg,var(--l-primary),#2F80ED);-webkit-background-clip:text;background-clip:text;color:transparent}
+.landing-home .landing-tagline{color:var(--l-muted);font-size:17px;line-height:1.5;max-width:30ch;margin-left:auto;margin-right:auto}
+.landing-home .landing-badge{display:inline-flex;align-items:center;height:30px;padding:0 14px;border-radius:999px;background:var(--l-soft);color:var(--l-primary);border:0;font-size:13px;font-weight:600;letter-spacing:.02em;box-shadow:none}
+.landing-home .landing-prompt-form{background:var(--l-surface);border:1px solid var(--l-line);border-radius:20px;box-shadow:var(--l-shadow);padding:16px 16px 12px;max-width:640px;width:100%;box-sizing:border-box}
+.landing-home .landing-prompt-form:focus-within{border-color:var(--l-primary)}
+.landing-home .landing-prompt-form textarea{border:0;background:transparent;box-shadow:none;outline:none;color:var(--l-ink);font-size:16px}
+.landing-home .landing-prompt-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.landing-home .landing-divider{display:none}
+.landing-home .landing-prompt-toolbar .icon-btn{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;padding:0;border:1px solid var(--l-line);background:var(--l-surface);color:var(--l-ink)}
+.landing-home .landing-select{height:44px;border-radius:14px;border:1px solid var(--l-line);background:var(--l-surface);color:var(--l-ink);padding:0 10px;font-size:14px;font-weight:500}
+.landing-home .landing-send-btn{width:44px;height:44px;border-radius:14px;border:0;display:grid;place-items:center;padding:0;color:#fff;background:linear-gradient(135deg,var(--l-primary),var(--l-primary2));box-shadow:0 4px 12px rgba(91,91,214,.3)}
+.landing-home .landing-send-btn:hover{transform:none;filter:brightness(1.05)}
+.landing-home .landing-login{color:var(--l-muted);font-size:15px;padding:10px 0;cursor:pointer}
+.landing-home .landing-login:hover{color:var(--l-primary)}
+.landing-home .landing-feature-row{display:flex;align-items:center;gap:14px;background:var(--l-surface);border:1px solid var(--l-line);border-radius:20px;box-shadow:none;padding:16px;text-align:left}
+.landing-home .landing-feature-row .feature-icon{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--l-soft);color:var(--l-primary)}
+.landing-home .landing-feature-row h3{margin:0 0 2px;font-size:16px;font-weight:600;color:var(--l-ink)}
+.landing-home .landing-feature-row p{margin:0;font-size:14px;line-height:1.45;color:var(--l-muted)}
+.landing-home .feature-chevron{color:var(--l-muted)}
+.landing-home .landing-decor-tagline{font-family:Fraunces,Georgia,serif;font-weight:600;color:var(--l-ink);letter-spacing:-.01em}
+.landing-home .landing-float-btn{width:52px;height:52px;border-radius:16px;border:0;display:grid;place-items:center;background:linear-gradient(135deg,var(--l-primary),var(--l-primary2));box-shadow:0 6px 16px rgba(91,91,214,.35)}

@@ -24,13 +24,13 @@ export default function Accueil({
 }: AccueilProps) {
   const { setShowAuth, setAuthMode } = navProps;
   return (
-    <div className="landing">
+    <div className="landing landing-home">
       <PublicNav {...navProps} />
       <div className="landing-hero">
         <img src="/logo.png" alt="GNB41 IA" className="app-logo app-logo-lg" />
         <h1>GNB41 IA</h1>
         <p className="landing-tagline">Décrivez votre application. L'IA la construit pour vous.</p>
-        <div className="landing-badge">⚡ IA &bull; Code &bull; Apps &bull; Web</div>
+        <div className="landing-badge">IA &bull; Code &bull; Apps &bull; Web</div>
 
         <form onSubmit={handleLandingSubmit} className="landing-prompt-form">
           <div className="textarea-wrap">
