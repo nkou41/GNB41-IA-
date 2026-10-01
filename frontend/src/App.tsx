@@ -1921,8 +1921,7 @@ ${jsFile.contenu}
                 }
                 setDeployLoading(true);
                 try {
-                  const versionsCheck = await api.listVersions(activeProject.id);
-                  const derniere = versionsCheck[0];
+                  const derniere: any = await api.latestWarnings(activeProject.id);
                   if (derniere && derniere.avertissements) {
                     const liste = JSON.parse(derniere.avertissements);
                     if (liste.length > 0) {

@@ -95,6 +95,7 @@ export const api = {
   regenerateProject: (projectId: string, prompt: string, provider?: string, mode?: string) =>
     request(`/projects/${projectId}/regenerate`, { method: 'POST', body: JSON.stringify({ prompt, provider, mode }) }),
   listVersions: (projectId: string) => request(`/projects/${projectId}/versions`),
+  latestWarnings: (projectId: string) => request(`/projects/${projectId}/versions/latest-warnings`),
   restoreVersion: (projectId: string, versionId: string) => request(`/projects/${projectId}/versions/${versionId}/restore`, { method: 'POST' }),
   updateMemoireProjet: (projectId: string, memoire_projet: string) => request(`/projects/${projectId}/memoire`, { method: 'PUT', body: JSON.stringify({ memoire_projet }) }),
   deleteProject: (projectId: string) => request(`/projects/${projectId}`, { method: 'DELETE' }),
