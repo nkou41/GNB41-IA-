@@ -3723,3 +3723,16 @@ body.dark-mode .workspace-builder{--h-bg:#16141F;--h-surface:#1F1C2C;--h-line:#2
   .workspace-builder .code-editor-main{min-height:0}
   .workspace-builder .code-editor-textarea{min-height:55dvh}
 }
+
+/* ===== Studio: onglet Base de données ===== */
+.workspace-builder .db-body{flex:1;overflow:auto;padding:16px}
+.workspace-builder .db-empty{margin:0;padding:8px;font-size:14px;line-height:1.45;color:var(--h-muted)}
+.workspace-builder .db-count{margin:0 0 10px;font-size:14px;color:var(--h-muted)}
+.workspace-builder .db-row{margin:0 0 10px;padding:12px 14px;background:var(--h-bg);border:1px solid var(--h-line);border-radius:14px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.5;color:var(--h-ink);overflow-x:auto;white-space:pre}
+.workspace-builder .db-btn{display:inline-flex;align-items:center;justify-content:center;height:44px;margin-bottom:16px;padding:0 18px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--h-primary),var(--h-primary2));color:#fff;font:inherit;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(91,91,214,.3);cursor:pointer}
+.workspace-builder .db-btn:active{transform:scale(.98)}
+.workspace-builder .db-secret{margin:0 0 14px;padding:12px 14px;border-radius:14px;background:var(--h-warn-bg);color:var(--h-warn);font-size:14px;line-height:1.5;word-break:break-all}
+.workspace-builder .db-secret strong{display:block;margin-top:6px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;color:var(--h-ink);user-select:all}
+.workspace-builder .db-key-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;padding:12px 14px;background:var(--h-bg);border:1px solid var(--h-line);border-radius:14px}
+.workspace-builder .db-key-prefix{min-width:0;overflow:hidden;text-overflow:ellipsis;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;color:var(--h-ink)}
+.workspace-builder .db-revoke{flex:none;height:36px;padding:0 14px;border:1px solid var(--h-line);border-radius:12px;background:var(--h-surface);color:var(--h-warn);font:inherit;font-size:14px;font-weight:500;cursor:pointer}

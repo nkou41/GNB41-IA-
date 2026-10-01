@@ -2330,6 +2330,7 @@ ${jsFile.contenu}
               <div className="code-editor-layout">
                 <div className="code-editor-sidebar">
                   <p className="stack-badge">Tables</p>
+                  <button type="button" className={`code-editor-file-btn ${!selectedTableId ? 'active' : ''}`} onClick={() => setSelectedTableId(null)}>Clés API</button>
                   {appTables.map((t: any) => (
                     <button
                       key={t.id}
@@ -2343,28 +2344,27 @@ ${jsFile.contenu}
                       {t.nom}
                     </button>
                   ))}
-                  {appTables.length === 0 && <p style={{ fontSize: '0.78rem', color: '#8a7f68', padding: '0.5rem' }}>Aucune table declaree pour ce projet.</p>}
+                  {appTables.length === 0 && <p className="db-empty">Aucune table déclarée pour ce projet.</p>}
                 </div>
                 <div className="code-editor-main">
                   <div className="code-editor-toolbar">
                     <span className="code-editor-filename">
-                      {selectedTableId ? appTables.find((t: any) => t.id === selectedTableId)?.nom : 'Cles API'}
+                      {selectedTableId ? appTables.find((t: any) => t.id === selectedTableId)?.nom : 'Clés API'}
                     </span>
                   </div>
-                  <div style={{ padding: '1rem', overflow: 'auto', flex: 1 }}>
+                  <div className="db-body">
                     {selectedTableId ? (
                       <>
-                        <p style={{ fontSize: '0.8rem', color: '#8a7f68', marginBottom: '0.6rem' }}>{selectedTableRows.length} ligne(s)</p>
+                        <p className="db-count">{selectedTableRows.length} ligne{selectedTableRows.length !== 1 ? 's' : ''}</p>
                         {selectedTableRows.map((row: any) => (
-                          <pre key={row.id} className="code-block" style={{ fontSize: '0.75rem', marginBottom: '0.5rem' }}>{JSON.stringify(row.data, null, 2)}</pre>
+                          <pre key={row.id} className="db-row">{JSON.stringify(row.data, null, 2)}</pre>
                         ))}
                       </>
                     ) : (
                       <>
                         <button
                           type="button"
-                          className="btn-publish"
-                          style={{ marginBottom: '1rem' }}
+                          className="db-btn"
                           onClick={async () => {
                             if (!activeProject) return;
                             const res = await api.createAppKey(activeProject.id);
@@ -2373,20 +2373,20 @@ ${jsFile.contenu}
                             setAppKeys(keys);
                           }}
                         >
-                          + Nouvelle cle API
+                          + Nouvelle clé API
                         </button>
                         {newKeyRevealed && (
-                          <div style={{ padding: '0.8rem', background: darkMode ? '#4a3f1a' : '#fef3c7', color: darkMode ? '#f0e6c0' : 'inherit', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.78rem', wordBreak: 'break-all' }}>
-                            Copiez cette cle maintenant, elle ne sera plus affichee : <strong>{newKeyRevealed}</strong>
+                          <div className="db-secret">
+                            Copiez cette clé maintenant, elle ne sera plus affichée : <strong>{newKeyRevealed}</strong>
                           </div>
                         )}
                         {appKeys.map((k: any) => (
-                          <div key={k.id} className="admin-sales-row" style={{ gridTemplateColumns: '1fr auto' }}>
-                            <span>{k.key_prefix}... {k.revoked ? '(revoquee)' : ''}</span>
+                          <div key={k.id} className="db-key-row">
+                            <span className="db-key-prefix">{k.key_prefix}… {k.revoked ? '(révoquée)' : ''}</span>
                             {!k.revoked && (
                               <button
                                 type="button"
-                                className="marketplace-link-btn"
+                                className="db-revoke"
                                 onClick={async () => {
                                   await api.revokeAppKey(k.id);
                                   if (activeProject) {
@@ -2394,9 +2394,7 @@ ${jsFile.contenu}
                                     setAppKeys(keys);
                                   }
                                 }}
-                              >
-                                Revoquer
-                              </button>
+                              >Révoquer</button>
                             )}
                           </div>
                         ))}
