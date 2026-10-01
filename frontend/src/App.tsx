@@ -2122,33 +2122,33 @@ ${jsFile.contenu}
                       if (!mapActuel.has(chemin)) supprimes++;
                     });
                     const parts = [];
-                    if (ajoutes) parts.push(`+${ajoutes} ajoute(s)`);
-                    if (modifies) parts.push(`~${modifies} modifie(s)`);
-                    if (supprimes) parts.push(`-${supprimes} supprime(s)`);
+                    if (ajoutes) parts.push(`+${ajoutes} ajouté(s)`);
+                    if (modifies) parts.push(`~${modifies} modifié(s)`);
+                    if (supprimes) parts.push(`-${supprimes} supprimé(s)`);
                     diffTexte = parts.join(', ');
                   } catch {}
                 }
                 return (
-                <li key={v.id}>
-                  <span className={`statut statut-${v.statut}`}>{v.statut}</span>
-                  <p>{v.prompt}</p>
-                  <span className="version-date">{new Date(v.created_at).toLocaleString('fr-FR')}</span>
+                <li key={v.id} className="ver-card">
+                  <span className={`statut statut-${v.statut} ver-statut`}>{({ pret: 'Prêt', genere: 'Prêt', erreur: 'Échec', en_generation: 'En cours', en_attente: 'En attente' } as Record<string, string>)[v.statut] || v.statut}</span>
+                  <p className="ver-prompt">{v.prompt}</p>
+                  <span className="ver-meta">{new Date(v.created_at).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
                   {v.duree_generation_ms != null && (
-                    <span className="version-date" style={{ marginLeft: '0.5rem' }}>({(v.duree_generation_ms / 1000).toFixed(1)}s)</span>
+                    <span className="ver-meta">{(v.duree_generation_ms / 1000).toFixed(1)} s</span>
                   )}
                   {v.agent_type && (
-                    <span className="version-date" style={{ marginLeft: '0.5rem' }}>[{v.agent_type}]</span>
+                    <span className="ver-meta">{v.agent_type}</span>
                   )}
                   {diffTexte && (
-                    <span className="version-date" style={{ marginLeft: '0.5rem', color: '#6366f1' }}>{diffTexte}</span>
+                    <span className="ver-meta ver-diff">{diffTexte}</span>
                   )}
                   {v.statut === 'pret' && v.code_genere && (
                     <button
                       type="button"
-                      className="marketplace-link-btn"
+                      className="ver-restore"
                       onClick={async () => {
                         if (!activeProject) return;
-                        if (!window.confirm('Restaurer cette version ? Le code actuel du projet sera remplace.')) return;
+                        if (!window.confirm('Restaurer cette version ? Le code actuel du projet sera remplacé.')) return;
                         try {
                           const updated = await api.restoreVersion(activeProject.id, v.id);
                           setActiveProject(updated);
@@ -2157,7 +2157,7 @@ ${jsFile.contenu}
                           const vs = await api.listVersions(activeProject.id);
                           setVersions(vs);
                         } catch (err: any) {
-                          alert('Erreur lors de la restauration: ' + err.message);
+                          alert('Erreur lors de la restauration : ' + err.message);
                         }
                       }}
                     >
@@ -2167,7 +2167,7 @@ ${jsFile.contenu}
                 </li>
                 );
               })}
-              {versions.length === 0 && <p>Aucune version dans l'historique.</p>}
+              {versions.length === 0 && <p className="ver-empty">Aucune version dans l'historique.</p>}
             </ul>
           </div>
         )}

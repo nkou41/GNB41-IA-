@@ -3760,3 +3760,15 @@ body.dark-mode .workspace-builder{--h-bg:#16141F;--h-surface:#1F1C2C;--h-line:#2
 .workspace-builder .versions-panel{margin:4px 16px 8px;padding:16px;max-height:45dvh;overflow-y:auto;background:var(--h-surface);border:1px solid var(--h-line);border-radius:20px;box-shadow:var(--h-shadow)}
 .workspace-builder .versions-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 .workspace-builder .versions-list > p{margin:0;padding:12px 0;text-align:center;font-size:14px;line-height:1.5;color:var(--h-muted)}
+
+/* ===== Studio: versions ===== */
+.workspace-builder .versions-list li.ver-card{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:0;padding:14px;background:var(--h-bg);border:1px solid var(--h-line);border-radius:16px;list-style:none;text-align:left}
+.workspace-builder .versions-list li.ver-card:hover{background:var(--h-bg)}
+.workspace-builder .ver-statut{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;background:var(--h-ok-bg);color:var(--h-ok);font-size:13px;font-weight:500}
+.workspace-builder .ver-statut.statut-erreur{background:var(--h-warn-bg);color:var(--h-warn)}
+.workspace-builder .ver-statut.statut-en_generation,.workspace-builder .ver-statut.statut-en_attente{background:var(--h-info-bg);color:var(--h-info)}
+.workspace-builder .versions-list li.ver-card p.ver-prompt{flex:0 0 100%;order:2;margin:0;font-size:15px;line-height:1.45;color:var(--h-ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.workspace-builder .ver-meta{order:1;font-size:13px;color:var(--h-muted)}
+.workspace-builder .ver-meta.ver-diff{order:3;flex:0 0 100%;color:var(--h-primary);font-weight:500}
+.workspace-builder .ver-restore{order:4;flex:0 0 100%;height:44px;margin-top:4px;border:1px solid var(--h-line);border-radius:12px;background:var(--h-surface);color:var(--h-primary);font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+.workspace-builder .ver-restore:active{background:var(--h-soft)}
