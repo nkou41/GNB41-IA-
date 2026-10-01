@@ -3694,3 +3694,9 @@ body.dark-mode .workspace-builder{--h-bg:#16141F;--h-surface:#1F1C2C;--h-line:#2
 .workspace-builder > header .studio-actions .studio-menu button{display:flex;align-items:center;justify-content:flex-start;gap:12px;width:100%;height:48px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:var(--h-ink);font:inherit;font-size:15px;font-weight:500;text-align:left;cursor:pointer}
 .workspace-builder > header .studio-actions .studio-menu button:active{background:var(--h-soft)}
 .workspace-builder > header .studio-actions .studio-menu button svg{flex:none;color:var(--h-muted)}
+
+/* ===== Studio: publication, indicateur d'attente ===== */
+.workspace-builder > header .studio-actions .studio-menu button.studio-depublier{color:var(--h-warn)}
+.workspace-builder > header .studio-actions .studio-menu button.studio-depublier svg{color:var(--h-warn)}
+.workspace-builder > header .studio-actions .studio-publish:disabled svg{animation:studio-pulse 1s ease-in-out infinite}
+@keyframes studio-pulse{0%,100%{opacity:1}50%{opacity:.35}}

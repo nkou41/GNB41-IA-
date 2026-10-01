@@ -1919,6 +1919,7 @@ ${jsFile.contenu}
                   setLiveUrl(`${base}/projects/${activeProject.id}/live/`);
                   return;
                 }
+                setDeployLoading(true);
                 try {
                   const versionsCheck = await api.listVersions(activeProject.id);
                   const derniere = versionsCheck[0];
@@ -1928,12 +1929,11 @@ ${jsFile.contenu}
                       const suite = window.confirm(
                         'Des points a verifier ont ete detectes sur la derniere generation :\n\n' + liste.join('\n') + '\n\nDeployer quand meme ?'
                       );
-                      if (!suite) return;
+                      if (!suite) { setDeployLoading(false); return; }
                     }
                   }
                 } catch {}
 
-                setDeployLoading(true);
                 try {
                   const res = await api.deployProject(activeProject.id);
                   setActiveProject(res.project);
@@ -1966,6 +1966,20 @@ ${jsFile.contenu}
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
                       Historique des versions
                     </button>
+                    {activeProject.est_deploye && (
+                      <button type="button" role="menuitem" className="studio-depublier" onClick={async () => {
+                        setMenuStudio(false);
+                        if (!window.confirm("Retirer l'application de la publication ? Son lien public ne fonctionnera plus.")) return;
+                        try {
+                          await api.undeployProject(activeProject.id);
+                          setActiveProject({ ...activeProject, est_deploye: false });
+                          setLiveUrl(null);
+                        } catch (err: any) { alert(`Erreur: ${err.message}`); }
+                      }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/></svg>
+                        Dépublier
+                      </button>
+                    )}
                     <button type="button" role="menuitem" onClick={() => { setMenuStudio(false); setShowPublishTemplate(true); }}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                       Publier dans les templates
