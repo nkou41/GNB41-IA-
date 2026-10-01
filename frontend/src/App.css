@@ -3755,3 +3755,8 @@ body.dark-mode .workspace-builder{--h-bg:#16141F;--h-surface:#1F1C2C;--h-line:#2
 .workspace-builder .mem-btn:active{transform:scale(.98)}
 .workspace-builder .mem-msg{margin:12px 0 0;padding:10px 12px;border-radius:12px;background:var(--h-ok-bg);color:var(--h-ok);font-size:14px;line-height:1.4}
 .workspace-builder .mem-msg.is-error{background:var(--h-warn-bg);color:var(--h-warn)}
+
+/* ===== Studio: panneau des versions ===== */
+.workspace-builder .versions-panel{margin:4px 16px 8px;padding:16px;max-height:45dvh;overflow-y:auto;background:var(--h-surface);border:1px solid var(--h-line);border-radius:20px;box-shadow:var(--h-shadow)}
+.workspace-builder .versions-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.workspace-builder .versions-list > p{margin:0;padding:12px 0;text-align:center;font-size:14px;line-height:1.5;color:var(--h-muted)}
