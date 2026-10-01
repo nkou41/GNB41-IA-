@@ -3736,3 +3736,11 @@ body.dark-mode .workspace-builder{--h-bg:#16141F;--h-surface:#1F1C2C;--h-line:#2
 .workspace-builder .db-key-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;padding:12px 14px;background:var(--h-bg);border:1px solid var(--h-line);border-radius:14px}
 .workspace-builder .db-key-prefix{min-width:0;overflow:hidden;text-overflow:ellipsis;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;color:var(--h-ink)}
 .workspace-builder .db-revoke{flex:none;height:36px;padding:0 14px;border:1px solid var(--h-line);border-radius:12px;background:var(--h-surface);color:var(--h-warn);font:inherit;font-size:14px;font-weight:500;cursor:pointer}
+
+/* ===== Studio: base de données, corrections ===== */
+.workspace-builder .db-secret{word-break:normal;overflow-wrap:break-word}
+.workspace-builder .db-secret strong{word-break:break-all}
+.workspace-builder .code-editor-file-btn.active{background:linear-gradient(135deg,var(--h-primary),var(--h-primary2));color:#fff;border-color:transparent}
+@media (max-width:767px){
+  .workspace-builder .code-editor-sidebar .db-empty{flex:none;padding:0 4px;white-space:nowrap}
+}
