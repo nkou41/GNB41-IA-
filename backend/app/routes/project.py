@@ -361,6 +361,20 @@ def list_versions(project_id):
     return jsonify([v.to_dict() for v in versions])
 
 
+@project_bp.route('/<project_id>/versions/latest-warnings', methods=['GET'])
+@login_required
+def latest_warnings(project_id):
+    project = Project.query.get_or_404(project_id)
+    if not _check_access(project.workspace_id):
+        return jsonify({'error': 'Non autorisé'}), 403
+    derniere = (ProjectVersion.query
+                .with_entities(ProjectVersion.avertissements)
+                .filter_by(project_id=project_id)
+                .order_by(ProjectVersion.created_at.desc())
+                .first())
+    return jsonify({'avertissements': derniere[0] if derniere else None})
+
+
 @project_bp.route('/<project_id>/versions/<version_id>/restore', methods=['POST'])
 @login_required
 def restore_version(project_id, version_id):
