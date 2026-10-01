@@ -2447,7 +2447,7 @@ ${jsFile.contenu}
                       type="button"
                       className={`code-editor-file-btn ${previewFile === f.chemin ? 'active' : ''}`}
                       onClick={() => {
-                        if (editorDirty && previewFile && !confirm('Modifications non enregistrees. Changer de fichier quand meme ?')) return;
+                        if (editorDirty && previewFile && !confirm('Modifications non enregistrées. Changer de fichier quand même ?')) return;
                         setPreviewFile(f.chemin);
                         setEditorContent(f.contenu);
                         setEditorDirty(false);
@@ -2481,7 +2481,7 @@ ${jsFile.contenu}
                             }
                           }}
                         >
-                          {editorSaving ? 'Enregistrement...' : editorDirty ? 'Enregistrer' : 'Enregistre'}
+                          {editorSaving ? 'Enregistrement…' : editorDirty ? 'Enregistrer' : 'Enregistré'}
                         </button>
                       </div>
                       <textarea
@@ -2493,7 +2493,7 @@ ${jsFile.contenu}
                     </>
                   ) : (
                     <div className="preview-empty">
-                      <p>Selectionnez un fichier a gauche pour l'editer.</p>
+                      <p>Sélectionnez un fichier pour l'éditer.</p>
                     </div>
                   )}
                 </div>

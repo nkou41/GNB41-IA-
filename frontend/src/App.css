@@ -3700,3 +3700,26 @@ body.dark-mode .workspace-builder{--h-bg:#16141F;--h-surface:#1F1C2C;--h-line:#2
 .workspace-builder > header .studio-actions .studio-menu button.studio-depublier svg{color:var(--h-warn)}
 .workspace-builder > header .studio-actions .studio-publish:disabled svg{animation:studio-pulse 1s ease-in-out infinite}
 @keyframes studio-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ===== Studio: éditeur de code ===== */
+.workspace-builder .code-editor-layout{background:var(--h-surface);border:1px solid var(--h-line);border-radius:20px;box-shadow:var(--h-shadow);overflow:hidden}
+.workspace-builder .code-editor-sidebar{background:var(--h-bg);border-right:1px solid var(--h-line);padding:12px}
+.workspace-builder .code-editor-sidebar .stack-badge{display:inline-flex;align-items:center;height:24px;margin:0 0 10px;padding:0 10px;border-radius:999px;background:var(--h-soft);color:var(--h-primary);font-size:13px;font-weight:500}
+.workspace-builder .code-editor-file-btn{padding:10px 12px;margin-bottom:4px;border-radius:12px;color:var(--h-ink);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
+.workspace-builder .code-editor-file-btn:hover{background:var(--h-soft)}
+.workspace-builder .code-editor-file-btn.active{background:var(--h-soft);color:var(--h-primary);font-weight:600}
+.workspace-builder .code-editor-toolbar{gap:10px;padding:10px 12px;border-bottom:1px solid var(--h-line);background:var(--h-bg)}
+.workspace-builder .code-editor-filename{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;color:var(--h-ink)}
+.workspace-builder .code-editor-toolbar .btn-publish{flex:none;height:40px;padding:0 16px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--h-primary),var(--h-primary2));color:#fff;font:inherit;font-size:14px;font-weight:600;box-shadow:0 4px 12px rgba(91,91,214,.3);cursor:pointer}
+.workspace-builder .code-editor-toolbar .btn-publish:disabled{opacity:.5;box-shadow:none;cursor:default}
+.workspace-builder .code-editor-textarea{padding:14px;background:var(--h-surface);color:var(--h-ink);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.6;tab-size:2}
+@media (max-width:767px){
+  .workspace-builder .code-editor-layout{flex-direction:column;height:auto;min-height:0}
+  .workspace-builder .code-editor-sidebar{display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;padding:10px 12px;border-right:0;border-bottom:1px solid var(--h-line);overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+  .workspace-builder .code-editor-sidebar::-webkit-scrollbar{display:none}
+  .workspace-builder .code-editor-sidebar .stack-badge{flex:none;margin:0}
+  .workspace-builder .code-editor-file-btn{display:inline-flex;align-items:center;flex:none;width:auto;height:36px;margin:0;padding:0 14px;border:1px solid var(--h-line);border-radius:999px;background:var(--h-surface);white-space:nowrap;word-break:normal}
+  .workspace-builder .code-editor-file-btn.active{border-color:transparent}
+  .workspace-builder .code-editor-main{min-height:0}
+  .workspace-builder .code-editor-textarea{min-height:55dvh}
+}
