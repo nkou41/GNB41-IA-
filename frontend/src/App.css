@@ -3744,3 +3744,14 @@ body.dark-mode .workspace-builder{--h-bg:#16141F;--h-surface:#1F1C2C;--h-line:#2
 @media (max-width:767px){
   .workspace-builder .code-editor-sidebar .db-empty{flex:none;padding:0 4px;white-space:nowrap}
 }
+
+/* ===== Studio: onglet Mémoire ===== */
+.workspace-builder .mem-body{flex:1;overflow:auto;padding:16px 4px 8px;text-align:left}
+.workspace-builder .mem-intro{margin:0 0 14px;font-size:14px;line-height:1.5;color:var(--h-muted)}
+.workspace-builder .mem-body .memoire-textarea{display:block;width:100%;min-height:240px;box-sizing:border-box;padding:14px;border:1px solid var(--h-line);border-radius:20px;background:var(--h-surface);color:var(--h-ink);box-shadow:var(--h-shadow);font:inherit;font-size:16px;line-height:1.6;resize:vertical;outline:none}
+.workspace-builder .mem-body .memoire-textarea:focus{border-color:var(--h-primary)}
+.workspace-builder .mem-body .memoire-textarea::placeholder{color:var(--h-muted)}
+.workspace-builder .mem-btn{display:flex;align-items:center;justify-content:center;width:100%;height:48px;margin-top:14px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--h-primary),var(--h-primary2));color:#fff;font:inherit;font-size:16px;font-weight:600;box-shadow:0 4px 12px rgba(91,91,214,.3);cursor:pointer}
+.workspace-builder .mem-btn:active{transform:scale(.98)}
+.workspace-builder .mem-msg{margin:12px 0 0;padding:10px 12px;border-radius:12px;background:var(--h-ok-bg);color:var(--h-ok);font-size:14px;line-height:1.4}
+.workspace-builder .mem-msg.is-error{background:var(--h-warn-bg);color:var(--h-warn)}

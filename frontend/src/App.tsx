@@ -2404,27 +2404,26 @@ ${jsFile.contenu}
                 </div>
               </div>
             ) : previewTab === 'memoire' ? (
-              <div style={{ padding: '1rem', overflow: 'auto', flex: 1 }}>
-                <p style={{ fontSize: '0.8rem', color: '#8a7f68', marginBottom: '0.8rem' }}>
-                  Regles et decisions techniques memorisees pour ce projet. L'IA les respecte automatiquement a chaque generation, et y ajoute elle-meme les decisions importantes qu'elle prend.
+              <div className="mem-body">
+                <p className="mem-intro">
+                  Règles et décisions techniques mémorisées pour ce projet. L'IA les respecte automatiquement à chaque génération, et y ajoute elle-même les décisions importantes qu'elle prend.
                 </p>
                 <textarea
                   value={memoireDraft}
                   onChange={(e) => setMemoireDraft(e.target.value)}
                   rows={12}
                   className="memoire-textarea"
-                  placeholder="Aucune regle memorisee pour l'instant."
+                  placeholder="Aucune règle mémorisée pour l'instant."
                 />
                 <button
                   type="button"
-                  className="btn-publish"
-                  style={{ marginTop: '0.8rem' }}
+                  className="mem-btn"
                   onClick={async () => {
                     if (!activeProject) return;
                     try {
                       const updated = await api.updateMemoireProjet(activeProject.id, memoireDraft);
                       setActiveProject(updated);
-                      setMemoireMsg('Memoire enregistree.');
+                      setMemoireMsg('Mémoire enregistrée.');
                       setTimeout(() => setMemoireMsg(''), 2500);
                     } catch (err: any) {
                       setMemoireMsg('Erreur: ' + err.message);
@@ -2433,7 +2432,7 @@ ${jsFile.contenu}
                 >
                   Enregistrer
                 </button>
-                {memoireMsg && <p style={{ fontSize: '0.78rem', marginTop: '0.5rem', color: '#166534' }}>{memoireMsg}</p>}
+                {memoireMsg && <p className={`mem-msg ${memoireMsg.startsWith('Erreur') ? 'is-error' : ''}`} role="status">{memoireMsg}</p>}
               </div>
             ) : parsedFiles && parsedFiles.fichiers ? (
               <div className="code-editor-layout">
