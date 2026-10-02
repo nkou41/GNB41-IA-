@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from flask_login import login_required, current_user
 from app import db, limiter
 from app.models.plan import Plan
+from app.services.email_service import send_email
 
 billing_bp = Blueprint('billing', __name__)
 
@@ -93,6 +94,16 @@ def verify_payment(transaction_id):
             current_user.pending_plan = None
             current_user.pending_transaction_id = None
             db.session.commit()
+            try:
+                send_email(
+                    to=current_user.email,
+                    subject='Paiement confirme - GNB41 IA',
+                    text=f"Votre paiement a ete confirme. Vous etes maintenant sur le plan {plan.nom}"
+                         + (f" avec {plan.credits} credits" if plan.credits is not None else "")
+                         + ". Merci de votre confiance !"
+                )
+            except Exception as e:
+                current_app.logger.error(f'Erreur envoi email confirmation paiement: {str(e)}')
             return jsonify({'status': 'approved', 'plan': current_user.plan, 'plan_expiry': current_user.plan_expiry.isoformat()})
         return jsonify({'status': status})
     except requests.exceptions.RequestException as e:
