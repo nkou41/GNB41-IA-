@@ -1,10 +1,14 @@
 import os
 import requests
 from flask import Blueprint, request, jsonify, current_app
+import hmac
+import hashlib
 from datetime import datetime, timedelta
 from flask_login import login_required, current_user
 from app import db, limiter
 from app.models.plan import Plan
+from app.models.user import User
+from app.models.payment import Payment
 from app.services.email_service import send_email
 
 billing_bp = Blueprint('billing', __name__)
@@ -61,6 +65,13 @@ def create_payment():
 
         current_user.pending_plan = plan.slug
         current_user.pending_transaction_id = transaction_id
+        db.session.add(Payment(
+            user_id=current_user.id,
+            transaction_id=str(transaction_id),
+            plan_slug=plan.slug,
+            amount=int(plan.prix_xof),
+            status='pending',
+        ))
         db.session.commit()
 
         return jsonify({'payment_url': token_data['url'], 'transaction_id': transaction_id})
@@ -72,40 +83,79 @@ def create_payment():
         return jsonify({'error': 'Erreur lors de la creation du paiement', 'detail': str(e)}), 500
 
 
+def _activate_plan(transaction_id, tx):
+    """Idempotent: renvoie (payment, erreur)."""
+    p = Payment.query.filter_by(transaction_id=str(transaction_id)).first()
+    if not p:
+        return None, 'Transaction inconnue'
+    if p.status == 'approved':
+        return p, None
+    plan = Plan.query.filter_by(slug=p.plan_slug, actif=True).first()
+    if not plan or int(tx.get('amount') or 0) != int(plan.prix_xof or 0):
+        return None, 'Montant ou plan invalide'
+    now = datetime.utcnow()
+    # prise de verrou atomique: un seul appel passe de pending a approved
+    claimed = Payment.query.filter_by(id=p.id, status='pending').update(
+        {'status': 'approved', 'processed_at': now}, synchronize_session=False)
+    if claimed != 1:
+        db.session.rollback()
+        return p, None
+    user = db.session.get(User, p.user_id)
+    base = max(now, user.plan_expiry or now)
+    user.plan = plan.slug
+    user.plan_expiry = base + timedelta(days=30)
+    if plan.credits is not None:
+        user.credits = plan.credits
+    user.pending_plan = None
+    user.pending_transaction_id = None
+    db.session.commit()
+    return p, None
+
+
 @billing_bp.route('/verify-payment/<int:transaction_id>', methods=['GET'])
 @login_required
 def verify_payment(transaction_id):
-    base = _fedapay_base_url()
-    headers = _fedapay_headers()
     try:
-        res = requests.get(f'{base}/transactions/{transaction_id}', headers=headers, timeout=15)
+        res = requests.get(f'{_fedapay_base_url()}/transactions/{transaction_id}',
+                           headers=_fedapay_headers(), timeout=15)
         res.raise_for_status()
-        transaction = res.json()['v1/transaction']
-        status = transaction.get('status')
+        tx = res.json()['v1/transaction']
+        status = tx.get('status')
         if status == 'approved':
-            if current_user.pending_transaction_id != transaction_id or not current_user.pending_plan:
-                return jsonify({'error': 'Transaction non reconnue pour cet utilisateur'}), 400
-            plan = Plan.query.filter_by(slug=current_user.pending_plan, actif=True).first()
-            if not plan:
-                return jsonify({'error': 'Plan introuvable'}), 400
-            current_user.plan = plan.slug
-            current_user.plan_expiry = datetime.utcnow() + timedelta(days=30)
-            current_user.credits = plan.credits if plan.credits is not None else current_user.credits
-            current_user.pending_plan = None
-            current_user.pending_transaction_id = None
-            db.session.commit()
-            try:
-                send_email(
-                    to=current_user.email,
-                    subject='Paiement confirme - GNB41 IA',
-                    text=f"Votre paiement a ete confirme. Vous etes maintenant sur le plan {plan.nom}"
-                         + (f" avec {plan.credits} credits" if plan.credits is not None else "")
-                         + ". Merci de votre confiance !"
-                )
-            except Exception as e:
-                current_app.logger.error(f'Erreur envoi email confirmation paiement: {str(e)}')
-            return jsonify({'status': 'approved', 'plan': current_user.plan, 'plan_expiry': current_user.plan_expiry.isoformat()})
+            p, err = _activate_plan(transaction_id, tx)
+            if err or p.user_id != current_user.id:
+                return jsonify({'error': err or 'Transaction non reconnue pour cet utilisateur'}), 400
+            return jsonify({'status': 'approved', 'plan': current_user.plan,
+                            'plan_expiry': current_user.plan_expiry.isoformat()})
         return jsonify({'status': status})
-    except requests.exceptions.RequestException as e:
+    except (requests.exceptions.RequestException, KeyError, ValueError) as e:
         current_app.logger.error(f'Erreur verification paiement FedaPay: {str(e)}')
         return jsonify({'error': 'Erreur lors de la verification'}), 500
+
+
+@billing_bp.route('/webhook/fedapay', methods=['POST'])
+def fedapay_webhook():
+    secret = os.environ.get('FEDAPAY_WEBHOOK_SECRET', '').strip()
+    if not secret:
+        return '', 500
+    raw = request.get_data()
+    sig = request.headers.get('X-FEDAPAY-SIGNATURE', '')
+    parts = dict(x.strip().split('=', 1) for x in sig.split(',') if '=' in x)
+    expected = hmac.new(secret.encode(), f"{parts.get('t', '')}.{raw.decode()}".encode(),
+                        hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, parts.get('s', '')):
+        return '', 400
+    try:
+        tid = (request.get_json(silent=True) or {}).get('entity', {}).get('id')
+        if not tid:
+            return '', 200
+        res = requests.get(f'{_fedapay_base_url()}/transactions/{tid}',
+                           headers=_fedapay_headers(), timeout=15)
+        res.raise_for_status()
+        tx = res.json()['v1/transaction']
+        if tx.get('status') == 'approved':
+            _activate_plan(tid, tx)
+    except Exception as e:
+        current_app.logger.error(f'Webhook FedaPay: {str(e)}')
+        return '', 500
+    return '', 200

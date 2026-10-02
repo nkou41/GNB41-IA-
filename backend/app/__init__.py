@@ -93,6 +93,7 @@ def create_app(test_config=None):
     from app.models.activity_log import ActivityLog
     from app.models.evaluation_run import EvaluationRun
     from app.models.plan import Plan
+    from app.models.payment import Payment
 
     from app.routes.auth import auth_bp
     from app.routes.workspace import workspace_bp
@@ -119,6 +120,7 @@ def create_app(test_config=None):
     app.register_blueprint(studio_bp, url_prefix='/api/studio')
     app.register_blueprint(studio_public_bp, url_prefix='/v1')
     csrf.exempt(studio_public_bp)
+    csrf.exempt(app.view_functions["billing.fedapay_webhook"])
 
     @app.route('/api/health', methods=['GET'])
     def health_check():
