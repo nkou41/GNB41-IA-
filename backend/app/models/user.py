@@ -25,6 +25,7 @@ class User(UserMixin, db.Model):
     google_play_package_name = db.Column(db.String(150), nullable=True)
     pending_plan = db.Column(db.String(30), nullable=True)
     pending_transaction_id = db.Column(db.Integer, nullable=True)
+    reminder_sent_for = db.Column(db.DateTime, nullable=True)
     credits = db.Column(db.Integer, default=1)
 
     def set_password(self, password):

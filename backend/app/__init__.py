@@ -121,6 +121,7 @@ def create_app(test_config=None):
     app.register_blueprint(studio_public_bp, url_prefix='/v1')
     csrf.exempt(studio_public_bp)
     csrf.exempt(app.view_functions["billing.fedapay_webhook"])
+    csrf.exempt(app.view_functions["billing.cron_daily"])
 
     @app.route('/api/health', methods=['GET'])
     def health_check():

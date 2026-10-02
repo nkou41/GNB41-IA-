@@ -171,3 +171,60 @@ def fedapay_webhook():
         current_app.logger.error(f'Webhook FedaPay: {str(e)}')
         return '', 500
     return '', 200
+
+
+@billing_bp.route('/cron/daily', methods=['POST'])
+def cron_daily():
+    from sqlalchemy import or_
+    secret = os.environ.get('CRON_SECRET', '').strip()
+    given = request.headers.get('X-Cron-Secret', '')
+    if not secret or not hmac.compare_digest(secret, given):
+        return '', 403
+
+    now = datetime.utcnow()
+    free = Plan.query.filter_by(slug='gratuit').first()
+    free_credits = free.credits if free and free.credits is not None else 1
+
+    # 1. Expiration -> plan gratuit
+    expired = User.query.filter(
+        User.plan != 'gratuit',
+        User.plan_expiry.isnot(None),
+        User.plan_expiry < now).all()
+    expired_info = [(u.email, u.username, u.plan) for u in expired]
+    for u in expired:
+        u.plan = 'gratuit'
+        u.plan_expiry = None
+        u.credits = free_credits
+        u.reminder_sent_for = None
+    db.session.commit()
+    for email, name, old_plan in expired_info:
+        try:
+            send_email(email, "Votre abonnement a expire",
+                f"Bonjour {name},\n\nVotre plan {old_plan} a expire. "
+                f"Votre compte est repasse au plan Gratuit.\n"
+                f"Vous pouvez vous reabonner a tout moment depuis votre espace.\n\nGNB41 IA")
+        except Exception as e:
+            current_app.logger.error(f"Email expiration: {e}")
+
+    # 2. Rappel 3 jours avant l'echeance (une seule fois par echeance)
+    soon = User.query.filter(
+        User.plan != 'gratuit',
+        User.plan_expiry >= now,
+        User.plan_expiry <= now + timedelta(days=3),
+        or_(User.reminder_sent_for.is_(None),
+            User.reminder_sent_for != User.plan_expiry)).all()
+    reminded = 0
+    for u in soon:
+        try:
+            send_email(u.email, "Votre abonnement expire bientot",
+                f"Bonjour {u.username},\n\nVotre plan {u.plan} expire le "
+                f"{u.plan_expiry.strftime('%d/%m/%Y')}.\n"
+                f"Renouvelez-le pour garder vos credits et vos avantages.\n\nGNB41 IA")
+            u.reminder_sent_for = u.plan_expiry
+            db.session.commit()
+            reminded += 1
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Email rappel: {e}")
+
+    return jsonify({'downgraded': len(expired_info), 'reminded': reminded})
