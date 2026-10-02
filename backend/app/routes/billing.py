@@ -109,6 +109,18 @@ def _activate_plan(transaction_id, tx):
     user.pending_plan = None
     user.pending_transaction_id = None
     db.session.commit()
+    try:
+        send_email(
+            user.email,
+            f"Paiement confirme - Plan {plan.nom}",
+            f"Bonjour {user.username},\n\n"
+            f"Votre paiement de {p.amount} XOF a bien ete recu.\n"
+            f"Plan active : {plan.nom}\n"
+            f"Valable jusqu'au : {user.plan_expiry.strftime('%d/%m/%Y')}\n\n"
+            f"Merci de votre confiance,\nGNB41 IA",
+        )
+    except Exception as e:
+        current_app.logger.error(f"Email confirmation paiement: {e}")
     return p, None
 
 
