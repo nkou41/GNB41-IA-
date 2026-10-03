@@ -125,6 +125,9 @@ def create_listing():
     if not titre or not description or not prix:
         return jsonify({'error': 'titre, description et prix_centimes requis'}), 400
 
+    if request.form.get('droits_certifies') != '1':
+        return jsonify({'error': 'Vous devez certifier détenir les droits sur cette application.'}), 400
+
     try:
         prix_centimes = int(prix)
         if prix_centimes < 0:
@@ -199,7 +202,8 @@ def create_listing():
         favicon_url=favicon_url,
         image_url=image_url,
         categorie=categorie,
-        tags=tags
+        tags=tags,
+        droits_certifies_at=datetime.utcnow()
     )
     db.session.add(listing)
     db.session.commit()

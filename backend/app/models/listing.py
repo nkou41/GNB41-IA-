@@ -25,6 +25,7 @@ class Listing(db.Model):
 
     statut = db.Column(db.String(20), default='publie')
     commission_pourcentage = db.Column(db.Integer, default=20)
+    droits_certifies_at = db.Column(db.DateTime, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
