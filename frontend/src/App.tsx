@@ -171,6 +171,7 @@ function App() {
   const [publishFile, setPublishFile] = useState<File | null>(null);
   const [publishImage, setPublishImage] = useState<File | null>(null);
   const [publishCategorie, setPublishCategorie] = useState('autre');
+  const [publishDroits, setPublishDroits] = useState(false);
   const [publishTags, setPublishTags] = useState('');
   const [publishLoading, setPublishLoading] = useState(false);
   const [publishError, setPublishError] = useState('');
@@ -644,6 +645,10 @@ function App() {
       setPublishError('Indiquez un lien externe.');
       return;
     }
+    if (!publishDroits) {
+      setPublishError('Vous devez certifier détenir les droits sur cette application.');
+      return;
+    }
 
     setPublishLoading(true);
     try {
@@ -658,6 +663,7 @@ function App() {
       if (publishImage) formData.append('image', publishImage);
       formData.append('categorie', publishCategorie);
       formData.append('tags', publishTags);
+      formData.append('droits_certifies', '1');
 
       await api.createListing(formData);
       trackEvent('listing_published', { categorie: publishCategorie, source_type: publishSourceType });
@@ -671,6 +677,7 @@ function App() {
       setPublishImage(null);
       setPublishCategorie('autre');
       setPublishTags('');
+      setPublishDroits(false);
       const res = await api.listMarketplace();
       setMarketplaceListings(res.listings);
     } catch (err: any) {
@@ -1437,8 +1444,13 @@ function App() {
                 <input placeholder="https://..." value={publishLienExterne} onChange={(e) => setPublishLienExterne(e.target.value)} />
               )}
 
+              <label className="droits-check">
+                <input type="checkbox" checked={publishDroits} onChange={(e) => setPublishDroits(e.target.checked)} />
+                <span>Je certifie détenir les droits sur tous les noms, logos, images, sons et personnages de cette application, et j'accepte qu'elle soit retirée en cas de réclamation d'un titulaire de droits.</span>
+              </label>
+
               {publishError && <p className="error">{publishError}</p>}
-              <button type="submit" className="btn-publish" disabled={publishLoading} style={{ justifyContent: 'center' }}>
+              <button type="submit" className="btn-publish" disabled={publishLoading || !publishDroits} style={{ justifyContent: 'center' }}>
                 {publishLoading ? 'Publication...' : 'Publier'}
               </button>
             </form>
