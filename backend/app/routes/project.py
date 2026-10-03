@@ -646,13 +646,14 @@ def _generer_manifest_pwa(project, parsed):
     fichiers = parsed.get('fichiers', [])
     couleur = _extraire_couleur_primaire(fichiers)
     nom = project.nom or 'Application'
+    est_jeu = any(('<canvas' in (f.get('contenu') or '')) or ('getContext(' in (f.get('contenu') or '')) for f in fichiers)
     description = parsed.get('description') or project.prompt_initial or nom
     return {
         'name': nom,
         'short_name': nom[:12],
         'description': description[:200],
         'start_url': './index.html',
-        'display': 'standalone',
+        'display': 'fullscreen' if est_jeu else 'standalone',
         'background_color': '#ffffff',
         'theme_color': couleur,
         'icons': [

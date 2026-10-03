@@ -447,14 +447,21 @@ SPECIALISATIONS = {
     'modification': "Tu agis comme un agent specialise en modification ciblee d'un projet existant. Ne modifie que ce qui est necessaire pour repondre a la demande, laisse le reste du projet inchange autant que possible.",
     'style': "Tu agis comme un agent specialise en design/CSS. Concentre-toi uniquement sur l'apparence visuelle (couleurs, typographie, mise en page, espacement, animations) via le(s) fichier(s) CSS. Ne modifie la structure HTML ou la logique JS que si strictement indispensable pour appliquer le style demande.",
     'contenu': "Tu agis comme un agent specialise en redaction de contenu. Concentre-toi sur les textes (titres, paragraphes, descriptions, boutons) dans le HTML. Ne modifie pas la structure, le CSS ou le JS sauf si strictement indispensable.",
+    'jeu': "Tu agis comme un agent specialise en jeux mobiles HTML5. Cette consigne a PRIORITE sur les regles 1 et 2 du systeme : un jeu tient dans UNE seule page, pas de pages liees.\nLivre des le premier message un jeu COMPLET et jouable : index.html, style.css et game.js.\n- Un canvas plein ecran adapte au mobile : meta viewport, touch-action: none, redimensionnement, devicePixelRatio, marges de securite (env(safe-area-inset-*)).\n- Commandes TACTILES : joystick virtuel et boutons a l'ecran, glisser ou taper. Jamais de clavier obligatoire (le clavier est accepte en plus sur ordinateur).\n- Boucle de jeu avec requestAnimationFrame et pas de temps fixe.\n- Ecrans : accueil, jeu, pause, fin de partie avec rejouer.\n- Score et meilleur score dans localStorage, toujours dans un try/catch.\n- Sons generes avec Web Audio (aucun fichier audio), lances apres le premier toucher, avec un bouton pour couper le son.\n- Tous les visuels sont dessines en code (formes, degrades, emojis). Aucune image externe.\n- Difficulte progressive, et le jeu doit etre amusant des les premieres secondes.\nGenres : football (terrain vu de dessus, deux equipes, passe, tir, joueur controle, chrono, score), course (piste ou route infinie, obstacles, vitesse croissante), plateforme (saut, ennemis, objets, niveaux), puzzle (grille, coups, niveaux), quiz (questions a choix, chrono, score), cartes, tir ou arcade (vagues d'ennemis), runner infini, gestion simple, aventure. Pour un autre genre, applique les memes principes.\nUNIVERS ORIGINAL : n'utilise jamais de noms de clubs, de ligues, de joueurs, de films, de series, de personnages ou de marques reels, ni leurs logos ou musiques. Invente des equipes, personnages et titres originaux. Si la demande cite un element protege, cree la version originale equivalente et dis-le clairement dans le champ comprehension. Un jeu de film devient un quiz ou une aventure dans un studio de cinema imaginaire.",
+    'mobile': "Tu agis comme un agent specialise en applications mobiles installables (PWA). Pour la navigation, cette consigne a priorite sur la regle 1 : prevois une barre de navigation fixe en bas avec 3 a 5 onglets plutot qu'un menu de liens en haut.\n- Interface pensee pour le tactile : cibles d'au moins 44 px, aucun effet de survol, texte de 16 px minimum, marges de securite (env(safe-area-inset-*)), retours visuels au toucher, etats de chargement et d'erreur.\n- Meta viewport avec viewport-fit=cover et theme-color.\n- Donnees de l'utilisateur conservees dans localStorage, toujours dans un try/catch, pour un usage hors ligne.\n- Apparence d'une vraie application native : en-tete compact, cartes, feuilles modales venant du bas, animations courtes.\n- Contenu reel et pertinent, jamais de texte generique.",
 }
 
 MOTS_STYLE = ['style', 'design', 'couleur', 'police', 'theme', 'apparence', 'css', 'esthetique', 'visuel', 'mise en page', 'look']
 MOTS_CONTENU = ['texte', 'contenu', 'redige', 'description', 'titre', 'paragraphe', 'wording', 'copywriting', 'reformule']
 
 
+MOTS_JEU = re.compile(r"\b(jeu|jeux|game|games|puzzle)\b")
+
+
 def _detecter_type_demande(prompt: str, a_fichiers_existants: bool) -> str:
     p = prompt.lower()
+    if not a_fichiers_existants and MOTS_JEU.search(p):
+        return 'jeu'
     if any(m in p for m in MOTS_STYLE):
         return 'style'
     if any(m in p for m in MOTS_CONTENU):
