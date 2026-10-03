@@ -124,6 +124,8 @@ function tonStatut(statut: string): string {
   return 'info';
 }
 
+const API_URL_PUBLIQUE: string = (import.meta as any).env.VITE_API_URL || 'http://localhost:5001/api';
+
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true); // TODO: nettoyage complet prévu plus tard
@@ -1464,11 +1466,11 @@ function App() {
         ) : (
           <div className="marketplace-grid">
             {marketplaceListings.map((l) => {
-              const openLink = l.source_type === 'externe_lien' ? l.lien_externe : `https://favor-legendary-edge-cultural.trycloudflare.com/api/marketplace/${l.id}/preview`;
+              const openLink = l.source_type === 'externe_lien' ? l.lien_externe : `${API_URL_PUBLIQUE}/marketplace/${l.id}/preview`;
               const copyLink = () => {
                 navigator.clipboard.writeText(openLink).catch(() => {});
               };
-              const bannerUrl = l.image_url && l.image_url.startsWith('/') ? `https://favor-legendary-edge-cultural.trycloudflare.com${l.image_url}` : l.image_url;
+              const bannerUrl = l.image_url && l.image_url.startsWith('/') ? `${API_URL_PUBLIQUE.replace(/\/api\/?$/, '')}${l.image_url}` : l.image_url;
               return (
                 <div key={l.id} className="marketplace-card">
                   {bannerUrl && (
