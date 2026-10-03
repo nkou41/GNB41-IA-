@@ -108,7 +108,7 @@ function messageAuth(msg: string): string {
   return msg;
 }
 
-const LIBELLES_STATUT: Record<string, string> = { en_attente: 'En attente', paye: 'Payé', complete: 'Terminé', termine: 'Terminé', publie: 'Publié', brouillon: 'Brouillon', retire: 'Retiré', echoue: 'Échoué', annule: 'Annulé', erreur: 'Erreur' };
+const LIBELLES_STATUT: Record<string, string> = { en_attente: 'En attente', paye: 'Payé', complete: 'Terminé', termine: 'Terminé', publie: 'Publié', brouillon: 'Brouillon', retire: 'Retirée', echoue: 'Échoué', annule: 'Annulé', erreur: 'Erreur', en_revue: 'En revue', refuse: 'Refusée', suspendu: 'Suspendue' };
 
 function libelleStatut(statut: string): string {
   const cle = String(statut || '').toLowerCase();
@@ -119,7 +119,7 @@ function libelleStatut(statut: string): string {
 
 function tonStatut(statut: string): string {
   const cle = String(statut || '').toLowerCase();
-  if (['en_attente', 'echoue', 'annule', 'erreur'].includes(cle)) return 'warn';
+  if (['en_attente', 'echoue', 'annule', 'erreur', 'refuse', 'retire', 'suspendu'].includes(cle)) return 'warn';
   if (['paye', 'complete', 'termine', 'publie', 'actif', 'active', 'livre'].includes(cle)) return 'ok';
   return 'info';
 }
@@ -174,6 +174,9 @@ function App() {
   const [publishImage, setPublishImage] = useState<File | null>(null);
   const [publishCategorie, setPublishCategorie] = useState('autre');
   const [publishDroits, setPublishDroits] = useState(false);
+  const [publishJustification, setPublishJustification] = useState('');
+  const [publishNeedsJustif, setPublishNeedsJustif] = useState(false);
+  const [report, setReport] = useState<{ target: any; motif: string; details: string; msg: string; ok: boolean; loading: boolean } | null>(null);
   const [publishTags, setPublishTags] = useState('');
   const [publishLoading, setPublishLoading] = useState(false);
   const [publishError, setPublishError] = useState('');
@@ -628,6 +631,22 @@ function App() {
     }
   };
 
+  const handleReport = async () => {
+    if (!report) return;
+    if (report.motif === 'autre' && report.details.trim().length < 10) {
+      setReport({ ...report, msg: 'Précisez votre signalement (10 caractères minimum).', ok: false });
+      return;
+    }
+    setReport({ ...report, loading: true, msg: '' });
+    try {
+      await api.reportListing(report.target.id, report.motif, report.details);
+      setReport((r) => r && { ...r, loading: false, ok: true, msg: 'Merci, votre signalement a été enregistré.' });
+      setTimeout(() => setReport(null), 1800);
+    } catch (err: any) {
+      setReport((r) => r && { ...r, loading: false, ok: false, msg: err.message });
+    }
+  };
+
   const handlePublishListing = async (e: React.FormEvent) => {
     e.preventDefault();
     setPublishError('');
@@ -666,8 +685,9 @@ function App() {
       formData.append('categorie', publishCategorie);
       formData.append('tags', publishTags);
       formData.append('droits_certifies', '1');
+      if (publishNeedsJustif) formData.append('justification', publishJustification);
 
-      await api.createListing(formData);
+      const created: any = await api.createListing(formData);
       trackEvent('listing_published', { categorie: publishCategorie, source_type: publishSourceType });
       setShowPublishForm(false);
       setPublishTitre('');
@@ -680,9 +700,13 @@ function App() {
       setPublishCategorie('autre');
       setPublishTags('');
       setPublishDroits(false);
+      setPublishJustification('');
+      setPublishNeedsJustif(false);
+      if (created && created.statut === 'en_revue') alert('Votre annonce a été envoyée pour examen. Vous serez notifié de la décision.');
       const res = await api.listMarketplace();
       setMarketplaceListings(res.listings);
     } catch (err: any) {
+      if (/marque prot[ée]g[ée]e/i.test(String(err.message)) && /justification/i.test(String(err.message))) setPublishNeedsJustif(true);
       setPublishError(err.message);
     } finally {
       setPublishLoading(false);
@@ -1452,6 +1476,16 @@ function App() {
               </label>
 
               {publishError && <p className="error">{publishError}</p>}
+              {publishNeedsJustif && (
+                <textarea
+                  className="justif-field"
+                  rows={4}
+                  maxLength={2000}
+                  placeholder="Justification : licence, autorisation écrite du titulaire des droits… (20 caractères minimum)"
+                  value={publishJustification}
+                  onChange={(e) => setPublishJustification(e.target.value)}
+                />
+              )}
               <button type="submit" className="btn-publish" disabled={publishLoading || !publishDroits} style={{ justifyContent: 'center' }}>
                 {publishLoading ? 'Publication...' : 'Publier'}
               </button>
@@ -1530,9 +1564,35 @@ function App() {
                       {purchaseLoadingId === l.id ? 'Achat...' : 'Acheter'}
                     </button>
                   )}
+                  {l.vendeur_id !== user.id && (
+                    <button type="button" className="report-link" onClick={() => setReport({ target: l, motif: 'contrefacon', details: '', msg: '', ok: false, loading: false })}>
+                      Signaler
+                    </button>
+                  )}
                 </div>
               );
             })}
+          </div>
+        )}
+        {report && (
+          <div className="report-overlay" onClick={() => setReport(null)}>
+            <div className="report-sheet" role="dialog" aria-modal="true" aria-label="Signaler cette annonce" onClick={(e) => e.stopPropagation()}>
+              <h3>Signaler cette annonce</h3>
+              <p className="report-title">{report.target.titre}</p>
+              <label className="report-label">Motif</label>
+              <select value={report.motif} onChange={(e) => setReport({ ...report, motif: e.target.value })}>
+                <option value="contrefacon">Contrefaçon ou marque non autorisée</option>
+                <option value="contenu_illegal">Contenu illégal ou dangereux</option>
+                <option value="autre">Autre</option>
+              </select>
+              <label className="report-label">Détails {report.motif === 'autre' ? '(requis)' : '(facultatif)'}</label>
+              <textarea rows={4} maxLength={2000} value={report.details} onChange={(e) => setReport({ ...report, details: e.target.value })} />
+              {report.msg && <p className={`report-msg ${report.ok ? 'is-ok' : 'is-error'}`} role="status">{report.msg}</p>}
+              <div className="report-actions">
+                <button type="button" className="report-cancel" onClick={() => setReport(null)}>Fermer</button>
+                <button type="button" className="report-send" disabled={report.loading || report.ok} onClick={handleReport}>{report.loading ? 'Envoi…' : 'Envoyer'}</button>
+              </div>
+            </div>
           </div>
         )}
         <div style={{ padding: '1.5rem', textAlign: 'center', fontSize: '0.8rem', color: '#a89f8c' }}>
