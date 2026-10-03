@@ -2262,12 +2262,12 @@ ${jsFile.contenu}
 
                 <div className="provider-dropdown">
                   <button type="button" className="provider-pill" onClick={() => setShowAgentModeMenu(!showAgentModeMenu)}>
-                    {agentMode === 'creation' ? 'Création' : agentMode === 'modification' ? 'Modification' : agentMode === 'style' ? 'Design' : agentMode === 'contenu' ? 'Contenu' : 'Agent: Auto'}
+                    {({ creation: 'Création', modification: 'Modification', style: 'Design', contenu: 'Contenu', jeu: 'Jeu mobile', mobile: 'App mobile' } as Record<string, string>)[agentMode] || 'Agent: Auto'}
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="6 9 12 15 18 9"/></svg>
                   </button>
                   {showAgentModeMenu && (
                     <div className="provider-menu">
-                      {[['auto', 'Auto (detection)'], ['creation', 'Creation'], ['modification', 'Modification'], ['style', 'Design/Style'], ['contenu', 'Contenu']].map(([val, label]) => (
+                      {[['auto', 'Auto (détection)'], ['creation', 'Création'], ['modification', 'Modification'], ['style', 'Design/Style'], ['contenu', 'Contenu'], ['jeu', 'Jeu mobile'], ['mobile', 'App mobile']].map(([val, label]) => (
                         <button
                           type="button"
                           key={val}

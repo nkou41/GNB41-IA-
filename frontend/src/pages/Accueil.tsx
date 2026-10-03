@@ -63,6 +63,8 @@ export default function Accueil({
               <option value="modification">Agent: Modification</option>
               <option value="style">Agent: Design/Style</option>
               <option value="contenu">Agent: Contenu</option>
+              <option value="jeu">Agent: Jeu mobile</option>
+              <option value="mobile">Agent: App mobile</option>
             </select>
             <select className="landing-select">
               <option>Créateur</option>
