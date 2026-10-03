@@ -97,6 +97,10 @@ def my_listings():
 @marketplace_bp.route('/<listing_id>', methods=['GET'])
 def get_listing(listing_id):
     listing = Listing.query.get_or_404(listing_id)
+    if listing.statut != 'publie':
+        visible = current_user.is_authenticated and (current_user.id == listing.vendeur_id or (current_user.role or 'user') in ('admin', 'superadmin'))
+        if not visible:
+            return jsonify({'error': 'Annonce introuvable'}), 404
     return jsonify(listing.to_dict())
 
 
@@ -127,6 +131,19 @@ def create_listing():
 
     if request.form.get('droits_certifies') != '1':
         return jsonify({'error': 'Vous devez certifier détenir les droits sur cette application.'}), 400
+
+    from app.services.marques import marques_detectees
+    marques = marques_detectees(titre, description, request.form.get('tags', ''))
+    justification = (request.form.get('justification') or '').strip()[:2000]
+    statut_initial = 'publie'
+    if marques:
+        if len(justification) < 20:
+            return jsonify({
+                'error': f"« {marques[0]} » est une marque protégée. Pour publier cette application, joignez une justification (licence ou autorisation du titulaire des droits) : elle sera examinée avant sa mise en ligne.",
+                'code': 'marque_detectee',
+                'marques': marques
+            }), 409
+        statut_initial = 'en_revue'
 
     try:
         prix_centimes = int(prix)
@@ -203,10 +220,21 @@ def create_listing():
         image_url=image_url,
         categorie=categorie,
         tags=tags,
+        statut=statut_initial,
         droits_certifies_at=datetime.utcnow()
     )
     db.session.add(listing)
+    db.session.flush()
+    if statut_initial == 'en_revue':
+        from app.models.listing_review import ListingReview
+        db.session.add(ListingReview(
+            listing_id=listing.id, listing_titre=(listing.titre or '')[:120], vendeur_id=current_user.id,
+            motif='marque_detectee', terme=', '.join(marques)[:120], justification=justification,
+            statut='en_attente'))
     db.session.commit()
+
+    if statut_initial == 'en_revue':
+        _notifier_moderation(listing, marques)
 
     return jsonify(listing.to_dict()), 201
 
@@ -219,6 +247,19 @@ def update_listing(listing_id):
         return jsonify({'error': 'Non autorisé'}), 403
 
     data = request.get_json() or {}
+
+    if 'statut' in data and listing.statut not in ('publie', 'suspendu'):
+        return jsonify({'error': "Cette annonce est en cours d'examen ou a été retirée : son statut ne peut pas être modifié."}), 403
+
+    if 'titre' in data or 'description' in data:
+        from app.services.marques import marques_detectees
+        from app.models.listing_review import ListingReview
+        nouvelles = marques_detectees(str(data.get('titre', listing.titre)), str(data.get('description', listing.description)), listing.tags or '')
+        existantes = marques_detectees(listing.titre, listing.description, listing.tags or '')
+        deja_ok = ' | '.join((x.terme or '') for x in ListingReview.query.filter_by(listing_id=listing.id, statut='approuve').all())
+        interdites = [m for m in nouvelles if m not in existantes and m not in deja_ok]
+        if interdites:
+            return jsonify({'error': f"« {interdites[0]} » est une marque protégée : cette modification est refusée. Écrivez à contact@gnb41ia.com avec la preuve de vos droits.", 'code': 'marque_detectee'}), 409
 
     if 'titre' in data:
         if not data['titre'].strip():
@@ -252,6 +293,11 @@ def delete_listing(listing_id):
     listing = Listing.query.get_or_404(listing_id)
     if listing.vendeur_id != current_user.id:
         return jsonify({'error': 'Non autorisé'}), 403
+    if Purchase.query.filter_by(listing_id=listing_id).first():
+        # Des achats existent : on retire l'annonce sans effacer l'historique des ventes.
+        listing.statut = 'retire'
+        db.session.commit()
+        return jsonify({'success': True, 'archived': True})
     db.session.delete(listing)
     db.session.commit()
     return jsonify({'success': True})
@@ -446,3 +492,21 @@ def admin_dashboard():
         'total_chiffre_affaires_centimes': total_ca,
         'dernieres_ventes': ventes_detail
     })
+
+
+def _notifier_moderation(listing, marques):
+    """Prévient l'équipe de modération et le vendeur."""
+    try:
+        from app.models.user import User
+        from app.services.notifications import envoyer_notification
+        terme = ', '.join(marques)
+        for admin in User.query.filter(User.role.in_(['admin', 'superadmin'])).all():
+            try:
+                envoyer_notification(admin.id, 'moderation', 'Annonce à examiner',
+                                     f"« {listing.titre} » mentionne : {terme}. Justification à vérifier.")
+            except Exception:
+                db.session.rollback()
+        envoyer_notification(listing.vendeur_id, 'moderation', "Annonce en cours d'examen",
+                             f"Votre annonce « {listing.titre} » sera examinée avant sa mise en ligne.")
+    except Exception:
+        db.session.rollback()
