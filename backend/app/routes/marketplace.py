@@ -11,6 +11,11 @@ from PIL import Image
 from app import db
 from app.models.listing import Listing
 from app.models.purchase import Purchase
+from app.models.listing_review import ListingReview
+from app.models.listing_report import ListingReport
+from app.models.user import User
+from sqlalchemy import or_
+from app import limiter
 from app.models.project import Project
 from datetime import datetime, timedelta
 
@@ -98,7 +103,7 @@ def my_listings():
 def get_listing(listing_id):
     listing = Listing.query.get_or_404(listing_id)
     if listing.statut != 'publie':
-        visible = current_user.is_authenticated and (current_user.id == listing.vendeur_id or (current_user.role or 'user') in ('admin', 'superadmin'))
+        visible = current_user.is_authenticated and (current_user.id == listing.vendeur_id or _est_moderateur())
         if not visible:
             return jsonify({'error': 'Annonce introuvable'}), 404
     return jsonify(listing.to_dict())
@@ -494,19 +499,168 @@ def admin_dashboard():
     })
 
 
-def _notifier_moderation(listing, marques):
-    """Prévient l'équipe de modération et le vendeur."""
+MOTIFS_SIGNALEMENT = ('contrefacon', 'contenu_illegal', 'autre')
+SEUIL_SIGNALEMENTS = 3
+
+
+def _est_moderateur():
+    if not current_user.is_authenticated:
+        return False
+    if (current_user.role or 'user') in ('admin', 'superadmin'):
+        return True
+    admin_email = os.environ.get('ADMIN_EMAIL', '')
+    return bool(admin_email) and current_user.email == admin_email
+
+
+def _notifier_admins(titre, message):
+    """Prévient les modérateurs. Ne doit jamais faire échouer l'action en cours."""
     try:
-        from app.models.user import User
-        from app.services.notifications import envoyer_notification
-        terme = ', '.join(marques)
-        for admin in User.query.filter(User.role.in_(['admin', 'superadmin'])).all():
+        cond = User.role.in_(['admin', 'superadmin'])
+        admin_email = os.environ.get('ADMIN_EMAIL', '')
+        if admin_email:
+            cond = or_(cond, User.email == admin_email)
+        for admin in User.query.filter(cond).all():
             try:
-                envoyer_notification(admin.id, 'moderation', 'Annonce à examiner',
-                                     f"« {listing.titre} » mentionne : {terme}. Justification à vérifier.")
+                envoyer_notification(admin.id, 'moderation', titre[:200], message)
             except Exception:
                 db.session.rollback()
-        envoyer_notification(listing.vendeur_id, 'moderation', "Annonce en cours d'examen",
-                             f"Votre annonce « {listing.titre} » sera examinée avant sa mise en ligne.")
     except Exception:
         db.session.rollback()
+
+
+def _notifier_vendeur(user_id, titre, message):
+    if not user_id:
+        return
+    try:
+        envoyer_notification(user_id, 'moderation', titre[:200], message)
+    except Exception:
+        db.session.rollback()
+
+
+def _notifier_moderation(listing, marques):
+    """Une marque a été détectée à la publication."""
+    _notifier_admins('Annonce à examiner', f"« {listing.titre} » mentionne : {', '.join(marques)}. Justification à vérifier.")
+    _notifier_vendeur(listing.vendeur_id, "Annonce en cours d'examen", f"Votre annonce « {listing.titre} » sera examinée avant sa mise en ligne.")
+
+
+@marketplace_bp.route('/<listing_id>/report', methods=['POST'])
+@limiter.limit('10 per hour')
+def report_listing(listing_id):
+    listing = Listing.query.get_or_404(listing_id)
+    if listing.statut != 'publie':
+        return jsonify({'error': 'Annonce introuvable'}), 404
+    data = request.get_json(silent=True) or {}
+    motif = data.get('motif')
+    if motif not in MOTIFS_SIGNALEMENT:
+        return jsonify({'error': 'Motif invalide'}), 400
+    details = (data.get('details') or '').strip()[:2000]
+    if motif == 'autre' and len(details) < 10:
+        return jsonify({'error': 'Précisez votre signalement (10 caractères minimum)'}), 400
+    if current_user.is_authenticated:
+        if current_user.id == listing.vendeur_id:
+            return jsonify({'error': 'Vous ne pouvez pas signaler votre propre annonce'}), 400
+        identite, reporter_id, email = current_user.id, current_user.id, None
+    else:
+        email = (data.get('contact_email') or '').strip().lower()[:255]
+        if '@' not in email or '.' not in email.split('@')[-1]:
+            return jsonify({'error': 'Une adresse e-mail valide est requise'}), 400
+        identite, reporter_id = email, None
+
+    passe_en_revue = False
+    try:
+        ouverts = ListingReport.query.filter_by(listing_id=listing.id, statut='nouveau').all()
+        identites = {(x.reporter_id or (x.contact_email or '').lower()) for x in ouverts}
+        if identite in identites:
+            return jsonify({'success': True, 'deja': True}), 200
+        db.session.add(ListingReport(
+            listing_id=listing.id, listing_titre=(listing.titre or '')[:120],
+            reporter_id=reporter_id, contact_email=email, motif=motif, details=details or None,
+            statut='nouveau'))
+        identites.add(identite)
+        if len(identites) >= SEUIL_SIGNALEMENTS:
+            passe_en_revue = True
+            listing.statut = 'en_revue'
+            if not ListingReview.query.filter_by(listing_id=listing.id, statut='en_attente').first():
+                db.session.add(ListingReview(
+                    listing_id=listing.id, listing_titre=(listing.titre or '')[:120],
+                    vendeur_id=listing.vendeur_id, motif='signalement', statut='en_attente'))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error': 'Signalement impossible. Réessayez.'}), 500
+
+    if passe_en_revue:
+        _notifier_admins('Annonce signalée', f"« {listing.titre} » a été signalée par {SEUIL_SIGNALEMENTS} personnes et passe en revue.")
+        _notifier_vendeur(listing.vendeur_id, "Annonce en cours d'examen", f"Votre annonce « {listing.titre} » a été signalée et sera examinée.")
+    return jsonify({'success': True}), 201
+
+
+@marketplace_bp.route('/admin/reviews', methods=['GET'])
+@login_required
+def list_reviews():
+    if not _est_moderateur():
+        return jsonify({'error': 'Non autorisé'}), 403
+    statut = request.args.get('statut', 'en_attente')
+    if statut not in ('en_attente', 'approuve', 'refuse', 'retire'):
+        statut = 'en_attente'
+    reviews = ListingReview.query.filter_by(statut=statut).order_by(ListingReview.created_at.desc()).limit(100).all()
+    items = []
+    for rv in reviews:
+        d = rv.to_dict()
+        l = Listing.query.get(rv.listing_id)
+        d['listing'] = {
+            'statut': l.statut, 'description': (l.description or '')[:500], 'prix_centimes': l.prix_centimes,
+            'devise': l.devise, 'source_type': l.source_type, 'categorie': l.categorie
+        } if l else None
+        v = User.query.get(rv.vendeur_id) if rv.vendeur_id else None
+        d['vendeur_email'] = v.email if v else None
+        reports = ListingReport.query.filter_by(listing_id=rv.listing_id).order_by(ListingReport.created_at.desc()).limit(10).all()
+        d['signalements'] = [{'motif': x.motif, 'details': x.details,
+                              'created_at': x.created_at.isoformat() if x.created_at else None} for x in reports]
+        items.append(d)
+    return jsonify({'reviews': items})
+
+
+@marketplace_bp.route('/admin/reviews/<review_id>/decision', methods=['POST'])
+@login_required
+def decide_review(review_id):
+    if not _est_moderateur():
+        return jsonify({'error': 'Non autorisé'}), 403
+    review = ListingReview.query.get_or_404(review_id)
+    if review.statut != 'en_attente':
+        return jsonify({'error': 'Ce dossier a déjà été traité'}), 409
+    data = request.get_json(silent=True) or {}
+    decision = data.get('decision')
+    motif = (data.get('motif') or '').strip()[:1000]
+    if decision not in ('approuver', 'refuser', 'retirer'):
+        return jsonify({'error': 'Décision invalide'}), 400
+    if decision != 'approuver' and len(motif) < 5:
+        return jsonify({'error': 'Un motif est requis pour refuser ou retirer une annonce'}), 400
+
+    statut_review = {'approuver': 'approuve', 'refuser': 'refuse', 'retirer': 'retire'}[decision]
+    statut_listing = {'approuver': 'publie', 'refuser': 'refuse', 'retirer': 'retire'}[decision]
+    listing = Listing.query.get(review.listing_id)
+    titre = (listing.titre if listing else review.listing_titre) or 'Annonce'
+    try:
+        if listing:
+            listing.statut = statut_listing
+        review.statut = statut_review
+        review.decide_par = current_user.id
+        review.decision_motif = motif or None
+        review.decided_at = datetime.utcnow()
+        for rp in ListingReport.query.filter_by(listing_id=review.listing_id, statut='nouveau').all():
+            rp.statut = 'traite'
+            rp.traite_par = current_user.id
+            rp.traite_at = datetime.utcnow()
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error': 'Décision impossible. Réessayez.'}), 500
+
+    if decision == 'approuver':
+        _notifier_vendeur(review.vendeur_id, 'Annonce approuvée', f"Votre annonce « {titre} » est maintenant en ligne.")
+    elif decision == 'refuser':
+        _notifier_vendeur(review.vendeur_id, 'Annonce refusée', f"Votre annonce « {titre} » a été refusée : {motif}")
+    else:
+        _notifier_vendeur(review.vendeur_id, 'Annonce retirée', f"Votre annonce « {titre} » a été retirée : {motif}")
+    return jsonify({'success': True, 'review': review.to_dict()})
