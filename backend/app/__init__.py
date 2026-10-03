@@ -62,6 +62,21 @@ def create_app(test_config=None):
     app.config['WTF_CSRF_CHECK_DEFAULT'] = True
     app.config['WTF_CSRF_SSL_STRICT'] = False
     csrf.init_app(app)
+
+    @app.before_request
+    def bloquer_requetes_meme_origine():
+        # Une application publiee est servie depuis l'origine de l'API : ses scripts
+        # ne doivent pas pouvoir appeler l'API avec la session du visiteur.
+        from flask import request, jsonify
+        chemin = request.path
+        if not chemin.startswith('/api/'):
+            return None
+        if '/live/' in chemin or chemin.startswith('/api/appdb/v1/'):
+            return None
+        origine = request.headers.get('Origin', '').rstrip('/')
+        if request.headers.get('Sec-Fetch-Site') == 'same-origin' or (origine and origine == request.host_url.rstrip('/')):
+            return jsonify({'error': 'Requête refusée'}), 403
+        return None
     socketio.init_app(app, async_mode='eventlet')
 
     if not app.debug:
