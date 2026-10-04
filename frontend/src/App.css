@@ -3798,3 +3798,34 @@ body.dark-mode .report-overlay{--r-surface:#1F1C2C;--r-line:#2E2A40;--r-ink:#F1E
 .report-cancel{border:1px solid var(--r-line);background:var(--r-surface);color:var(--r-ink)}
 .report-send{border:0;background:linear-gradient(135deg,var(--r-primary),var(--r-primary2));color:#fff}
 .report-send:disabled{opacity:.5;cursor:default}
+
+/* ===== Administration: modération ===== */
+.admin-tabs{overflow-x:auto;scrollbar-width:none}
+.admin-tabs::-webkit-scrollbar{display:none}
+.admin-tabs button{flex:none;white-space:nowrap}
+.mod-panel{--m-bg:#F7F5EF;--m-surface:#fff;--m-line:#E7E2D6;--m-ink:#211D33;--m-muted:#7B7591;--m-primary:#5B5BD6;--m-primary2:#7C6CF0;--m-soft:#EEEDFB;--m-ok:#1F7A5A;--m-warn:#A5480B;--m-warn-bg:#FDEBDD;--m-info:#3B5BDB;--m-info-bg:#E7EDFF;margin:0 16px 40px;padding:16px;box-sizing:border-box;background:var(--m-bg);color:var(--m-ink);border-radius:20px;text-align:left}
+body.dark-mode .mod-panel{--m-bg:#16141F;--m-surface:#1F1C2C;--m-line:#2E2A40;--m-ink:#F1EFF8;--m-muted:#A29DB8;--m-primary:#8B8BF2;--m-primary2:#A08FFF;--m-soft:#2A2850;--m-ok:#6FD3A8;--m-warn:#F5B27A;--m-warn-bg:#3A2415;--m-info:#9DB4FF;--m-info-bg:#1D2748}
+.mod-chips{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none}
+.mod-chips::-webkit-scrollbar{display:none}
+.mod-chips button{flex:none;height:40px;padding:0 16px;border:1px solid var(--m-line);border-radius:999px;background:var(--m-surface);color:var(--m-muted);font:inherit;font-size:15px;cursor:pointer}
+.mod-chips button.active{border-color:transparent;background:linear-gradient(135deg,var(--m-primary),var(--m-primary2));color:#fff;font-weight:600}
+.mod-error{margin:0 0 12px;padding:10px 12px;border-radius:12px;background:var(--m-warn-bg);color:var(--m-warn);font-size:14px;line-height:1.4}
+.mod-empty{margin:0;padding:28px 12px;text-align:center;color:var(--m-muted);font-size:15px}
+.mod-list{display:grid;gap:12px}
+.mod-card{display:flex;flex-direction:column;gap:8px;padding:16px;background:var(--m-surface);border:1px solid var(--m-line);border-radius:18px}
+.mod-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.mod-head h3{margin:0;font-size:17px;font-weight:600;color:var(--m-ink);overflow-wrap:anywhere}
+.mod-badge{flex:none;display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;background:var(--m-info-bg);color:var(--m-info);font-size:13px;font-weight:500}
+.mod-meta{margin:0;font-size:13px;color:var(--m-muted);overflow-wrap:anywhere}
+.mod-term{margin:0;font-size:14px;font-weight:600;color:var(--m-warn)}
+.mod-desc{margin:0;font-size:14px;line-height:1.45;color:var(--m-ink);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.mod-block{padding:10px 12px;border-radius:12px;background:var(--m-bg);font-size:14px;line-height:1.45}
+.mod-block span{display:block;margin-bottom:4px;font-size:13px;font-weight:600;color:var(--m-muted)}
+.mod-block p{margin:0 0 4px;overflow-wrap:anywhere}
+.mod-motif{width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid var(--m-line);border-radius:14px;background:var(--m-surface);color:var(--m-ink);font:inherit;font-size:16px;resize:vertical}
+.mod-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.mod-actions button{height:46px;border-radius:14px;font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+.mod-ok{border:0;background:linear-gradient(135deg,var(--m-primary),var(--m-primary2));color:#fff}
+.mod-no{border:1px solid var(--m-line);background:var(--m-surface);color:var(--m-warn)}
+.mod-actions button:disabled{opacity:.5;cursor:default}
+.mod-decision{margin:0;font-size:14px;color:var(--m-muted)}

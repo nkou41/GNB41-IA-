@@ -126,6 +126,120 @@ function tonStatut(statut: string): string {
 
 const API_URL_PUBLIQUE: string = (import.meta as any).env.VITE_API_URL || 'http://localhost:5001/api';
 
+const MOTIFS_REVUE: Record<string, string> = { marque_detectee: 'Marque détectée', signalement: 'Signalée', modification: 'Modifiée' };
+const STATUTS_REVUE: [string, string][] = [['en_attente', 'À examiner'], ['approuve', 'Approuvées'], ['refuse', 'Refusées'], ['retire', 'Retirées']];
+
+function PanneauModeration() {
+  const [statut, setStatut] = useState('en_attente');
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [erreur, setErreur] = useState('');
+  const [motifs, setMotifs] = useState<Record<string, string>>({});
+  const [occupe, setOccupe] = useState<string | null>(null);
+
+  const charger = (s: string) => {
+    setLoading(true);
+    setErreur('');
+    api.listReviews(s)
+      .then((res: any) => setItems(res.reviews || []))
+      .catch((err: any) => { setItems([]); setErreur(err.message); })
+      .finally(() => setLoading(false));
+  };
+  useEffect(() => { charger(statut); }, [statut]);
+
+  const decider = async (rv: any, decision: 'approuver' | 'refuser' | 'retirer') => {
+    const motif = (motifs[rv.id] || '').trim();
+    if (decision !== 'approuver' && motif.length < 5) {
+      setErreur('Un motif de 5 caractères minimum est requis pour refuser ou retirer.');
+      return;
+    }
+    const texte = {
+      approuver: 'Approuver cette annonce ? Elle sera mise en ligne.',
+      refuser: 'Refuser cette annonce ? Le vendeur sera notifié avec votre motif.',
+      retirer: 'Retirer cette annonce ? Le vendeur sera notifié avec votre motif.',
+    }[decision];
+    if (!window.confirm(texte)) return;
+    setOccupe(rv.id);
+    setErreur('');
+    try {
+      await api.decideReview(rv.id, decision, motif);
+      setItems((prev) => prev.filter((x) => x.id !== rv.id));
+    } catch (err: any) {
+      setErreur(err.message);
+    } finally {
+      setOccupe(null);
+    }
+  };
+
+  const date = (iso: string | null) => iso ? new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+
+  return (
+    <div className="mod-panel">
+      <div className="mod-chips" role="tablist" aria-label="Statut des dossiers">
+        {STATUTS_REVUE.map(([val, label]) => (
+          <button key={val} type="button" role="tab" aria-selected={statut === val} className={statut === val ? 'active' : ''} onClick={() => setStatut(val)}>{label}</button>
+        ))}
+      </div>
+      {erreur && <p className="mod-error" role="alert">{erreur}</p>}
+      {loading ? (
+        <p className="mod-empty">Chargement…</p>
+      ) : items.length === 0 ? (
+        <p className="mod-empty">{statut === 'en_attente' ? 'Aucune annonce à examiner.' : 'Aucun dossier dans cette catégorie.'}</p>
+      ) : (
+        <div className="mod-list">
+          {items.map((rv) => (
+            <article key={rv.id} className="mod-card">
+              <div className="mod-head">
+                <h3>{rv.listing_titre || 'Annonce'}</h3>
+                <span className="mod-badge">{MOTIFS_REVUE[rv.motif] || rv.motif}</span>
+              </div>
+              <p className="mod-meta">
+                {rv.vendeur_email || 'Vendeur inconnu'} · {date(rv.created_at)}
+                {rv.listing ? ` · ${(rv.listing.prix_centimes / 100).toFixed(2)} ${rv.listing.devise}` : ' · annonce supprimée'}
+              </p>
+              {rv.terme && <p className="mod-term">Détecté : {rv.terme}</p>}
+              {rv.listing && rv.listing.description && <p className="mod-desc">{rv.listing.description}</p>}
+              {rv.justification && (
+                <div className="mod-block">
+                  <span>Justification du vendeur</span>
+                  <p>{rv.justification}</p>
+                </div>
+              )}
+              {rv.signalements && rv.signalements.length > 0 && (
+                <div className="mod-block">
+                  <span>Signalements ({rv.signalements.length})</span>
+                  {rv.signalements.map((sg: any, i: number) => (
+                    <p key={i}>{sg.motif}{sg.details ? ` : ${sg.details}` : ''}</p>
+                  ))}
+                </div>
+              )}
+              {statut === 'en_attente' ? (
+                <>
+                  <textarea
+                    className="mod-motif"
+                    rows={2}
+                    maxLength={1000}
+                    placeholder="Motif (obligatoire pour refuser ou retirer)"
+                    value={motifs[rv.id] || ''}
+                    onChange={(e) => setMotifs({ ...motifs, [rv.id]: e.target.value })}
+                  />
+                  <div className="mod-actions">
+                    <button type="button" className="mod-ok" disabled={occupe === rv.id} onClick={() => decider(rv, 'approuver')}>Approuver</button>
+                    <button type="button" className="mod-no" disabled={occupe === rv.id} onClick={() => decider(rv, 'refuser')}>Refuser</button>
+                    <button type="button" className="mod-no" disabled={occupe === rv.id} onClick={() => decider(rv, 'retirer')}>Retirer</button>
+                  </div>
+                </>
+              ) : (
+                <p className="mod-decision">{rv.decision_motif || 'Aucun motif enregistré'}{rv.decided_at ? ` · ${date(rv.decided_at)}` : ''}</p>
+              )}
+            </article>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true); // TODO: nettoyage complet prévu plus tard
@@ -140,7 +254,7 @@ function App() {
   const [resetStatus, setResetStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [resetMessage, setResetMessage] = useState('');
   const [adminStats, setAdminStats] = useState<any | null>(null);
-  const [adminTab, setAdminTab] = useState<'boutique' | 'utilisateurs' | 'workspaces' | 'evaluation'>('boutique');
+  const [adminTab, setAdminTab] = useState<'boutique' | 'moderation' | 'utilisateurs' | 'workspaces' | 'evaluation'>('boutique');
   const [adminUsers, setAdminUsers] = useState<any[]>([]);
   const [adminWorkspaces, setAdminWorkspaces] = useState<any[]>([]);
   const [adminUsersLoading, setAdminUsersLoading] = useState(false);
@@ -1110,7 +1224,10 @@ function App() {
           <button onClick={() => setAdminTab('utilisateurs')} className={adminTab === 'utilisateurs' ? 'btn-publish' : 'btn-publish is-cancel'}>Utilisateurs</button>
           <button onClick={() => setAdminTab('workspaces')} className={adminTab === 'workspaces' ? 'btn-publish' : 'btn-publish is-cancel'}>Workspaces</button>
           <button onClick={() => setAdminTab('evaluation')} className={adminTab === 'evaluation' ? 'btn-publish' : 'btn-publish is-cancel'}>Evaluation IA</button>
+          <button onClick={() => setAdminTab('moderation')} className={adminTab === 'moderation' ? 'btn-publish' : 'btn-publish is-cancel'}>Modération</button>
         </div>
+
+        {adminTab === 'moderation' && <PanneauModeration />}
 
         {adminTab === 'boutique' && (
         !adminStats ? (

@@ -110,6 +110,8 @@ export const api = {
   myListings: () => request('/marketplace/mine'),
   deleteListing: (listingId: string) => request(`/marketplace/${listingId}`, { method: 'DELETE' }),
   reportListing: (listingId: string, motif: string, details: string) => request(`/marketplace/${listingId}/report`, { method: 'POST', body: JSON.stringify({ motif, details }) }),
+  listReviews: (statut: string) => request(`/marketplace/admin/reviews?statut=${statut}`),
+  decideReview: (reviewId: string, decision: string, motif: string) => request(`/marketplace/admin/reviews/${reviewId}/decision`, { method: 'POST', body: JSON.stringify({ decision, motif }) }),
   createListing: (formData: FormData) => requestForm('/marketplace', formData),
   myPurchases: () => request('/marketplace/mine-purchases'),
   purchaseListing: (listingId: string) => request(`/marketplace/${listingId}/purchase`, { method: 'POST' }),
