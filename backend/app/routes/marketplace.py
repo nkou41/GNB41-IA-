@@ -310,8 +310,11 @@ def delete_listing(listing_id):
 @marketplace_bp.route('/<listing_id>/preview', methods=['GET'])
 def preview_listing(listing_id):
     listing = Listing.query.get_or_404(listing_id)
+    moderation = False
     if listing.statut != 'publie':
-        return jsonify({'error': 'Annonce non disponible'}), 404
+        if not _est_moderateur():
+            return jsonify({'error': 'Annonce non disponible'}), 404
+        moderation = True
 
     if listing.source_type != 'gnb41' or not listing.project_id:
         return jsonify({'error': "Pas d'apercu disponible pour ce type d'annonce"}), 404
@@ -326,7 +329,13 @@ def preview_listing(listing_id):
         html_file = next((f for f in fichiers if f['chemin'].endswith('.html')), None)
         if not html_file:
             return jsonify({'error': 'Aucun fichier HTML dans ce projet'}), 404
-        return Response(html_file['contenu'], mimetype='text/html')
+        reponse = Response(html_file['contenu'], mimetype='text/html')
+        if moderation:
+            # Contenu non vérifié : exécuté dans un bac à sable, sans accès à la session du modérateur.
+            reponse.headers['Content-Security-Policy'] = 'sandbox allow-scripts'
+            reponse.headers['Cache-Control'] = 'no-store'
+            reponse.headers['X-Content-Type-Options'] = 'nosniff'
+        return reponse
     except (json.JSONDecodeError, KeyError):
         return jsonify({'error': "Erreur lors de la lecture de l'apercu"}), 500
 
@@ -664,3 +673,45 @@ def decide_review(review_id):
     else:
         _notifier_vendeur(review.vendeur_id, 'Annonce retirée', f"Votre annonce « {titre} » a été retirée : {motif}")
     return jsonify({'success': True, 'review': review.to_dict()})
+
+
+@marketplace_bp.route('/admin/listings/<listing_id>/retirer', methods=['POST'])
+@login_required
+def retirer_annonce(listing_id):
+    """Retrait d'office d'une annonce (réclamation d'un titulaire de droits, abus...)."""
+    if not _est_moderateur():
+        return jsonify({'error': 'Non autorisé'}), 403
+    listing = Listing.query.get_or_404(listing_id)
+    if listing.statut in ('retire', 'refuse'):
+        return jsonify({'error': 'Cette annonce est déjà retirée'}), 409
+    data = request.get_json(silent=True) or {}
+    motif = (data.get('motif') or '').strip()[:1000]
+    if len(motif) < 5:
+        return jsonify({'error': 'Un motif de 5 caractères minimum est requis'}), 400
+
+    maintenant = datetime.utcnow()
+    titre = listing.titre or 'Annonce'
+    try:
+        ouverts = ListingReview.query.filter_by(listing_id=listing.id, statut='en_attente').all()
+        for rv in ouverts:
+            rv.statut = 'retire'
+            rv.decide_par = current_user.id
+            rv.decision_motif = motif
+            rv.decided_at = maintenant
+        if not ouverts:
+            db.session.add(ListingReview(
+                listing_id=listing.id, listing_titre=titre[:120], vendeur_id=listing.vendeur_id,
+                motif='retrait_office', statut='retire', decide_par=current_user.id,
+                decision_motif=motif, decided_at=maintenant))
+        for rp in ListingReport.query.filter_by(listing_id=listing.id, statut='nouveau').all():
+            rp.statut = 'traite'
+            rp.traite_par = current_user.id
+            rp.traite_at = maintenant
+        listing.statut = 'retire'
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error': 'Retrait impossible. Réessayez.'}), 500
+
+    _notifier_vendeur(listing.vendeur_id, 'Annonce retirée', f"Votre annonce « {titre} » a été retirée : {motif}")
+    return jsonify({'success': True})
