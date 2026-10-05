@@ -17,8 +17,8 @@ def envoyer_push(user_id, titre, message, lien=None):
         return 0
     try:
         from pywebpush import webpush, WebPushException
-    except ImportError:
-        log.warning('pywebpush non installe')
+    except Exception as e:
+        log.warning('pywebpush indisponible: %r', e)
         return 0
 
     payload = json.dumps({'title': titre, 'body': message, 'url': lien or '/'})
