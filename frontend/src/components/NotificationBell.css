@@ -42,3 +42,14 @@
 .nb-empty-ico{width:84px;height:84px;margin:0 auto 18px;border-radius:28px;background:#eef0ff;color:#6366f1;display:flex;align-items:center;justify-content:center}
 .nb-empty h3{margin:0 0 6px;font-size:18px;color:#1c1b2e}
 .nb-empty p{margin:0;font-size:14px}
+
+/* Le panneau ne dépasse jamais de l'écran */
+.nb-empty-title{margin:0 0 6px;font-size:18px;font-weight:700;color:#1c1b2e}
+.nb-overlay{top:0;left:0;width:100%;max-width:100vw;height:100%;overflow:hidden}
+.nb-overlay,.nb-overlay *{box-sizing:border-box}
+.nb-panel{max-width:100vw;overflow-x:hidden}
+.nb-header,.nb-main,.nb-bar,.nb-list{min-width:0;max-width:100%}
+.nb-main{overflow-x:hidden}
+.nb-card{max-width:100%}
+.nb-overlay button{min-width:0}
+.nb-card-title,.nb-msg{overflow-wrap:anywhere;word-break:break-word}
