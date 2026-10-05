@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, type ReactElement, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NotificationBell from './components/NotificationBell';
+import { formatDate, formatDateTime, formatShortDateTime, formatTime, parseServerDate } from './lib/time';
 import PublicNav from './components/PublicNav';
 import Apropos from './pages/Apropos';
 import Contact from './pages/Contact';
@@ -195,7 +196,7 @@ function PanneauModeration() {
     }
   };
 
-  const date = (iso: string | null) => iso ? new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+  const date = (iso: string | null) => iso ? formatShortDateTime(iso) : '';
   const vide = statut === 'en_ligne' ? annonces.length === 0 : items.length === 0;
 
   return (
@@ -1322,7 +1323,7 @@ function App() {
                       <span className="admin-sales-titre">{v.titre}</span>
                       <span className="admin-sales-prix">{(v.prix_paye_centimes / 100).toFixed(2)} €</span>
                       <span className={`marketplace-badge ${v.statut === 'complete' ? '' : 'admin-badge-pending'}`}>{v.statut}</span>
-                      <span className="admin-sales-date">{new Date(v.created_at).toLocaleDateString('fr-FR')}</span>
+                      <span className="admin-sales-date">{formatDate(v.created_at)}</span>
                     </div>
                   ))}
                 </div>
@@ -1339,7 +1340,7 @@ function App() {
                 {adminUsers.map((u: any) => (
                   <div key={u.id} className="admin-sales-row">
                     <span className="admin-sales-titre">{u.username} ({u.email})</span>
-                    <span className="admin-sales-date">{new Date(u.created_at).toLocaleDateString('fr-FR')}</span>
+                    <span className="admin-sales-date">{formatDate(u.created_at)}</span>
                     <select value={u.role} onChange={(e) => api.adminUpdateUserRole(u.id, e.target.value).then(() => api.adminListUsers().then((res) => setAdminUsers(res.users)))}>
                       <option value="user">user</option>
                       <option value="admin">admin</option>
@@ -1390,7 +1391,7 @@ function App() {
               adminEvalSuites.map((suite: any) => (
                 <div key={suite.suite_id} style={{ marginBottom: '1.5rem' }}>
                   <h3 style={{ fontSize: '0.95rem', opacity: 0.7 }}>
-                    {new Date(suite.created_at).toLocaleString('fr-FR')}
+                    {formatDateTime(suite.created_at)}
                   </h3>
                   <div className="admin-sales-table">
                     {suite.runs.map((r: any) => (
@@ -1451,7 +1452,7 @@ function App() {
                   <span className={`acv-badge acv-badge-${tonStatut(p.statut)}`}>{libelleStatut(p.statut)}</span>
                 </div>
                 <p className="acv-date">
-                  Acheté le {new Date(p.created_at).toLocaleDateString('fr-FR')}
+                  Acheté le {formatDate(p.created_at)}
                 </p>
                 {p.statut === 'en_attente' && (
                   <button
@@ -2293,7 +2294,7 @@ ${jsFile.contenu}
                       return (
                         <li key={log.id}>
                           <strong>{log.username}</strong> {label} {log.details && <em>{log.details}</em>}
-                          <span className="activity-date"> — {new Date(log.created_at).toLocaleString('fr-FR')}</span>
+                          <span className="activity-date"> — {formatDateTime(log.created_at)}</span>
                         </li>
                       );
                     })}
@@ -2378,7 +2379,7 @@ ${jsFile.contenu}
                 <li key={v.id} className="ver-card">
                   <span className={`statut statut-${v.statut} ver-statut`}>{({ pret: 'Prêt', genere: 'Prêt', erreur: 'Échec', en_generation: 'En cours', en_attente: 'En attente' } as Record<string, string>)[v.statut] || v.statut}</span>
                   <p className="ver-prompt">{v.prompt}</p>
-                  <span className="ver-meta">{new Date(v.created_at).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                  <span className="ver-meta">{formatShortDateTime(v.created_at)}</span>
                   {v.duree_generation_ms != null && (
                     <span className="ver-meta">{(v.duree_generation_ms / 1000).toFixed(1)} s</span>
                   )}
@@ -2440,7 +2441,7 @@ ${jsFile.contenu}
                     return m.content;
                   })()}</p>
                   <div className="chat-msg-actions">
-                    {m.created_at && <span className="msg-time">{new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>}
+                    {m.created_at && <span className="msg-time">{formatTime(m.created_at)}</span>}
                     <button type="button" className="msg-action-btn" title="Copier" onClick={() => copyMessage(m.content)}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                     </button>
@@ -2856,7 +2857,7 @@ ${jsFile.contenu}
                 <div className="side-menu-user-info">
                   <span className="side-menu-username">{user.username}</span>
                   {user.plan === 'pro' && user.plan_expiry ? (
-                    <span className="side-menu-plan">Pro jusqu'au {new Date(user.plan_expiry).toLocaleDateString('fr-FR')}</span>
+                    <span className="side-menu-plan">Pro jusqu'au {formatDate(user.plan_expiry)}</span>
                   ) : (
                     <span className="side-menu-plan side-menu-plan-free">Plan Gratuit</span>
                   )}
@@ -2943,7 +2944,7 @@ ${jsFile.contenu}
                   navigateTo(`/projet/${p.id}`);
                 };
                 const depuis = (iso: string) => {
-                  const d = (new Date(iso).getTime() - Date.now()) / 1000;
+                  const d = (parseServerDate(iso).getTime() - Date.now()) / 1000;
                   const rtf = new Intl.RelativeTimeFormat('fr', { numeric: 'auto' });
                   const u: [Intl.RelativeTimeFormatUnit, number][] = [['year', 31536000], ['month', 2592000], ['day', 86400], ['hour', 3600], ['minute', 60]];
                   for (const [k, v] of u) { if (Math.abs(d) >= v) return rtf.format(Math.round(d / v), k); }

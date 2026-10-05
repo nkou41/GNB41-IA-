@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { getSocket } from '../socket';
 import './NotificationBell.css';
+import { formatRelative, isToday, parseServerDate, useTimeZone } from '../lib/time';
 
 interface Notification {
   id: number;
@@ -37,24 +38,13 @@ const ICONS = {
   info: Bell,
 };
 
-function relatif(iso: string) {
-  const d = new Date(iso);
-  const s = (Date.now() - d.getTime()) / 1000;
-  if (s < 60) return "À l'instant";
-  if (s < 3600) return `Il y a ${Math.floor(s / 60)} min`;
-  if (s < 86400) return `Il y a ${Math.floor(s / 3600)} h`;
-  if (s < 172800) return 'Hier';
-  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-}
-
-const estAujourdhui = (iso: string) =>
-  new Date(iso).toDateString() === new Date().toDateString();
 
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [nonLues, setNonLues] = useState(0);
   const [open, setOpen] = useState(false);
   const [filtre, setFiltre] = useState<'all' | 'unread'>('all');
+  useTimeZone();
 
   const fetchNotifications = async () => {
     try {
@@ -131,11 +121,11 @@ export default function NotificationBell() {
     () =>
       notifications
         .filter((n) => filtre === 'all' || !n.lu)
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
+        .sort((a, b) => parseServerDate(b.created_at).getTime() - parseServerDate(a.created_at).getTime()),
     [notifications, filtre]
   );
-  const aujourdhui = affichees.filter((n) => estAujourdhui(n.created_at));
-  const avant = affichees.filter((n) => !estAujourdhui(n.created_at));
+  const aujourdhui = affichees.filter((n) => isToday(n.created_at));
+  const avant = affichees.filter((n) => !isToday(n.created_at));
 
   const carte = (n: Notification) => {
     const kind = kindOf(n);
@@ -150,7 +140,7 @@ export default function NotificationBell() {
         <span className="nb-text">
           <span className="nb-row">
             <span className="nb-card-title">{n.titre}</span>
-            <span className="nb-time">{relatif(n.created_at)}</span>
+            <span className="nb-time">{formatRelative(n.created_at)}</span>
           </span>
           <span className="nb-msg">{n.message}</span>
         </span>
