@@ -13,7 +13,7 @@ MARQUES = [
     "Ligue des champions", "Champions League", "Ballon d'or",
     "EA Sports FC", "eFootball", "Football Manager",
     # Joueurs
-    "Messi", "Cristiano Ronaldo", "Mbappé", "Neymar", "Haaland", "Benzema", "Zidane", "Maradona",
+    "Messi", "Cristiano Ronaldo", "Ronaldo", "Lewandowski", "Bellingham", "Mbappé", "Neymar", "Haaland", "Benzema", "Zidane", "Maradona",
     # Cinéma, séries, animation
     "Disney", "Pixar", "DreamWorks", "Warner Bros", "Marvel", "Avengers", "Spider-Man", "Batman", "Superman",
     "Star Wars", "Harry Potter", "Le Seigneur des anneaux", "Game of Thrones", "Squid Game", "Netflix",
