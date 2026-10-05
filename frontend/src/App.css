@@ -3829,3 +3829,6 @@ body.dark-mode .mod-panel{--m-bg:#16141F;--m-surface:#1F1C2C;--m-line:#2E2A40;--
 .mod-no{border:1px solid var(--m-line);background:var(--m-surface);color:var(--m-warn)}
 .mod-actions button:disabled{opacity:.5;cursor:default}
 .mod-decision{margin:0;font-size:14px;color:var(--m-muted)}
+
+.mod-link{align-self:flex-start;display:inline-flex;align-items:center;height:40px;padding:0 14px;border:1px solid var(--m-line);border-radius:12px;color:var(--m-primary);font-size:14px;font-weight:600;text-decoration:none}
+.mod-actions.un{grid-template-columns:1fr}

@@ -126,23 +126,28 @@ function tonStatut(statut: string): string {
 
 const API_URL_PUBLIQUE: string = (import.meta as any).env.VITE_API_URL || 'http://localhost:5001/api';
 
-const MOTIFS_REVUE: Record<string, string> = { marque_detectee: 'Marque détectée', signalement: 'Signalée', modification: 'Modifiée' };
-const STATUTS_REVUE: [string, string][] = [['en_attente', 'À examiner'], ['approuve', 'Approuvées'], ['refuse', 'Refusées'], ['retire', 'Retirées']];
+const MOTIFS_REVUE: Record<string, string> = { marque_detectee: 'Marque détectée', signalement: 'Signalée', modification: 'Modifiée', retrait_office: "Retrait d'office" };
+const STATUTS_REVUE: [string, string][] = [['en_attente', 'À examiner'], ['approuve', 'Approuvées'], ['refuse', 'Refusées'], ['retire', 'Retirées'], ['en_ligne', 'En ligne']];
 
 function PanneauModeration() {
   const [statut, setStatut] = useState('en_attente');
   const [items, setItems] = useState<any[]>([]);
+  const [annonces, setAnnonces] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [erreur, setErreur] = useState('');
   const [motifs, setMotifs] = useState<Record<string, string>>({});
   const [occupe, setOccupe] = useState<string | null>(null);
 
+  const lienApercu = (id: string) => `${API_URL_PUBLIQUE}/marketplace/${id}/preview`;
+
   const charger = (s: string) => {
     setLoading(true);
     setErreur('');
-    api.listReviews(s)
-      .then((res: any) => setItems(res.reviews || []))
-      .catch((err: any) => { setItems([]); setErreur(err.message); })
+    const requete = s === 'en_ligne'
+      ? api.listMarketplace().then((res: any) => { setAnnonces(res.listings || []); })
+      : api.listReviews(s).then((res: any) => { setItems(res.reviews || []); });
+    requete
+      .catch((err: any) => { setItems([]); setAnnonces([]); setErreur(err.message); })
       .finally(() => setLoading(false));
   };
   useEffect(() => { charger(statut); }, [statut]);
@@ -171,7 +176,27 @@ function PanneauModeration() {
     }
   };
 
+  const retirer = async (a: any) => {
+    const motif = (motifs[a.id] || '').trim();
+    if (motif.length < 5) {
+      setErreur('Un motif de 5 caractères minimum est requis pour retirer une annonce.');
+      return;
+    }
+    if (!window.confirm(`Retirer « ${a.titre} » ? Le vendeur sera notifié avec votre motif.`)) return;
+    setOccupe(a.id);
+    setErreur('');
+    try {
+      await api.retirerAnnonce(a.id, motif);
+      setAnnonces((prev) => prev.filter((x) => x.id !== a.id));
+    } catch (err: any) {
+      setErreur(err.message);
+    } finally {
+      setOccupe(null);
+    }
+  };
+
   const date = (iso: string | null) => iso ? new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+  const vide = statut === 'en_ligne' ? annonces.length === 0 : items.length === 0;
 
   return (
     <div className="mod-panel">
@@ -183,8 +208,35 @@ function PanneauModeration() {
       {erreur && <p className="mod-error" role="alert">{erreur}</p>}
       {loading ? (
         <p className="mod-empty">Chargement…</p>
-      ) : items.length === 0 ? (
-        <p className="mod-empty">{statut === 'en_attente' ? 'Aucune annonce à examiner.' : 'Aucun dossier dans cette catégorie.'}</p>
+      ) : vide ? (
+        <p className="mod-empty">{statut === 'en_attente' ? 'Aucune annonce à examiner.' : statut === 'en_ligne' ? 'Aucune annonce en ligne.' : 'Aucun dossier dans cette catégorie.'}</p>
+      ) : statut === 'en_ligne' ? (
+        <div className="mod-list">
+          {annonces.map((a) => (
+            <article key={a.id} className="mod-card">
+              <div className="mod-head">
+                <h3>{a.titre}</h3>
+                <span className="mod-badge">{(a.prix_centimes / 100).toFixed(2)} {a.devise}</span>
+              </div>
+              <p className="mod-meta">{[date(a.created_at), a.categorie].filter(Boolean).join(' · ')}</p>
+              {a.description && <p className="mod-desc">{a.description}</p>}
+              {a.source_type === 'gnb41' && (
+                <a className="mod-link" href={lienApercu(a.id)} target="_blank" rel="noopener noreferrer">Voir l'application</a>
+              )}
+              <textarea
+                className="mod-motif"
+                rows={2}
+                maxLength={1000}
+                placeholder="Motif du retrait (obligatoire)"
+                value={motifs[a.id] || ''}
+                onChange={(e) => setMotifs({ ...motifs, [a.id]: e.target.value })}
+              />
+              <div className="mod-actions un">
+                <button type="button" className="mod-no" disabled={occupe === a.id} onClick={() => retirer(a)}>Retirer l'annonce</button>
+              </div>
+            </article>
+          ))}
+        </div>
       ) : (
         <div className="mod-list">
           {items.map((rv) => (
@@ -199,6 +251,9 @@ function PanneauModeration() {
               </p>
               {rv.terme && <p className="mod-term">Détecté : {rv.terme}</p>}
               {rv.listing && rv.listing.description && <p className="mod-desc">{rv.listing.description}</p>}
+              {rv.listing && rv.listing.source_type === 'gnb41' && (
+                <a className="mod-link" href={lienApercu(rv.listing_id)} target="_blank" rel="noopener noreferrer">Voir l'application</a>
+              )}
               {rv.justification && (
                 <div className="mod-block">
                   <span>Justification du vendeur</span>
