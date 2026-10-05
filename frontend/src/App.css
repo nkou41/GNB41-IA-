@@ -3832,3 +3832,6 @@ body.dark-mode .mod-panel{--m-bg:#16141F;--m-surface:#1F1C2C;--m-line:#2E2A40;--
 
 .mod-link{align-self:flex-start;display:inline-flex;align-items:center;height:40px;padding:0 14px;border:1px solid var(--m-line);border-radius:12px;color:var(--m-primary);font-size:14px;font-weight:600;text-decoration:none}
 .mod-actions.un{grid-template-columns:1fr}
+
+.mod-chips{flex-wrap:wrap;overflow:visible}
+.mod-chips button{height:38px;padding:0 14px;font-size:14px}
