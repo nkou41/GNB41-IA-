@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, type ReactElement, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NotificationBell from './components/NotificationBell';
+import Preferences from './components/Preferences';
+import { isDarkNow, setThemePref, useThemePref } from './lib/prefs';
 import { formatDate, formatDateTime, formatShortDateTime, formatTime, parseServerDate } from './lib/time';
 import PublicNav from './components/PublicNav';
 import Apropos from './pages/Apropos';
@@ -405,18 +407,16 @@ function App() {
   const [quickLoading, setQuickLoading] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [darkMode, setDarkMode] = useState<boolean>(() => localStorage.getItem('theme') === 'dark');
+  useThemePref();
+  const darkMode = isDarkNow();
+  const setDarkMode = (v: boolean) => setThemePref(v ? 'dark' : 'light');
   const [ouvertureId, setOuvertureId] = useState<string | number | null>(null);
   const [menuProjetId, setMenuProjetId] = useState<string | number | null>(null);
   const [vueMobile, setVueMobile] = useState<'chat' | 'apercu'>('apercu');
   useEffect(() => { if (activeProject?.id) setVueMobile('apercu'); }, [activeProject?.id]); // studio-ouvre-apercu
   const [menuStudio, setMenuStudio] = useState(false);
 
-  useEffect(() => {
-    document.body.classList.toggle('dark-mode', darkMode);
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
-  const [showWorkspaceSettings, setShowWorkspaceSettings] = useState(false);
+    const [showWorkspaceSettings, setShowWorkspaceSettings] = useState(false);
   const [workspaceSettingsTab, setWorkspaceSettingsTab] = useState<'membres' | 'activite' | 'general'>('membres');
   const [wsMembers, setWsMembers] = useState<any[]>([]);
   const [wsActivityLogs, setWsActivityLogs] = useState<any[]>([]);
@@ -1800,6 +1800,8 @@ function App() {
               <p className="settings-page-subtitle" style={{ marginBottom: 0 }}>Gérez vos informations personnelles et vos connexions de publication.</p>
             </div>
           </div>
+
+          <Preferences />
 
           <div className="settings-card">
             <div className="settings-card-header">
