@@ -129,6 +129,8 @@ def create_app(test_config=None):
     app.register_blueprint(billing_bp, url_prefix='/api/billing')
     from app.routes.notifications import notifications_bp
     app.register_blueprint(notifications_bp, url_prefix='/api/notifications')
+    from app.routes.push import push_bp
+    app.register_blueprint(push_bp, url_prefix='/api/push')
     from app.routes.admin import admin_bp
     from app.routes.studio import studio_bp, studio_public_bp
     app.register_blueprint(admin_bp, url_prefix='/api/admin')

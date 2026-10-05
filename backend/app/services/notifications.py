@@ -17,4 +17,10 @@ def envoyer_notification(user_id, type, titre, message, lien=None):
 
     socketio.emit('notification', notif.to_dict(), room=f'user_{user_id}')
 
+    try:
+        from app.services.push import envoyer_push
+        envoyer_push(user_id, titre, message, lien)
+    except Exception:
+        pass
+
     return notif

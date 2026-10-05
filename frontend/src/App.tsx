@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, type ReactElement, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import NotificationBell from './components/NotificationBell';
 import Preferences from './components/Preferences';
+import PushToggle from './components/PushToggle';
 import { isDarkNow, setThemePref, useThemePref } from './lib/prefs';
 import { formatDate, formatDateTime, formatShortDateTime, formatTime, parseServerDate } from './lib/time';
 import PublicNav from './components/PublicNav';
@@ -1802,6 +1803,7 @@ function App() {
           </div>
 
           <Preferences />
+            <PushToggle />
 
           <div className="settings-card">
             <div className="settings-card-header">

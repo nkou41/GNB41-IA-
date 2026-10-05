@@ -6,3 +6,8 @@
 .pf-seg{display:flex;gap:6px;padding:4px;border-radius:12px;background:#f1f2f7}
 .pf-seg-btn{flex:1;padding:10px 6px;border:0;border-radius:9px;background:transparent;color:#6b6f80;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .pf-seg-btn.is-active{background:#6366f1;color:#fff}
+
+.pf-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.pf-btn{padding:11px 18px;border:0;border-radius:12px;background:#6366f1;color:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.pf-btn:disabled{opacity:.5;cursor:default}
+.pf-btn-soft{background:#eef0ff;color:#6366f1}
