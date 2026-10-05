@@ -3,9 +3,7 @@ import {
   COUNTRIES, deviceTimeZone, formatDate, formatTime,
   getTimeZonePref, setTimeZonePref, useTimeZone,
 } from '../lib/time';
-import {
-  BACKGROUNDS, setBgPref, setThemePref, useBgPref, useThemePref, type Theme,
-} from '../lib/prefs';
+import { setThemePref, useThemePref, type Theme } from '../lib/prefs';
 import './Preferences.css';
 
 const THEMES: { id: Theme; nom: string }[] = [
@@ -18,7 +16,6 @@ export default function Preferences() {
   const tz = useTimeZone();
   const pref = getTimeZonePref();
   const theme = useThemePref();
-  const bg = useBgPref();
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -54,21 +51,6 @@ export default function Preferences() {
             onClick={() => setThemePref(t.id)}
           >
             {t.nom}
-          </button>
-        ))}
-      </div>
-
-      <div className="pf-label">Fond d'écran (thème clair)</div>
-      <div className="pf-swatches">
-        {BACKGROUNDS.map((b) => (
-          <button
-            key={b.id}
-            className={`pf-swatch${bg === b.id ? ' is-active' : ''}`}
-            onClick={() => setBgPref(b.id)}
-            aria-label={b.nom}
-          >
-            <span className="pf-swatch-color" style={{ background: b.css || '#f7f5f0' }} />
-            <span className="pf-swatch-name">{b.nom}</span>
           </button>
         ))}
       </div>
