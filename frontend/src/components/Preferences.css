@@ -11,3 +11,13 @@
 .pf-btn{padding:11px 18px;border:0;border-radius:12px;background:#6366f1;color:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .pf-btn:disabled{opacity:.5;cursor:default}
 .pf-btn-soft{background:#eef0ff;color:#6366f1}
+
+.pf-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-top:1px solid #eef0f6}
+.pf-row:first-of-type{margin-top:12px}
+.pf-row-text{min-width:0}
+.pf-row-label{font-size:15px;font-weight:600;color:#1c1b2e}
+.pf-row-desc{margin-top:2px;font-size:13px;line-height:1.4;color:#6b6f80}
+.pf-switch{position:relative;flex:none;width:50px;height:30px;padding:0;border:0;border-radius:15px;background:#d4d6e3;cursor:pointer;transition:background .15s}
+.pf-switch.is-on{background:#6366f1}
+.pf-switch-knob{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+.pf-switch.is-on .pf-switch-knob{transform:translateX(20px)}

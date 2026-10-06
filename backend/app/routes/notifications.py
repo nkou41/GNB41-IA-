@@ -32,3 +32,26 @@ def tout_marquer_lu():
     Notification.query.filter_by(user_id=current_user.id, lu=False).update({'lu': True})
     db.session.commit()
     return jsonify({'success': True})
+
+
+@notifications_bp.route('/preferences', methods=['GET'])
+@login_required
+def lire_preferences():
+    from app.services.notification_prefs import CATEGORIES, get_preferences
+    etat = get_preferences(current_user.id)
+    return jsonify({'categories': [
+        {'id': c['id'], 'label': c['label'], 'description': c['description'],
+         'active': etat[c['id']]} for c in CATEGORIES
+    ]})
+
+
+@notifications_bp.route('/preferences', methods=['PUT'])
+@login_required
+def modifier_preference():
+    from app.services.notification_prefs import IDS, set_preference
+    data = request.get_json(silent=True) or {}
+    categorie = data.get('categorie')
+    if categorie not in IDS or not isinstance(data.get('active'), bool):
+        return jsonify({'error': 'Requête invalide'}), 400
+    set_preference(current_user.id, categorie, data['active'])
+    return jsonify({'success': True})

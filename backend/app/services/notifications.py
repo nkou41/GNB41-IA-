@@ -1,10 +1,14 @@
 from app import db, socketio
 from app.models.notification import Notification
+from app.services.notification_prefs import categorie_active
 
 def envoyer_notification(user_id, type, titre, message, lien=None):
     """
     Cree une notification en base ET la pousse en temps reel si l'utilisateur est connecte.
     """
+    if not categorie_active(user_id, type):
+        return None
+
     notif = Notification(
         user_id=user_id,
         type=type,
