@@ -75,3 +75,35 @@ export async function sendTestPush(): Promise<number> {
   const data = await res.json();
   return data.sent || 0;
 }
+
+export type PushStatus = 'unsupported' | 'ios-install' | 'denied' | 'enabled' | 'available';
+
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = () =>
+  window.matchMedia('(display-mode: standalone)').matches ||
+  (navigator as unknown as { standalone?: boolean }).standalone === true;
+
+export async function pushStatus(): Promise<PushStatus> {
+  if (!pushSupported()) return isIOS() && !isStandalone() ? 'ios-install' : 'unsupported';
+  if (Notification.permission === 'denied') return 'denied';
+  if (await isPushEnabled()) return 'enabled';
+  return 'available';
+}
+
+/** Réinscrit silencieusement cet appareil au nom de l'utilisateur connecté */
+export async function syncPush(): Promise<void> {
+  if (!pushSupported() || Notification.permission !== 'granted') return;
+  await navigator.serviceWorker.register('/sw.js');
+  const reg = await navigator.serviceWorker.ready;
+  const keyRes = await fetch(`${API_BASE}/push/public-key`, { credentials: 'include' });
+  const { public_key } = await keyRes.json();
+  if (!public_key) return;
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) {
+    sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: toBytes(public_key) as BufferSource,
+    });
+  }
+  await post('/push/subscribe', sub.toJSON());
+}

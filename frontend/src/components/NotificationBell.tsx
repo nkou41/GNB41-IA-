@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { getSocket } from '../socket';
 import './NotificationBell.css';
+import PushPrompt from './PushPrompt';
 import { formatRelative, isToday, parseServerDate, useTimeZone } from '../lib/time';
 
 interface Notification {
@@ -215,6 +216,7 @@ export default function NotificationBell() {
         {nonLues > 0 && <span className="nb-badge">{nonLues > 9 ? '9+' : nonLues}</span>}
       </button>
       {open && createPortal(panneau, document.body)}
+      <PushPrompt />
     </>
   );
 }
