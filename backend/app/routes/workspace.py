@@ -142,6 +142,13 @@ def remove_member(workspace_id, user_id):
     log_activity(workspace_id, current_user.id, 'member_removed', removed_user.email if removed_user else user_id)
     db.session.delete(member)
     db.session.commit()
+    try:
+        from app.services.notifications import envoyer_notification
+        envoyer_notification(
+            user_id, 'workspace', "Retiré d'un espace de travail",
+            f"{current_user.username} vous a retiré d'un espace de travail.")
+    except Exception:
+        db.session.rollback()
     return jsonify({'success': True})
 
 
