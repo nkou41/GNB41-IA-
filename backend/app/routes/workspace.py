@@ -108,6 +108,13 @@ def add_member(workspace_id):
     db.session.add(member)
     log_activity(workspace_id, current_user.id, 'member_added', user.email)
     db.session.commit()
+    try:
+        from app.services.notifications import envoyer_notification
+        envoyer_notification(
+            user.id, 'workspace', 'Nouvel espace de travail',
+            f"{current_user.username} vous a ajouté à un espace de travail.")
+    except Exception:
+        db.session.rollback()
 
     return jsonify({
         'user_id': user.id,

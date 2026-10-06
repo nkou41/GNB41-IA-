@@ -459,6 +459,16 @@ def verify_purchase(purchase_id):
                     message=f'Votre application "{listing_vendu.titre}" vient d\'etre achetee.',
                     lien=f'/marketplace/mes-ventes'
                 )
+                try:
+                    envoyer_notification(
+                        user_id=purchase.acheteur_id,
+                        type='achat',
+                        titre='Achat confirmé',
+                        message=f'Votre achat de "{listing_vendu.titre}" est confirmé.',
+                        lien='/marketplace'
+                    )
+                except Exception:
+                    db.session.rollback()
         elif statut_fedapay in ('declined', 'canceled'):
             purchase.statut = 'echoue'
             db.session.commit()

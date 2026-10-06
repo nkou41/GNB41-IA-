@@ -110,6 +110,13 @@ def _activate_plan(transaction_id, tx):
     user.pending_transaction_id = None
     db.session.commit()
     try:
+        from app.services.notifications import envoyer_notification
+        envoyer_notification(
+            user.id, 'abonnement', 'Paiement confirmé',
+            f"Votre plan {plan.nom} est activé jusqu'au {user.plan_expiry.strftime('%d/%m/%Y')}.")
+    except Exception:
+        db.session.rollback()
+    try:
         send_email(
             user.email,
             f"Paiement confirme - Plan {plan.nom}",
@@ -191,12 +198,21 @@ def cron_daily():
         User.plan_expiry.isnot(None),
         User.plan_expiry < now).all()
     expired_info = [(u.email, u.username, u.plan) for u in expired]
+    expired_ids = [u.id for u in expired]
     for u in expired:
         u.plan = 'gratuit'
         u.plan_expiry = None
         u.credits = free_credits
         u.reminder_sent_for = None
     db.session.commit()
+    for uid, (_e, _n, _old) in zip(expired_ids, expired_info):
+        try:
+            from app.services.notifications import envoyer_notification
+            envoyer_notification(
+                uid, 'abonnement', 'Abonnement expiré',
+                f"Votre plan {_old} a expiré. Votre compte est repassé au plan Gratuit.")
+        except Exception:
+            db.session.rollback()
     for email, name, old_plan in expired_info:
         try:
             send_email(email, "Votre abonnement a expire",
@@ -223,6 +239,13 @@ def cron_daily():
             u.reminder_sent_for = u.plan_expiry
             db.session.commit()
             reminded += 1
+            try:
+                from app.services.notifications import envoyer_notification
+                envoyer_notification(
+                    u.id, 'abonnement', 'Abonnement bientôt expiré',
+                    f"Votre plan {u.plan} expire le {u.plan_expiry.strftime('%d/%m/%Y')}. Renouvelez-le pour garder vos crédits.")
+            except Exception:
+                db.session.rollback()
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Email rappel: {e}")
