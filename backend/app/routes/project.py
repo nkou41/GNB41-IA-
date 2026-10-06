@@ -197,10 +197,27 @@ def _run_generation(project, prompt, provider, history=None, image=None, mode=No
             api_key_raw = _provision_database(project, tables)
             project.code_genere = _substitute_placeholders(project.code_genere, project, api_key_raw)
 
+    credit_utilise = False
     if owner and owner.credits is not None and result['statut'] != 'erreur' and not est_clarification:
         owner.credits = max(0, owner.credits - 1)
+        credit_utilise = True
 
     db.session.commit()
+
+    if credit_utilise and owner.role not in ('admin', 'superadmin') and owner.credits in (0, 1):
+        try:
+            from app.services.notifications import envoyer_notification
+            if owner.credits == 0:
+                envoyer_notification(
+                    owner.id, 'credits', 'Crédits épuisés',
+                    "Vous n'avez plus de crédits. Passez à un plan supérieur pour continuer à générer.")
+            else:
+                envoyer_notification(
+                    owner.id, 'credits', 'Il vous reste 1 crédit',
+                    "Votre dernier crédit sera bientôt utilisé. Pensez à mettre à niveau votre plan.")
+        except Exception:
+            db.session.rollback()
+
     return project
 
 
