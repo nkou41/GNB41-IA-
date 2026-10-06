@@ -240,6 +240,10 @@ def create_listing():
 
     if statut_initial == 'en_revue':
         _notifier_moderation(listing, marques)
+    else:
+        _notifier_vendeur(
+            current_user.id, 'Annonce publiée',
+            f"Votre annonce « {listing.titre} » est maintenant en ligne.")
 
     return jsonify(listing.to_dict()), 201
 
