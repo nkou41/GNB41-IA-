@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import NotificationBell from './components/NotificationBell';
 import Preferences from './components/Preferences';
 import PushToggle from './components/PushToggle';
+import { setSessionActive } from './lib/session';
 import NotificationPrefs from './components/NotificationPrefs';
 import { isDarkNow, setThemePref, useThemePref } from './lib/prefs';
 import { formatDate, formatDateTime, formatShortDateTime, formatTime, parseServerDate } from './lib/time';
@@ -302,6 +303,7 @@ function PanneauModeration() {
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
+  useEffect(() => { setSessionActive(!!user); }, [user]);
   const [loading, setLoading] = useState(true); // TODO: nettoyage complet prévu plus tard
   const [resetToken, setResetToken] = useState<string | null>(null);
   const [confirmToken, setConfirmToken] = useState<string | null>(null);

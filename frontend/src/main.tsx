@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import ErrorBoundary from './ErrorBoundary.tsx'
+import PushPromptGate from './components/PushPromptGate'
 import WebContainerTest from './WebContainerTest.tsx'
 import { initAnalytics } from './analytics'
 
@@ -17,7 +18,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <ErrorBoundary>
-        {WEBCONTAINER_TEST_MODE ? <WebContainerTest /> : <App />}
+        {WEBCONTAINER_TEST_MODE ? <WebContainerTest /> : <><App /><PushPromptGate /></>}
       </ErrorBoundary>
     </BrowserRouter>
   </StrictMode>,
