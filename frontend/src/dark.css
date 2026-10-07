@@ -47,7 +47,6 @@ body.dark-mode button.header-logout{background:#181a2e!important;border-color:#2
 
 /* Bouton du menu : barres claires en thème sombre */
 body.dark-mode .hamburger-btn span{background:#f1f1f8!important}
-body.dark-mode .hamburger-btn{border-color:#26283f!important;background:#181a2e!important}
 
 /* Les projets récents ne dépassent jamais de l'écran */
 .recent-section{max-width:100%;overflow-x:hidden}
