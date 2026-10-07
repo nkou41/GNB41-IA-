@@ -152,6 +152,22 @@ def create_listing():
             }), 409
         statut_initial = 'en_revue'
 
+    signaux = []
+    try:
+        from app.services.signaux_moderation import signaux_suspects
+        nb_ventes = (Purchase.query.join(Listing, Purchase.listing_id == Listing.id)
+                     .filter(Listing.vendeur_id == current_user.id, Purchase.statut == 'complete')
+                     .count())
+        signaux = signaux_suspects(
+            titre, description, request.form.get('tags', ''),
+            lien_externe if source_type == 'externe_lien' else None,
+            source_type, getattr(current_user, 'created_at', None), nb_ventes)
+    except Exception:
+        db.session.rollback()
+        signaux = []
+    if signaux and statut_initial == 'publie':
+        statut_initial = 'en_revue'
+
     try:
         prix_centimes = int(prix)
         if prix_centimes < 0:
@@ -187,6 +203,11 @@ def create_listing():
     elif source_type == 'externe_lien':
         if not lien_externe:
             return jsonify({'error': 'lien_externe requis pour source_type=externe_lien'}), 400
+        lien_externe = lien_externe.strip()
+        if lien_externe and ':' not in lien_externe.split('/')[0]:
+            lien_externe = 'https://' + lien_externe
+        if not lien_externe.lower().startswith(('http://', 'https://')):
+            return jsonify({'error': 'Le lien doit commencer par http:// ou https://'}), 400
         project_id = None
         try:
             domain = urlparse(lien_externe).netloc
@@ -236,11 +257,20 @@ def create_listing():
         from app.models.listing_review import ListingReview
         db.session.add(ListingReview(
             listing_id=listing.id, listing_titre=(listing.titre or '')[:120], vendeur_id=current_user.id,
-            motif='marque_detectee', terme=', '.join(marques)[:120], justification=justification,
+            motif='marque_detectee' if marques else 'signal_auto',
+            terme=(', '.join(marques) if marques else ' ; '.join(signaux))[:120],
+            justification=justification or ('Détection automatique : ' + ' ; '.join(signaux))[:2000],
             statut='en_attente'))
     db.session.commit()
 
-    if statut_initial == 'en_revue':
+    if statut_initial == 'en_revue' and not marques:
+        _notifier_vendeur(
+            current_user.id, "Annonce en cours d'examen",
+            f"Votre annonce « {listing.titre} » sera examinée avant sa mise en ligne.")
+        _notifier_admins(
+            'Annonce à examiner',
+            f"« {listing.titre} » : {' ; '.join(signaux)}. Vérification manuelle requise.")
+    elif statut_initial == 'en_revue':
         _notifier_moderation(listing, marques)
     else:
         _notifier_vendeur(
@@ -733,3 +763,31 @@ def retirer_annonce(listing_id):
 
     _notifier_vendeur(listing.vendeur_id, 'Annonce retirée', f"Votre annonce « {titre} » a été retirée : {motif}")
     return jsonify({'success': True})
+
+
+@marketplace_bp.route('/admin/suspects', methods=['GET'])
+@login_required
+def annonces_suspectes():
+    # Annonces déjà publiées qui présentent les signaux de la modération automatique.
+    if not _est_moderateur():
+        return jsonify({'error': 'Non autorisé'}), 403
+    from app.services.signaux_moderation import signaux_suspects
+    resultats = []
+    for l in Listing.query.filter(Listing.statut == 'publie').limit(500).all():
+        try:
+            source = getattr(l, 'source_type', None) or ('externe_lien' if l.lien_externe else 'gnb41')
+            vendeur = User.query.get(l.vendeur_id)
+            nb_ventes = (Purchase.query.join(Listing, Purchase.listing_id == Listing.id)
+                         .filter(Listing.vendeur_id == l.vendeur_id, Purchase.statut == 'complete')
+                         .count())
+            signaux = signaux_suspects(
+                l.titre, l.description, l.tags,
+                l.lien_externe if source == 'externe_lien' else None,
+                source, getattr(vendeur, 'created_at', None), nb_ventes)
+            if signaux:
+                resultats.append({
+                    'id': l.id, 'titre': l.titre, 'vendeur': getattr(vendeur, 'username', None),
+                    'lien': l.lien_externe, 'signaux': signaux})
+        except Exception:
+            db.session.rollback()
+    return jsonify({'total': len(resultats), 'annonces': resultats})

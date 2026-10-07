@@ -1140,7 +1140,7 @@ function App() {
           </button>
           <div className="marketplace-header-actions">
             <span>{user.username}</span>
-            <button onClick={handleLogout}>Déconnexion</button>
+            <button className="header-logout" onClick={handleLogout}>Déconnexion</button>
           </div>
         </header>
 
@@ -1268,7 +1268,7 @@ function App() {
           <div className="marketplace-header-actions">
             <NotificationBell />
             <span>{user.username}</span>
-            <button onClick={handleLogout}>Déconnexion</button>
+            <button className="header-logout" onClick={handleLogout}>Déconnexion</button>
           </div>
         </header>
 
@@ -1432,7 +1432,7 @@ function App() {
           <div className="marketplace-header-actions">
             <NotificationBell />
             <span>{user.username}</span>
-            <button onClick={handleLogout}>Déconnexion</button>
+            <button className="header-logout" onClick={handleLogout}>Déconnexion</button>
           </div>
         </header>
 
@@ -1493,7 +1493,7 @@ function App() {
           <div className="marketplace-header-actions">
             <NotificationBell />
             <span>{user.username}</span>
-            <button onClick={handleLogout}>Déconnexion</button>
+            <button className="header-logout" onClick={handleLogout}>Déconnexion</button>
           </div>
         </header>
 
@@ -1566,7 +1566,7 @@ function App() {
           <div className="marketplace-header-actions">
             <NotificationBell />
             <span>{user.username}</span>
-            <button onClick={handleLogout}>Déconnexion</button>
+            <button className="header-logout" onClick={handleLogout}>Déconnexion</button>
           </div>
         </header>
 
@@ -1793,7 +1793,7 @@ function App() {
           <div>
             <NotificationBell />
             <span>{user.username}</span>
-            <button onClick={handleLogout}>Déconnexion</button>
+            <button className="header-logout" onClick={handleLogout}>Déconnexion</button>
           </div>
         </header>
         <main className="settings-page-main">
