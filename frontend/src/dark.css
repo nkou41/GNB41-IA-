@@ -1,0 +1,46 @@
+:root{--c-bg:#f7f5f0;--c-surface:#ffffff;--c-surface2:#f0ede4;--c-line:#ddd6c7;--c-text:#2b2410;--c-muted:#8a7f68}
+body.dark-mode{--c-bg:#0f1020;--c-surface:#181a2e;--c-surface2:#20233a;--c-line:#26283f;--c-text:#f1f1f8;--c-muted:#a3a6bd;filter:none!important;background:#0f1020!important;color:#f1f1f8;color-scheme:dark}
+html:has(body.dark-mode){color-scheme:dark;background:#0f1020}
+body.dark-mode img,body.dark-mode video,body.dark-mode iframe,body.dark-mode .preview-iframe{filter:none!important}
+
+/* Notifications */
+body.dark-mode .nb-panel{background:#0f1020;color:#f1f1f8}
+body.dark-mode .nb-header{background:#181a2e;border-color:#26283f}
+body.dark-mode .nb-title,body.dark-mode .nb-card-title,body.dark-mode .nb-empty h3,body.dark-mode .nb-empty-title{color:#f1f1f8}
+body.dark-mode .nb-back,body.dark-mode .nb-empty-ico{background:#272a52;color:#8b8bf2}
+body.dark-mode .nb-tab{background:#20233a;color:#a3a6bd}
+body.dark-mode .nb-tab.is-active{background:#6366f1;color:#fff}
+body.dark-mode .nb-card{background:#181a2e;border-color:#26283f}
+body.dark-mode .nb-card.is-unread{background:#1d2040;border-color:#3a3d78}
+body.dark-mode .nb-msg,body.dark-mode .nb-time,body.dark-mode .nb-group,body.dark-mode .nb-empty{color:#a3a6bd}
+body.dark-mode .nb-pending .nb-ico{background:#3a2d10}
+body.dark-mode .nb-review .nb-ico{background:#14284a}
+body.dark-mode .nb-rejected .nb-ico{background:#3d1b1f}
+body.dark-mode .nb-approved .nb-ico{background:#13301f}
+body.dark-mode .nb-info .nb-ico{background:#272a52}
+body.dark-mode .nb-bell:hover{background:rgba(255,255,255,.08)}
+
+/* Paramètres : apparence, notifications */
+body.dark-mode .pf-card{background:#181a2e;border-color:#26283f;color:#f1f1f8}
+body.dark-mode .pf-select{background:#0f1020;border-color:#26283f;color:#f1f1f8}
+body.dark-mode .pf-seg{background:#20233a}
+body.dark-mode .pf-seg-btn{color:#a3a6bd}
+body.dark-mode .pf-seg-btn.is-active{background:#6366f1;color:#fff}
+body.dark-mode .pf-hint,body.dark-mode .pf-label,body.dark-mode .pf-row-desc{color:#a3a6bd}
+body.dark-mode .pf-row-label{color:#f1f1f8}
+body.dark-mode .pf-row{border-color:#26283f}
+body.dark-mode .pf-switch{background:#3a3d57}
+body.dark-mode .pf-switch.is-on{background:#6366f1}
+body.dark-mode .pf-btn-soft{background:#272a52;color:#8b8bf2}
+
+/* Fenêtre de demande et bannière de l'APK */
+body.dark-mode .pp-sheet{background:#181a2e;color:#f1f1f8}
+body.dark-mode .pp-text,body.dark-mode .pp-link{color:#a3a6bd}
+body.dark-mode .pp-ico{background:#272a52;color:#8b8bf2}
+body.dark-mode .pp-secondary{background:#20233a;color:#d4d6e8}
+body.dark-mode .ab-bar{background:#181a2e;border-color:#26283f;color:#f1f1f8}
+body.dark-mode .ab-sub{color:#a3a6bd}
+body.dark-mode .ab-close{background:#20233a;color:#a3a6bd}
+
+/* Bouton Déconnexion */
+body.dark-mode button.header-logout{background:#181a2e!important;border-color:#26283f!important;color:#f1f1f8!important}

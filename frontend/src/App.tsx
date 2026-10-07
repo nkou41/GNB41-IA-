@@ -1246,7 +1246,7 @@ function App() {
               <p style={{ marginTop: '1rem' }}><strong>6. Litiges</strong></p>
               <p>[Adresse email de contact pour tout litige]. À défaut de résolution amiable, les tribunaux compétents seront ceux du ressort de [ville/juridiction].</p>
 
-              <p style={{ marginTop: '1.5rem', fontStyle: 'italic', color: '#8a7f68' }}>
+              <p style={{ marginTop: '1.5rem', fontStyle: 'italic', color: 'var(--c-muted)' }}>
                 Ce document est un modèle et doit être complété/validé par un professionnel du droit avant mise en ligne publique.
               </p>
             </>
@@ -1317,9 +1317,9 @@ function App() {
             </div>
 
             <div style={{ padding: '0 1.5rem 2rem' }}>
-              <h3 style={{ marginBottom: '0.8rem', color: '#2b2410' }}>Dernières ventes</h3>
+              <h3 style={{ marginBottom: '0.8rem', color: 'var(--c-text)' }}>Dernières ventes</h3>
               {adminStats.dernieres_ventes.length === 0 ? (
-                <p style={{ color: '#8a7f68' }}>Aucune vente pour le moment.</p>
+                <p style={{ color: 'var(--c-muted)' }}>Aucune vente pour le moment.</p>
               ) : (
                 <div className="admin-sales-table">
                   {adminStats.dernieres_ventes.map((v: any) => (
@@ -1605,7 +1605,7 @@ function App() {
               <textarea placeholder="Description" value={publishDescription} onChange={(e) => setPublishDescription(e.target.value)} rows={3} />
               <input placeholder="Prix (€)" type="number" step="0.01" min="0" value={publishPrix} onChange={(e) => setPublishPrix(e.target.value)} />
 
-              <label style={{ fontSize: '0.85rem', color: '#8a7f68' }}>
+              <label style={{ fontSize: '0.85rem', color: 'var(--c-muted)' }}>
                 Image de présentation (optionnel — sinon capture automatique pour les liens)
               </label>
               <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => setPublishImage(e.target.files?.[0] || null)} />
@@ -1772,7 +1772,7 @@ function App() {
             </div>
           </div>
         )}
-        <div style={{ padding: '1.5rem', textAlign: 'center', fontSize: '0.8rem', color: '#a89f8c' }}>
+        <div style={{ padding: '1.5rem', textAlign: 'center', fontSize: '0.8rem', color: 'var(--c-muted)' }}>
           <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setShowLegal('cgv')}>Conditions Générales de Vente</span>
           {' · '}
           <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setShowLegal('mentions')}>Mentions légales</span>
@@ -1862,7 +1862,7 @@ function App() {
                     <IconCheckCircle />
                     Connecté
                   </span>
-                  <p style={{ marginTop: '0.8rem', fontSize: '0.9rem', color: '#4a4432' }}>Package : <strong>{googlePlayStatut.package_name}</strong></p>
+                  <p style={{ marginTop: '0.8rem', fontSize: '0.9rem', color: 'var(--c-text)' }}>Package : <strong>{googlePlayStatut.package_name}</strong></p>
                   <button
                     className="btn-publish is-cancel settings-btn-icon"
                     style={{ marginTop: '0.8rem' }}

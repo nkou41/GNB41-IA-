@@ -6,6 +6,7 @@ import App from './App.tsx'
 import ErrorBoundary from './ErrorBoundary.tsx'
 import PushPromptGate from './components/PushPromptGate'
 import ApkBanner from './components/ApkBanner'
+import './dark.css'
 import WebContainerTest from './WebContainerTest.tsx'
 import { initAnalytics } from './analytics'
 
