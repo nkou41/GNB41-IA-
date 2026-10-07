@@ -2,46 +2,159 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Télécharger GNB41 IA pour Android</title>
+<meta name="description" content="Installez l'application Android GNB41 IA : plein écran et notifications, même application fermée.">
+<meta name="theme-color" content="#6366f1">
+<link rel="icon" href="/favicon-32x32.png">
 <style>
-  *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#f6f7fb;color:#1c1b2e}
-  main{max-width:520px;margin:0 auto;padding:32px 20px}
-  .logo{width:72px;height:72px;border-radius:18px}
-  h1{margin:16px 0 6px;font-size:26px}
-  p{line-height:1.55;color:#4b4f63}
-  .btn{display:block;margin:22px 0 6px;padding:15px;border-radius:14px;background:#6366f1;color:#fff;text-align:center;text-decoration:none;font-weight:700;font-size:16px}
-  .meta{text-align:center;font-size:13px;color:#6b6f80}
-  .card{margin-top:26px;padding:18px;border:1px solid #e8e9f1;border-radius:16px;background:#fff}
-  .card h2{margin:0 0 8px;font-size:16px}
-  ol{margin:0;padding-left:20px;color:#4b4f63;line-height:1.7}
-  a.back{display:block;margin-top:24px;text-align:center;color:#6366f1;text-decoration:none;font-weight:600}
+:root{--accent:#6366f1;--accent2:#8b5cf6;--bg:#f6f7fb;--card:#fff;--text:#1c1b2e;--muted:#5d6176;--line:#e8e9f1;--soft:#eef0ff}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1020;--card:#181a2e;--text:#f1f1f8;--muted:#a3a6bd;--line:#26283f;--soft:#272a52}}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;padding-bottom:env(safe-area-inset-bottom)}
+.wrap{max-width:560px;margin:0 auto;padding:0 18px}
+.hero{background:linear-gradient(160deg,var(--accent),var(--accent2));color:#fff;border-radius:0 0 30px 30px;padding:calc(env(safe-area-inset-top) + 22px) 0 30px;text-align:center}
+.brand{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:700;font-size:15px;opacity:.95}
+.brand img{width:28px;height:28px;border-radius:8px;background:#fff}
+.logo{width:92px;height:92px;margin:22px auto 16px;border-radius:24px;background:#fff;padding:8px;box-shadow:0 12px 32px rgba(0,0,0,.25)}
+.logo img{width:100%;height:100%;border-radius:16px;display:block}
+.badge{display:inline-block;padding:4px 12px;border-radius:999px;background:rgba(255,255,255,.2);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+h1{margin:12px 0 8px;font-size:28px;line-height:1.2}
+.lead{max-width:420px;margin:0 auto;font-size:15px;opacity:.95}
+.cta{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:360px;margin:24px auto 0;padding:16px;border:0;border-radius:16px;background:#fff;color:var(--accent);font:inherit;font-size:17px;font-weight:800;text-decoration:none;box-shadow:0 10px 26px rgba(0,0,0,.22)}
+.cta:active{transform:scale(.98)}
+.cta svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.status{min-height:20px;margin-top:10px;font-size:13px;opacity:.95}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:14px}
+.chip{padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.18);font-size:13px;font-weight:600}
+.notice{margin:18px 0 0;padding:14px 16px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:14px;background:var(--card);font-size:14px;color:var(--muted)}
+.notice b{color:var(--text)}
+.copy{margin-top:10px;padding:8px 14px;border:0;border-radius:10px;background:var(--soft);color:var(--accent);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+section{margin-top:28px}
+h2{margin-bottom:12px;font-size:19px}
+.features{display:grid;gap:10px}
+.feat{display:flex;gap:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+.ico{flex:none;width:44px;height:44px;border-radius:12px;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center}
+.ico svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.feat b{display:block;font-size:15px}
+.feat span{font-size:14px;color:var(--muted)}
+.steps{list-style:none;counter-reset:s;border:1px solid var(--line);border-radius:16px;background:var(--card);padding:6px 16px}
+.steps li{counter-increment:s;position:relative;padding:14px 0 14px 44px;font-size:14.5px;color:var(--muted);border-top:1px solid var(--line)}
+.steps li:first-child{border-top:0}
+.steps li b{color:var(--text)}
+.steps li:before{content:counter(s);position:absolute;left:0;top:13px;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center}
+details{border:1px solid var(--line);border-radius:14px;background:var(--card);margin-bottom:8px;overflow:hidden}
+summary{padding:14px 16px;font-size:15px;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:10px}
+summary::-webkit-details-marker{display:none}
+summary:after{content:"+";color:var(--accent);font-size:20px;line-height:1}
+details[open] summary:after{content:"–"}
+details p{padding:0 16px 14px;font-size:14px;color:var(--muted)}
+code{display:block;margin:0 16px 14px;padding:10px;border-radius:10px;background:var(--bg);font-size:11.5px;word-break:break-all;color:var(--text)}
+footer{margin:30px 0 24px;text-align:center;font-size:13px;color:var(--muted)}
+footer a{display:inline-block;margin-bottom:10px;color:var(--accent);font-weight:700;text-decoration:none;font-size:15px}
 </style>
 </head>
 <body>
-<main>
-  <img class="logo" src="/android-chrome-192x192.png" alt="GNB41 IA">
-  <h1>GNB41 IA pour Android</h1>
-  <p>Installez l'application pour ouvrir GNB41 IA en plein écran et recevoir vos notifications, même application fermée.</p>
-  <a class="btn" href="/gnb41-ia.apk" download="GNB41-IA.apk">Télécharger l'application</a>
-  <div class="meta" id="meta"></div>
-  <div class="card">
-    <h2>Comment l'installer</h2>
-    <ol>
-      <li>Touchez « Télécharger l'application », puis ouvrez le fichier une fois téléchargé.</li>
-      <li>Si Android le demande, autorisez l'installation depuis votre navigateur, puis revenez en arrière.</li>
-      <li>Si une alerte de sécurité s'affiche, choisissez « Installer quand même ».</li>
-      <li>Touchez « Ouvrir » et connectez-vous avec votre compte.</li>
-    </ol>
+<header class="hero">
+  <div class="wrap">
+    <div class="brand"><img src="/android-chrome-192x192.png" alt=""><span>GNB41 IA</span></div>
+    <div class="logo"><img src="/android-chrome-192x192.png" alt="Logo GNB41 IA"></div>
+    <span class="badge">Application Android</span>
+    <h1>GNB41 IA, toujours à portée de main</h1>
+    <p class="lead">Ouvrez GNB41 IA en plein écran et recevez vos notifications, même application fermée.</p>
+    <a class="cta" id="dl" href="/gnb41-ia.apk" download="GNB41-IA.apk">
+      <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+      Télécharger l'application
+    </a>
+    <div class="status" id="status" role="status"></div>
+    <div class="chips">
+      <span class="chip" id="chip-v" hidden></span>
+      <span class="chip" id="chip-s" hidden></span>
+      <span class="chip">Android 5.0 ou plus</span>
+    </div>
   </div>
-  <a class="back" href="/">Retour au site</a>
+</header>
+
+<main class="wrap">
+  <div class="notice" id="notice" hidden>
+    <p></p>
+    <button class="copy" id="copy" type="button">Copier le lien de cette page</button>
+  </div>
+
+  <section>
+    <h2>Pourquoi l'installer</h2>
+    <div class="features">
+      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></div><div><b>Plein écran</b><span>Une application à part entière, sans barre d'adresse, depuis l'écran d'accueil.</span></div></div>
+      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div><div><b>Notifications</b><span>Ventes, paiements et décisions sur vos annonces, même application fermée.</span></div></div>
+      <div class="feat"><div class="ico"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg></div><div><b>Toujours à jour</b><span>Le contenu se met à jour tout seul, sans réinstaller l'application.</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Installation en 4 étapes</h2>
+    <ol class="steps">
+      <li><b>Téléchargez le fichier</b> avec le bouton ci-dessus. Il apparaît dans les notifications de votre navigateur.</li>
+      <li><b>Ouvrez-le.</b> Si Android le demande, autorisez l'installation depuis votre navigateur, puis revenez en arrière.</li>
+      <li><b>Confirmez l'installation.</b> Si une alerte de sécurité s'affiche, choisissez « Installer quand même ».</li>
+      <li><b>Ouvrez GNB41 IA</b> et connectez-vous avec votre compte.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Questions fréquentes</h2>
+    <details><summary>Pourquoi Android affiche-t-il une alerte ?</summary><p>L'application n'est pas distribuée par Google Play : Android demande donc une confirmation pour tout fichier installé depuis un navigateur. Téléchargez-la uniquement depuis cette page.</p></details>
+    <details><summary>L'installation est-elle payante ?</summary><p>Non. Installer l'application est gratuit. Les plans et les crédits restent ceux de votre compte GNB41 IA.</p></details>
+    <details><summary>Comment mettre l'application à jour ?</summary><p>Son contenu se met à jour automatiquement. Pour une nouvelle version de l'application elle-même, revenez sur cette page et téléchargez-la de nouveau : elle s'installe par-dessus l'ancienne, sans perdre votre compte.</p></details>
+    <details><summary>Comment la désinstaller ?</summary><p>Maintenez l'icône GNB41 IA appuyée sur l'écran d'accueil, puis choisissez « Désinstaller ». Vos projets restent sur votre compte.</p></details>
+    <details><summary>Comment vérifier l'intégrité du fichier ?</summary><p>L'empreinte SHA-256 du fichier officiel est indiquée ci-dessous. Elle permet de vérifier qu'il n'a pas été modifié.</p><code id="sha">Chargement…</code></details>
+  </section>
 </main>
+
+<footer>
+  <a href="/">Retour au site</a>
+  <div>© GNB41 IA</div>
+</footer>
+
 <script>
-fetch('/apk-version.json',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
-  var mo=(d.size/1048576).toFixed(1).replace('.',',');
-  document.getElementById('meta').textContent='Version '+d.version+' · '+mo+' Mo';
-}).catch(function(){});
+(function () {
+  var ua = navigator.userAgent;
+  var isAndroid = /android/i.test(ua);
+  var isIOS = /iphone|ipad|ipod/i.test(ua);
+  var notice = document.getElementById('notice');
+  var status = document.getElementById('status');
+
+  if (!isAndroid) {
+    notice.hidden = false;
+    notice.querySelector('p').innerHTML = isIOS
+      ? "<b>Cette application est réservée à Android.</b> Sur iPhone, ouvrez le site dans Safari, touchez Partager puis « Sur l'écran d'accueil »."
+      : "<b>Cette page est destinée aux téléphones Android.</b> Ouvrez-la sur votre téléphone pour installer l'application.";
+  }
+
+  fetch('/apk-version.json', { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      var v = document.getElementById('chip-v');
+      var s = document.getElementById('chip-s');
+      v.textContent = 'Version ' + d.version; v.hidden = false;
+      s.textContent = (d.size / 1048576).toFixed(1).replace('.', ',') + ' Mo'; s.hidden = false;
+      document.getElementById('sha').textContent = d.sha256 || 'Non disponible';
+    })
+    .catch(function () {
+      document.getElementById('sha').textContent = 'Non disponible';
+    });
+
+  document.getElementById('dl').addEventListener('click', function () {
+    status.textContent = "Téléchargement lancé. Ouvrez le fichier depuis les notifications de votre navigateur.";
+  });
+
+  document.getElementById('copy').addEventListener('click', function () {
+    var btn = this;
+    var done = function () { btn.textContent = 'Lien copié'; };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(location.href).then(done, done);
+    } else { done(); }
+  });
+})();
 </script>
 </body>
 </html>
