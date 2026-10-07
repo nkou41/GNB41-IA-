@@ -5,6 +5,9 @@ from app.models.user import User
 from app.models.workspace import Workspace, WorkspaceMember
 from app.models.project import Project
 from app.utils_admin import admin_required, superadmin_required
+from app.utils.rbac import permission_required, ROLES
+from app.services.audit import audit
+from app.models.audit_log import AuditLog
 from app.services.reqres_client import get_users as reqres_get_users, TEST_MODE
 from app.models.evaluation_run import EvaluationRun
 from app.services.generator import generate_project_code
@@ -37,17 +40,28 @@ def list_users():
 
 @admin_bp.route('/users/<user_id>/role', methods=['PATCH'])
 @login_required
-@superadmin_required
+@permission_required('roles.gerer')
 def update_user_role(user_id):
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     new_role = data.get('role')
-    if new_role not in ('user', 'admin', 'superadmin'):
+    if new_role != 'user' and new_role not in ROLES:
         return jsonify({'error': 'Role invalide'}), 400
     user = User.query.get(user_id)
     if not user:
         return jsonify({'error': 'Utilisateur introuvable'}), 404
-    user.role = new_role
-    db.session.commit()
+    if user.id == current_user.id:
+        return jsonify({'error': 'Vous ne pouvez pas modifier votre propre rôle'}), 403
+    ancien = user.role or 'user'
+    if ancien == new_role:
+        return jsonify({'user': user.to_dict()})
+    try:
+        user.role = new_role
+        audit('utilisateur.role_modifie', 'utilisateur', user.id,
+              avant={'role': ancien, 'email': user.email}, apres={'role': new_role})
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error': 'Modification impossible. Réessayez.'}), 500
     return jsonify({'user': user.to_dict()})
 
 
@@ -221,3 +235,15 @@ def admin_create_plan():
     db.session.add(plan)
     db.session.commit()
     return jsonify({'plan': plan.to_dict()}), 201
+
+
+@admin_bp.route('/audit', methods=['GET'])
+@login_required
+@permission_required('audit.voir')
+def list_audit():
+    prefix = request.args.get('prefix', '')
+    requete = AuditLog.query
+    if prefix in ('moderation.', 'annonce.', 'utilisateur.'):
+        requete = requete.filter(AuditLog.action.like(prefix + '%'))
+    lignes = requete.order_by(AuditLog.created_at.desc()).limit(100).all()
+    return jsonify({'entries': [dict(l.to_dict(), ip_chaine=l.ip_chaine) for l in lignes]})

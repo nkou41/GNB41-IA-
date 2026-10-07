@@ -16,6 +16,8 @@ from app.models.listing_report import ListingReport
 from app.models.user import User
 from sqlalchemy import or_
 from app import limiter
+from app.utils.rbac import a_permission
+from app.services.audit import audit
 from app.models.project import Project
 from datetime import datetime, timedelta
 
@@ -527,18 +529,13 @@ SEUIL_SIGNALEMENTS = 3
 
 
 def _est_moderateur():
-    if not current_user.is_authenticated:
-        return False
-    if (current_user.role or 'user') in ('admin', 'superadmin'):
-        return True
-    admin_email = os.environ.get('ADMIN_EMAIL', '')
-    return bool(admin_email) and current_user.email == admin_email
+    return a_permission('moderation.voir')
 
 
 def _notifier_admins(titre, message):
     """Prévient les modérateurs. Ne doit jamais faire échouer l'action en cours."""
     try:
-        cond = User.role.in_(['admin', 'superadmin'])
+        cond = User.role.in_(['admin', 'superadmin', 'moderateur'])
         admin_email = os.environ.get('ADMIN_EMAIL', '')
         if admin_email:
             cond = or_(cond, User.email == admin_email)
@@ -647,7 +644,7 @@ def list_reviews():
 @marketplace_bp.route('/admin/reviews/<review_id>/decision', methods=['POST'])
 @login_required
 def decide_review(review_id):
-    if not _est_moderateur():
+    if not a_permission('moderation.decider'):
         return jsonify({'error': 'Non autorisé'}), 403
     review = ListingReview.query.get_or_404(review_id)
     if review.statut != 'en_attente':
@@ -664,6 +661,7 @@ def decide_review(review_id):
     statut_listing = {'approuver': 'publie', 'refuser': 'refuse', 'retirer': 'retire'}[decision]
     listing = Listing.query.get(review.listing_id)
     titre = (listing.titre if listing else review.listing_titre) or 'Annonce'
+    ancien_statut = listing.statut if listing else None
     try:
         if listing:
             listing.statut = statut_listing
@@ -675,6 +673,9 @@ def decide_review(review_id):
             rp.statut = 'traite'
             rp.traite_par = current_user.id
             rp.traite_at = datetime.utcnow()
+        audit('moderation.' + decision, 'annonce', review.listing_id,
+              avant={'statut': ancien_statut},
+              apres={'statut': statut_listing, 'motif': motif or None, 'dossier': review.id})
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -693,7 +694,7 @@ def decide_review(review_id):
 @login_required
 def retirer_annonce(listing_id):
     """Retrait d'office d'une annonce (réclamation d'un titulaire de droits, abus...)."""
-    if not _est_moderateur():
+    if not a_permission('moderation.decider'):
         return jsonify({'error': 'Non autorisé'}), 403
     listing = Listing.query.get_or_404(listing_id)
     if listing.statut in ('retire', 'refuse'):
@@ -705,6 +706,7 @@ def retirer_annonce(listing_id):
 
     maintenant = datetime.utcnow()
     titre = listing.titre or 'Annonce'
+    ancien_statut = listing.statut
     try:
         ouverts = ListingReview.query.filter_by(listing_id=listing.id, statut='en_attente').all()
         for rv in ouverts:
@@ -722,6 +724,8 @@ def retirer_annonce(listing_id):
             rp.traite_par = current_user.id
             rp.traite_at = maintenant
         listing.statut = 'retire'
+        audit('annonce.retrait_office', 'annonce', listing.id,
+              avant={'statut': ancien_statut}, apres={'statut': 'retire', 'motif': motif})
         db.session.commit()
     except Exception:
         db.session.rollback()
