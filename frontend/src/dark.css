@@ -64,3 +64,9 @@ body.dark-mode .hamburger-btn span{background:#f1f1f8!important}
 .side-menu .nb-bell svg{width:18px;height:18px;flex:none}
 .side-menu .nb-bell::after{content:"Notifications";font-weight:500}
 .side-menu .nb-badge{position:static;margin-left:auto}
+
+/* Menu latéral : icône, texte, puis badge à droite */
+.side-menu .nb-bell{display:flex;align-items:center}
+.side-menu .nb-bell svg{order:1}
+.side-menu .nb-bell::after{order:2;margin-left:0}
+.side-menu .nb-badge{order:3;margin-left:auto}
