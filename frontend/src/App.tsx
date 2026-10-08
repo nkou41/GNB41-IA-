@@ -132,6 +132,86 @@ function tonStatut(statut: string): string {
 
 const API_URL_PUBLIQUE: string = (import.meta as any).env.VITE_API_URL || 'http://localhost:5001/api';
 
+const LIBELLES_AUDIT: Record<string, string> = {
+  'moderation.approuver': 'Annonce approuvée',
+  'moderation.refuser': 'Annonce refusée',
+  'moderation.retirer': 'Annonce retirée (dossier)',
+  'annonce.retrait_office': "Retrait d'office",
+  'utilisateur.role_modifie': 'Rôle modifié',
+};
+const FILTRES_AUDIT: [string, string][] = [['', 'Tout'], ['moderation.', 'Modération'], ['annonce.', 'Annonces'], ['utilisateur.', 'Rôles']];
+
+function lisibleAudit(brut: string | null): string {
+  if (!brut) return '—';
+  try {
+    const v = JSON.parse(brut);
+    if (v && typeof v === 'object') {
+      return Object.entries(v).filter(([, x]) => x !== null && x !== '').map(([k, x]) => `${k} : ${String(x)}`).join(' · ') || '—';
+    }
+    return String(v);
+  } catch {
+    return brut;
+  }
+}
+
+function PanneauAudit() {
+  const [prefix, setPrefix] = useState('');
+  const [entries, setEntries] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [erreur, setErreur] = useState('');
+
+  useEffect(() => {
+    setLoading(true);
+    setErreur('');
+    api.listAudit(prefix)
+      .then((res: any) => setEntries(res.entries || []))
+      .catch((err: any) => { setEntries([]); setErreur(err.message); })
+      .finally(() => setLoading(false));
+  }, [prefix]);
+
+  const date = (iso: string | null) => iso
+    ? new Date(iso.endsWith('Z') ? iso : iso + 'Z').toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+    : '';
+
+  return (
+    <div className="mod-panel">
+      <div className="mod-chips" role="tablist" aria-label="Type d'action">
+        {FILTRES_AUDIT.map(([val, label]) => (
+          <button key={label} type="button" role="tab" aria-selected={prefix === val} className={prefix === val ? 'active' : ''} onClick={() => setPrefix(val)}>{label}</button>
+        ))}
+      </div>
+      {erreur && <p className="mod-error" role="alert">{erreur}</p>}
+      {loading ? (
+        <p className="mod-empty">Chargement…</p>
+      ) : entries.length === 0 ? (
+        <p className="mod-empty">Aucune action enregistrée pour l'instant.</p>
+      ) : (
+        <div className="mod-list">
+          {entries.map((e) => (
+            <article key={e.id} className="mod-card">
+              <div className="mod-head">
+                <h3>{LIBELLES_AUDIT[e.action] || e.action}</h3>
+                <span className="mod-badge">{date(e.created_at)}</span>
+              </div>
+              <p className="mod-meta">
+                {e.admin_email || 'Administrateur inconnu'}
+                {e.cible_id ? ` · ${e.cible_type || 'cible'} ${String(e.cible_id).slice(0, 8)}…` : ''}
+              </p>
+              {(e.ancienne_valeur || e.nouvelle_valeur) && (
+                <div className="mod-block">
+                  <span>Avant → après</span>
+                  <p>{lisibleAudit(e.ancienne_valeur)} → {lisibleAudit(e.nouvelle_valeur)}</p>
+                </div>
+              )}
+              <p className="mod-meta">IP : {e.ip || '—'}{e.ip_chaine ? ` · transmise : ${e.ip_chaine}` : ''}</p>
+            </article>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const MOTIFS_REVUE: Record<string, string> = { marque_detectee: 'Marque détectée', signalement: 'Signalée', modification: 'Modifiée', retrait_office: "Retrait d'office" };
 const STATUTS_REVUE: [string, string][] = [['en_attente', 'À examiner'], ['approuve', 'Approuvées'], ['refuse', 'Refusées'], ['retire', 'Retirées'], ['en_ligne', 'En ligne']];
 
@@ -316,7 +396,7 @@ function App() {
   const [resetStatus, setResetStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [resetMessage, setResetMessage] = useState('');
   const [adminStats, setAdminStats] = useState<any | null>(null);
-  const [adminTab, setAdminTab] = useState<'boutique' | 'moderation' | 'utilisateurs' | 'workspaces' | 'evaluation'>('boutique');
+  const [adminTab, setAdminTab] = useState<'boutique' | 'moderation' | 'audit' | 'utilisateurs' | 'workspaces' | 'evaluation'>('boutique');
   const [adminUsers, setAdminUsers] = useState<any[]>([]);
   const [adminWorkspaces, setAdminWorkspaces] = useState<any[]>([]);
   const [adminUsersLoading, setAdminUsersLoading] = useState(false);
@@ -1285,7 +1365,10 @@ function App() {
           <button onClick={() => setAdminTab('workspaces')} className={adminTab === 'workspaces' ? 'btn-publish' : 'btn-publish is-cancel'}>Workspaces</button>
           <button onClick={() => setAdminTab('evaluation')} className={adminTab === 'evaluation' ? 'btn-publish' : 'btn-publish is-cancel'}>Evaluation IA</button>
           <button onClick={() => setAdminTab('moderation')} className={adminTab === 'moderation' ? 'btn-publish' : 'btn-publish is-cancel'}>Modération</button>
+          <button onClick={() => setAdminTab('audit')} className={adminTab === 'audit' ? 'btn-publish' : 'btn-publish is-cancel'}>Journal d'audit</button>
         </div>
+
+        {adminTab === 'audit' && <PanneauAudit />}
 
         {adminTab === 'moderation' && <PanneauModeration />}
 
