@@ -62,6 +62,14 @@ def create_app(test_config=None):
     app.config['WTF_CSRF_CHECK_DEFAULT'] = True
     app.config['WTF_CSRF_SSL_STRICT'] = False
     csrf.init_app(app)
+    # Derrière Render et Cloudflare : lire la vraie adresse du visiteur dans X-Forwarded-For.
+    try:
+        sauts = int(os.environ.get('TRUSTED_PROXY_HOPS', '3'))
+    except ValueError:
+        sauts = 3
+    if sauts > 0:
+        from werkzeug.middleware.proxy_fix import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=sauts)
 
     @app.before_request
     def bloquer_requetes_meme_origine():
