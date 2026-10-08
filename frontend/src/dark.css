@@ -58,3 +58,9 @@ body.dark-mode .hamburger-btn span{background:#f1f1f8!important}
 @media (min-width:640px){.home-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .home-card{min-width:0;max-width:100%}
 .home-thumb{min-width:0;max-width:100%}
+
+/* Cloche dans le menu latéral : même gabarit que les autres entrées */
+.side-menu .nb-bell{width:100%;height:auto;min-height:44px;border-radius:12px;justify-content:flex-start;gap:12px;padding:10px 14px;border:1px solid var(--c-line);background:transparent;color:inherit;font:inherit;font-size:15px}
+.side-menu .nb-bell svg{width:18px;height:18px;flex:none}
+.side-menu .nb-bell::after{content:"Notifications";font-weight:500}
+.side-menu .nb-badge{position:static;margin-left:auto}
