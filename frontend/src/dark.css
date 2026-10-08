@@ -52,3 +52,9 @@ body.dark-mode .hamburger-btn span{background:#f1f1f8!important}
 .recent-section{max-width:100%;overflow-x:hidden}
 .recent-section>*{max-width:100%;min-width:0}
 .recent-section .workspace-card{max-width:100%;box-sizing:border-box}
+
+/* Les colonnes de la grille ne dépassent jamais l'écran */
+.home-grid{grid-template-columns:minmax(0,1fr)}
+@media (min-width:640px){.home-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.home-card{min-width:0;max-width:100%}
+.home-thumb{min-width:0;max-width:100%}
