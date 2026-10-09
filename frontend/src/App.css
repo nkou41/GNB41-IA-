@@ -3839,3 +3839,10 @@ body.dark-mode .mod-panel{--m-bg:#0f1020;--m-surface:#181a2e;--m-line:#26283f;--
 /* Bouton Déconnexion des en-têtes */
 button.header-logout{height:38px;padding:0 14px!important;border:1px solid var(--c-line)!important;border-radius:12px!important;background:var(--c-surface)!important;color:var(--c-text)!important;font:inherit!important;font-size:14px!important;font-weight:600!important;white-space:nowrap;cursor:pointer;flex:none}
 button.header-logout:active{transform:scale(.97)}
+
+/* ===== Administration: rôles ===== */
+.role-select{min-height:44px;max-width:100%;padding:0 10px;border:1px solid #E7E2D6;border-radius:12px;background:#fff;color:#211D33;font:inherit;font-size:15px}
+.role-select:disabled{opacity:.6}
+.role-error{margin:4px 0 10px;padding:10px 12px;border-radius:12px;background:#FDEBDD;color:#A5480B;font-size:14px;line-height:1.4}
+body.dark-mode .role-select{background:#1F1C2C;border-color:#2E2A40;color:#F1EFF8}
+body.dark-mode .role-error{background:#3A2415;color:#F5B27A}

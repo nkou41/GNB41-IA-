@@ -132,6 +132,50 @@ function tonStatut(statut: string): string {
 
 const API_URL_PUBLIQUE: string = (import.meta as any).env.VITE_API_URL || 'http://localhost:5001/api';
 
+const ROLES_ADMIN: [string, string][] = [
+  ['user', 'Utilisateur'], ['moderateur', 'Modérateur'], ['support', 'Support client'],
+  ['finance', 'Responsable financier'], ['technique', 'Responsable technique'],
+  ['marketing', 'Responsable marketing'], ['analyste', 'Analyste'],
+  ['admin', 'Administrateur'], ['superadmin', 'Super administrateur'],
+];
+
+function LigneUtilisateur({ u, moi, date, onChanged }: { u: any; moi: boolean; date: string; onChanged: () => void }) {
+  const [erreur, setErreur] = useState('');
+  const [occupe, setOccupe] = useState(false);
+  const role: string = u.role || 'user';
+  const connu = ROLES_ADMIN.some(([val]) => val === role);
+
+  const changer = async (nouveau: string) => {
+    if (nouveau === role) return;
+    const libelle = (ROLES_ADMIN.find(([val]) => val === nouveau) || [nouveau, nouveau])[1];
+    if ((nouveau === 'admin' || nouveau === 'superadmin') && !window.confirm(`Donner le rôle « ${libelle} » à ${u.email} ? Ce rôle donne un large pouvoir sur la plateforme.`)) return;
+    setOccupe(true);
+    setErreur('');
+    try {
+      await api.adminUpdateUserRole(u.id, nouveau);
+      onChanged();
+    } catch (err: any) {
+      setErreur(err.message);
+    } finally {
+      setOccupe(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="admin-sales-row">
+        <span className="admin-sales-titre">{u.username} ({u.email}){moi ? ' · vous' : ''}</span>
+        <span className="admin-sales-date">{date}</span>
+        <select className="role-select" aria-label={`Rôle de ${u.username}`} value={role} disabled={moi || occupe} onChange={(e) => changer(e.target.value)}>
+          {!connu && <option value={role}>{role}</option>}
+          {ROLES_ADMIN.map(([val, label]) => <option key={val} value={val}>{label}</option>)}
+        </select>
+      </div>
+      {erreur && <p className="role-error" role="alert">{erreur}</p>}
+    </>
+  );
+}
+
 const LIBELLES_AUDIT: Record<string, string> = {
   'moderation.approuver': 'Annonce approuvée',
   'moderation.refuser': 'Annonce refusée',
@@ -1425,15 +1469,13 @@ function App() {
             {adminUsersLoading ? <p>Chargement...</p> : (
               <div className="admin-sales-table">
                 {adminUsers.map((u: any) => (
-                  <div key={u.id} className="admin-sales-row">
-                    <span className="admin-sales-titre">{u.username} ({u.email})</span>
-                    <span className="admin-sales-date">{formatDate(u.created_at)}</span>
-                    <select value={u.role} onChange={(e) => api.adminUpdateUserRole(u.id, e.target.value).then(() => api.adminListUsers().then((res) => setAdminUsers(res.users)))}>
-                      <option value="user">user</option>
-                      <option value="admin">admin</option>
-                      <option value="superadmin">superadmin</option>
-                    </select>
-                  </div>
+                  <LigneUtilisateur
+                    key={u.id}
+                    u={u}
+                    moi={u.id === user.id}
+                    date={formatDate(u.created_at)}
+                    onChanged={() => api.adminListUsers().then((res) => setAdminUsers(res.users)).catch(() => {})}
+                  />
                 ))}
               </div>
             )}
