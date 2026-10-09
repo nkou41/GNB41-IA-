@@ -46,8 +46,13 @@ class User(UserMixin, db.Model):
             'role': self.role or 'user',
             'google_play_connecte': bool(self.google_play_connecte),
             'google_play_connecte_le': self.google_play_connecte_le.isoformat() if self.google_play_connecte_le else None,
-            'google_play_package_name': self.google_play_package_name
+            'google_play_package_name': self.google_play_package_name,
+            'permissions': self._permissions()
         }
+
+    def _permissions(self):
+        from app.utils.rbac import permissions_de
+        return sorted(permissions_de(self))
 
 
 @login_manager.user_loader

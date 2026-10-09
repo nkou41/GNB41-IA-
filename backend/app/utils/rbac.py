@@ -60,3 +60,10 @@ def permission_required(permission):
             return f(*args, **kwargs)
         return decore
     return decorateur
+
+
+def permissions_de(user):
+    """Permissions d'un compte (le propriétaire a toutes les permissions)."""
+    if est_proprietaire(user):
+        return set(PERMISSIONS)
+    return set(ROLE_PERMISSIONS.get(getattr(user, 'role', None) or 'user', ()))

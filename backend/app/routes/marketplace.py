@@ -520,8 +520,7 @@ def my_purchases():
 @marketplace_bp.route('/admin/dashboard', methods=['GET'])
 @login_required
 def admin_dashboard():
-    admin_email = os.environ.get('ADMIN_EMAIL', '')
-    if not admin_email or current_user.email != admin_email:
+    if not a_permission('finance.voir'):
         return jsonify({'error': 'Non autorisé'}), 403
 
     total_listings = Listing.query.count()
