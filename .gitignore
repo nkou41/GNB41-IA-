@@ -31,3 +31,6 @@ backend/backups/backup.log
 # Node modules a la racine (WebContainer)
 node_modules/
 package-lock.json
+
+*.bak
+*.bak[0-9]*
