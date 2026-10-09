@@ -176,6 +176,15 @@ function LigneUtilisateur({ u, moi, date, onChanged }: { u: any; moi: boolean; d
   );
 }
 
+const ONGLETS_ADMIN: [string, string][] = [
+  ['boutique', 'finance.voir'], ['utilisateurs', 'utilisateurs.modifier'], ['workspaces', 'utilisateurs.modifier'],
+  ['evaluation', 'utilisateurs.modifier'], ['moderation', 'moderation.voir'], ['audit', 'audit.voir'],
+];
+const LIBELLES_ONGLETS: Record<string, string> = {
+  boutique: 'Boutique', utilisateurs: 'Utilisateurs', workspaces: 'Workspaces',
+  evaluation: 'Evaluation IA', moderation: 'Modération', audit: "Journal d'audit",
+};
+
 const LIBELLES_AUDIT: Record<string, string> = {
   'moderation.approuver': 'Annonce approuvée',
   'moderation.refuser': 'Annonce refusée',
@@ -427,6 +436,9 @@ function PanneauModeration() {
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
+  const permissions: string[] = Array.isArray((user as any)?.permissions)
+    ? (user as any).permissions
+    : (['admin', 'superadmin'].includes((user as any)?.role) ? ONGLETS_ADMIN.map(([, perm]) => perm) : []);
   useEffect(() => { setSessionActive(!!user); }, [user]);
   const [loading, setLoading] = useState(true); // TODO: nettoyage complet prévu plus tard
   const [resetToken, setResetToken] = useState<string | null>(null);
@@ -462,6 +474,11 @@ function App() {
   const [myPurchasesList, setMyPurchasesList] = useState<any[]>([]);
   const [purchaseLoadingId, setPurchaseLoadingId] = useState<string | null>(null);
   const [showAdminDashboard, setShowAdminDashboard] = useState(false);
+  useEffect(() => {
+    if (!showAdminDashboard) return;
+    const permis = ONGLETS_ADMIN.filter(([, perm]) => permissions.includes(perm)).map(([id]) => id);
+    if (permis.length > 0 && !permis.includes(adminTab)) setAdminTab(permis[0] as any);
+  }, [showAdminDashboard, permissions.join(',')]);
   const [showLegal, setShowLegal] = useState<'cgv' | 'mentions' | null>(null);
   const [showPublishForm, setShowPublishForm] = useState(false);
   const [publishTitre, setPublishTitre] = useState('');
@@ -1404,13 +1421,13 @@ function App() {
         </div>
 
         <div className="admin-tabs" style={{ display: 'flex', gap: '0.6rem', padding: '0 1.5rem 1rem' }}>
-          <button onClick={() => setAdminTab('boutique')} className={adminTab === 'boutique' ? 'btn-publish' : 'btn-publish is-cancel'}>Boutique</button>
-          <button onClick={() => setAdminTab('utilisateurs')} className={adminTab === 'utilisateurs' ? 'btn-publish' : 'btn-publish is-cancel'}>Utilisateurs</button>
-          <button onClick={() => setAdminTab('workspaces')} className={adminTab === 'workspaces' ? 'btn-publish' : 'btn-publish is-cancel'}>Workspaces</button>
-          <button onClick={() => setAdminTab('evaluation')} className={adminTab === 'evaluation' ? 'btn-publish' : 'btn-publish is-cancel'}>Evaluation IA</button>
-          <button onClick={() => setAdminTab('moderation')} className={adminTab === 'moderation' ? 'btn-publish' : 'btn-publish is-cancel'}>Modération</button>
-          <button onClick={() => setAdminTab('audit')} className={adminTab === 'audit' ? 'btn-publish' : 'btn-publish is-cancel'}>Journal d'audit</button>
+          {ONGLETS_ADMIN.filter(([, perm]) => permissions.includes(perm)).map(([id]) => (
+            <button key={id} onClick={() => setAdminTab(id as any)} className={adminTab === id ? 'btn-publish' : 'btn-publish is-cancel'}>{LIBELLES_ONGLETS[id]}</button>
+          ))}
         </div>
+        {!ONGLETS_ADMIN.some(([, perm]) => permissions.includes(perm)) && (
+          <div className="marketplace-empty"><p>Accès réservé aux administrateurs.</p></div>
+        )}
 
         {adminTab === 'audit' && <PanneauAudit />}
 
@@ -1700,7 +1717,7 @@ function App() {
             <h2>Boutique d'applications</h2>
             <p>Découvrez et publiez des applications prêtes à l'emploi</p>
           </div>
-          {user.email === 'nkougnarigo226@gmail.com' && (
+          {ONGLETS_ADMIN.some(([, perm]) => permissions.includes(perm)) && (
             <button className="btn-publish is-cancel" onClick={() => { setShowAdminDashboard(true); navigateTo('/administration'); }} style={{ marginRight: '0.6rem' }}>
               Administration
             </button>
