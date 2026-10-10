@@ -185,6 +185,99 @@ const LIBELLES_ONGLETS: Record<string, string> = {
   evaluation: 'Evaluation IA', moderation: 'Modération', audit: "Journal d'audit",
 };
 
+const CONTACT_EMAIL = 'nkougnarigo226@gmail.com';
+const MAJ_LEGALE = '10 octobre 2026';
+
+function PagesLegales({ page }: { page: 'cgv' | 'mentions' | 'confidentialite' | 'signalement' }) {
+  const mail = <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>;
+  return (
+    <article className="legal-doc">
+      {page === 'mentions' && (
+        <>
+          <h2>Mentions légales</h2>
+          <p className="legal-maj">Dernière mise à jour : {MAJ_LEGALE}</p>
+          <h3>Éditeur</h3>
+          <p>GNARIGO N'KOU, particulier / entrepreneur individuel.<br />Adresse : non communiquée publiquement.<br />Contact : {mail}</p>
+          <h3>Directeur de publication</h3>
+          <p>GNARIGO N'KOU</p>
+          <h3>Hébergement et prestataires techniques</h3>
+          <p>Site web : Vercel Inc. (vercel.com). Serveur applicatif : Render (render.com). Base de données : Supabase (supabase.com). Les coordonnées de ces sociétés figurent sur leurs sites.</p>
+        </>
+      )}
+
+      {page === 'cgv' && (
+        <>
+          <h2>Conditions Générales de Vente et d'Utilisation</h2>
+          <p className="legal-maj">Dernière mise à jour : {MAJ_LEGALE}</p>
+          <h3>1. Objet</h3>
+          <p>Les présentes conditions régissent l'utilisation de GNB41 IA et la vente d'applications numériques entre vendeurs et acheteurs sur la plateforme. GNB41 IA agit en tant qu'intermédiaire technique.</p>
+          <h3>2. Prix et commission</h3>
+          <p>Les prix sont indiqués en euros. Une commission de 20 % est prélevée par la plateforme sur chaque vente. Les paiements sont traités par un prestataire de paiement tiers (FedaPay).</p>
+          <h3>3. Livraison</h3>
+          <p>L'application (code source et/ou accès) est mise à disposition de l'acheteur après confirmation du paiement.</p>
+          <h3>4. Droit de rétractation</h3>
+          <p>Pour les contenus numériques dont l'exécution commence immédiatement avec l'accord de l'acheteur, le droit de rétractation ne s'applique pas, dans la mesure permise par la loi applicable.</p>
+          <h3>5. Remboursements</h3>
+          <p>Aucun remboursement n'est accordé pour les services déjà consommés, notamment les crédits IA utilisés, les abonnements en cours ou les contenus générés. Un remboursement peut être envisagé uniquement en cas de paiement dupliqué, d'indisponibilité totale prolongée du service sans faute de l'utilisateur, ou d'erreur technique imputable à GNB41 IA. Toute demande doit être envoyée à {mail} avec la preuve de paiement.</p>
+          <h3>6. Droits et contenus des vendeurs</h3>
+          <p>Avant toute publication, le vendeur certifie détenir les droits sur tous les noms, logos, images, sons, personnages et contenus de son application. Les applications qui reprennent sans autorisation des marques, clubs, joueurs, films, séries, personnages ou œuvres protégés sont interdites.</p>
+          <h3>7. Modération et retrait</h3>
+          <p>GNB41 IA peut examiner une annonce avant ou après sa mise en ligne, la refuser, la suspendre ou la retirer, notamment en cas de marque protégée détectée, de signalement ou de réclamation d'un titulaire de droits. Le motif de la décision est communiqué au vendeur.</p>
+          <h3>8. Signalement</h3>
+          <p>Tout utilisateur peut signaler une annonce depuis la Boutique. Les titulaires de droits et les visiteurs sans compte peuvent utiliser la page « Signaler un contenu ».</p>
+          <h3>9. Responsabilité</h3>
+          <p>Le vendeur est seul responsable du contenu, de la qualité et de la légalité de l'application vendue. La plateforme agit en tant qu'intermédiaire technique.</p>
+          <h3>10. Droit applicable et litiges</h3>
+          <p>Tout litige est d'abord traité à l'amiable par e-mail à {mail}. À défaut, il relève des tribunaux compétents du pays de résidence de l'utilisateur, dans la mesure permise par la loi applicable.</p>
+        </>
+      )}
+
+      {page === 'confidentialite' && (
+        <>
+          <h2>Politique de confidentialité</h2>
+          <p className="legal-maj">Dernière mise à jour : {MAJ_LEGALE}</p>
+          <h3>Responsable du traitement</h3>
+          <p>GNARIGO N'KOU. Contact pour toute question ou demande : {mail}</p>
+          <h3>Données collectées</h3>
+          <p>Compte : nom d'utilisateur, adresse e-mail et mot de passe (conservé sous forme chiffrée).<br />Contenus : projets, applications générées, messages échangés avec l'assistant IA, annonces publiées.<br />Paiements : traités par FedaPay ; nous conservons les références et les statuts des transactions.<br />Données techniques : adresse IP (journaux de sécurité et de modération, limitation du nombre de requêtes), cookie de session nécessaire à la connexion, et abonnement aux notifications push si vous l'activez.</p>
+          <h3>Finalités</h3>
+          <p>Fournir le service, sécuriser les comptes, traiter les paiements, modérer les annonces, prévenir les abus et vous envoyer les messages liés à votre compte.</p>
+          <h3>Fournisseurs d'intelligence artificielle</h3>
+          <p>Vos demandes de génération sont transmises au fournisseur du modèle que vous choisissez (Anthropic, OpenAI, Google ou Mistral) pour produire la réponse. N'y saisissez pas d'informations confidentielles ou sensibles.</p>
+          <h3>Prestataires et transferts</h3>
+          <p>Vos données sont traitées par nos prestataires techniques : Vercel, Render, Supabase, FedaPay et un service d'envoi d'e-mails (Brevo). Certains peuvent se trouver hors de votre pays.</p>
+          <h3>Mesure d'audience</h3>
+          <p>Aucun outil de mesure d'audience tiers n'est actuellement utilisé.</p>
+          <h3>Durée de conservation</h3>
+          <p>Vos données sont conservées tant que votre compte existe, puis supprimées ou anonymisées dans un délai raisonnable. Les journaux de sécurité et de modération sont conservés le temps nécessaire à la sécurité de la plateforme et au respect des obligations légales.</p>
+          <h3>Vos droits</h3>
+          <p>Vous pouvez demander l'accès à vos données, leur rectification ou leur suppression, en écrivant à {mail}.</p>
+        </>
+      )}
+
+      {page === 'signalement' && (
+        <>
+          <h2>Signaler un contenu</h2>
+          <p className="legal-maj">Dernière mise à jour : {MAJ_LEGALE}</p>
+          <p>Vous détenez des droits sur une marque, une œuvre, un nom, une image ou un autre contenu repris sans autorisation dans une annonce ? Vous pouvez en demander le retrait, avec ou sans compte.</p>
+          <h3>Comment procéder</h3>
+          <p>Envoyez un e-mail à {mail} avec :</p>
+          <ol>
+            <li>l'adresse ou le titre de l'annonce concernée ;</li>
+            <li>la description de l'œuvre, de la marque ou du contenu visé ;</li>
+            <li>la preuve que vous en êtes titulaire ou que vous êtes autorisé à agir en son nom ;</li>
+            <li>vos coordonnées ;</li>
+            <li>la déclaration que votre demande est faite de bonne foi et que ces informations sont exactes.</li>
+          </ol>
+          <h3>Ce qui se passe ensuite</h3>
+          <p>Nous examinons les demandes complètes. L'annonce peut être suspendue pendant l'examen. Le vendeur est informé du motif de la décision. Les demandes manifestement abusives ou incomplètes peuvent être ignorées.</p>
+          <p>Si vous avez un compte, vous pouvez aussi utiliser le bouton « Signaler » sous chaque annonce de la Boutique.</p>
+        </>
+      )}
+    </article>
+  );
+}
+
 const LIBELLES_AUDIT: Record<string, string> = {
   'moderation.approuver': 'Annonce approuvée',
   'moderation.refuser': 'Annonce refusée',
@@ -479,7 +572,7 @@ function App() {
     const permis = ONGLETS_ADMIN.filter(([, perm]) => permissions.includes(perm)).map(([id]) => id);
     if (permis.length > 0 && !permis.includes(adminTab)) setAdminTab(permis[0] as any);
   }, [showAdminDashboard, permissions.join(',')]);
-  const [showLegal, setShowLegal] = useState<'cgv' | 'mentions' | null>(null);
+  const [showLegal, setShowLegal] = useState<'cgv' | 'mentions' | 'confidentialite' | 'signalement' | null>(null);
   const [showPublishForm, setShowPublishForm] = useState(false);
   const [publishTitre, setPublishTitre] = useState('');
   const [publishDescription, setPublishDescription] = useState('');
@@ -1347,52 +1440,7 @@ function App() {
             <span className="app-header-back-title">Retour</span>
           </button>
         </header>
-        <div style={{ padding: '1.5rem', maxWidth: '700px', lineHeight: 1.6 }}>
-          {showLegal === 'mentions' ? (
-            <>
-              <h2>Mentions légales</h2>
-              <p style={{ marginTop: '1rem' }}><strong>Éditeur du site</strong></p>
-              <p>[Nom / Raison sociale — particulier ou société]<br/>
-              [Adresse complète]<br/>
-              [Numéro SIRET — si applicable, sinon indiquer "Entreprise individuelle non immatriculée" selon votre statut]<br/>
-              [Email de contact]<br/>
-              [Numéro de téléphone — optionnel]</p>
-
-              <p style={{ marginTop: '1rem' }}><strong>Hébergement</strong></p>
-              <p>[Nom de l'hébergeur]<br/>
-              [Adresse de l'hébergeur]</p>
-
-              <p style={{ marginTop: '1rem' }}><strong>Directeur de publication</strong></p>
-              <p>[Nom du responsable]</p>
-            </>
-          ) : (
-            <>
-              <h2>Conditions Générales de Vente</h2>
-
-              <p style={{ marginTop: '1rem' }}><strong>1. Objet</strong></p>
-              <p>Les présentes conditions régissent la vente d'applications numériques entre vendeurs et acheteurs sur la plateforme GNB41 IA.</p>
-
-              <p style={{ marginTop: '1rem' }}><strong>2. Prix</strong></p>
-              <p>Les prix sont indiqués en euros. Une commission de 20% est prélevée par la plateforme sur chaque vente.</p>
-
-              <p style={{ marginTop: '1rem' }}><strong>3. Livraison</strong></p>
-              <p>L'application (code source et/ou accès) est mise à disposition de l'acheteur immédiatement après confirmation du paiement.</p>
-
-              <p style={{ marginTop: '1rem' }}><strong>4. Droit de rétractation</strong></p>
-              <p>Conformément à la législation sur le contenu numérique non fourni sur support matériel, le droit de rétractation ne s'applique pas une fois le téléchargement commencé, sauf accord exprès du vendeur.</p>
-
-              <p style={{ marginTop: '1rem' }}><strong>5. Responsabilité</strong></p>
-              <p>Le vendeur est seul responsable du contenu, de la qualité et de la légalité de l'application vendue. La plateforme agit en tant qu'intermédiaire technique.</p>
-
-              <p style={{ marginTop: '1rem' }}><strong>6. Litiges</strong></p>
-              <p>[Adresse email de contact pour tout litige]. À défaut de résolution amiable, les tribunaux compétents seront ceux du ressort de [ville/juridiction].</p>
-
-              <p style={{ marginTop: '1.5rem', fontStyle: 'italic', color: 'var(--c-muted)' }}>
-                Ce document est un modèle et doit être complété/validé par un professionnel du droit avant mise en ligne publique.
-              </p>
-            </>
-          )}
-        </div>
+        <PagesLegales page={showLegal} />
       </div>
     );
   }
@@ -1918,6 +1966,10 @@ function App() {
           <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setShowLegal('cgv')}>Conditions Générales de Vente</span>
           {' · '}
           <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setShowLegal('mentions')}>Mentions légales</span>
+          {' · '}
+          <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setShowLegal('confidentialite')}>Confidentialité</span>
+          {' · '}
+          <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setShowLegal('signalement')}>Signaler un contenu</span>
         </div>
       </div>
     );

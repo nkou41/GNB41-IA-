@@ -3846,3 +3846,14 @@ button.header-logout:active{transform:scale(.97)}
 .role-error{margin:4px 0 10px;padding:10px 12px;border-radius:12px;background:#FDEBDD;color:#A5480B;font-size:14px;line-height:1.4}
 body.dark-mode .role-select{background:#1F1C2C;border-color:#2E2A40;color:#F1EFF8}
 body.dark-mode .role-error{background:#3A2415;color:#F5B27A}
+
+/* ===== Pages légales ===== */
+.legal-doc{max-width:720px;margin:0 auto;padding:24px 20px 56px;line-height:1.65;text-align:left;box-sizing:border-box}
+.legal-doc h2{margin:0 0 4px;font-family:Fraunces,Georgia,serif;font-weight:600;font-size:28px;line-height:1.2;letter-spacing:-.01em}
+.legal-doc h3{margin:22px 0 6px;font-size:17px;font-weight:600}
+.legal-doc p,.legal-doc li{font-size:15px;overflow-wrap:anywhere}
+.legal-doc p{margin:0 0 10px}
+.legal-doc ol{margin:0 0 10px;padding-left:22px}
+.legal-doc a{color:#5B5BD6;text-decoration:underline}
+.legal-maj{font-size:13px!important;opacity:.7}
+body.dark-mode .legal-doc a{color:#8B8BF2}
