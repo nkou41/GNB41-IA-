@@ -88,6 +88,22 @@ def confirm_email():
     return jsonify({'message': 'Email confirme avec succes'})
 
 
+def alerte_securite(user, titre, message, ancien_email=None):
+    """Notification de sécurité. Ne doit jamais faire échouer l'action en cours."""
+    try:
+        from app.services.notifications import envoyer_notification
+        envoyer_notification(user.id, 'securite', titre, message)
+    except Exception:
+        db.session.rollback()
+    try:
+        send_email(
+            ancien_email or user.email, titre,
+            f"Bonjour {user.username},\n\n{message}\n\n"
+            "Si ce n'est pas vous, réinitialisez votre mot de passe sans attendre.\n\nGNB41 IA")
+    except Exception:
+        pass
+
+
 @auth_bp.route('/login', methods=['POST'])
 @limiter.limit('10 per minute')
 @csrf.exempt
@@ -156,6 +172,8 @@ def reset_password():
     user.reset_token = None
     user.reset_token_expiry = None
     db.session.commit()
+    alerte_securite(user, 'Mot de passe réinitialisé',
+                    "Le mot de passe de votre compte vient d'être réinitialisé.")
     return jsonify({'message': 'Mot de passe reinitialise avec succes'})
 
 
@@ -184,15 +202,27 @@ def update_me():
     if not current_password or not current_user.check_password(current_password):
         return jsonify({'error': 'Mot de passe actuel incorrect'}), 401
 
+    ancien_email = current_user.email
+    email_change = False
+    mdp_change = False
     if new_email and new_email != current_user.email:
         if User.query.filter_by(email=new_email).first():
             return jsonify({'error': 'Email déjà utilisé'}), 409
         current_user.email = new_email
+        email_change = True
 
     if new_password:
         current_user.set_password(new_password)
+        mdp_change = True
 
     db.session.commit()
+    if email_change:
+        alerte_securite(current_user, 'Adresse e-mail modifiée',
+                        f"L'adresse e-mail de votre compte est maintenant {new_email}.",
+                        ancien_email=ancien_email)
+    if mdp_change:
+        alerte_securite(current_user, 'Mot de passe modifié',
+                        "Le mot de passe de votre compte vient d'être modifié.")
     return jsonify(current_user.to_dict())
 
 
