@@ -83,6 +83,45 @@ def create_payment():
         return jsonify({'error': 'Erreur lors de la creation du paiement', 'detail': str(e)}), 500
 
 
+def _marquer_echec(transaction_id, statut, user_id=None):
+    """Paiement d'abonnement refusé ou annulé : une seule alerte par paiement."""
+    try:
+        p = Payment.query.filter_by(transaction_id=str(transaction_id)).first()
+        if not p or (user_id and p.user_id != user_id):
+            return
+        claimed = Payment.query.filter_by(id=p.id, status='pending').update(
+            {'status': 'failed', 'processed_at': datetime.utcnow()}, synchronize_session=False)
+        if claimed != 1:
+            db.session.rollback()
+            return
+        user = db.session.get(User, p.user_id)
+        if user and str(user.pending_transaction_id) == str(transaction_id):
+            user.pending_plan = None
+            user.pending_transaction_id = None
+        db.session.commit()
+        from app.services.notifications import envoyer_notification
+        refuse = (statut == 'declined')
+        envoyer_notification(
+            p.user_id, 'abonnement', 'Paiement non abouti',
+            f"Votre paiement pour le plan {p.plan_slug} n'a pas abouti. Vous pouvez réessayer depuis « Mettre à niveau ».")
+        if refuse:
+            cond = User.role.in_(['admin', 'superadmin'])
+            admin_email = os.environ.get('ADMIN_EMAIL', '')
+            if admin_email:
+                from sqlalchemy import or_
+                cond = or_(cond, User.email == admin_email)
+            for admin in User.query.filter(cond).all():
+                try:
+                    envoyer_notification(
+                        admin.id, 'paiement', 'Paiement refusé',
+                        f"Abonnement {p.plan_slug} : paiement de {p.amount} XOF refusé pour {user.username if user else p.user_id}.")
+                except Exception:
+                    db.session.rollback()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Alerte paiement echoue: {e}')
+
+
 def _activate_plan(transaction_id, tx):
     """Idempotent: renvoie (payment, erreur)."""
     p = Payment.query.filter_by(transaction_id=str(transaction_id)).first()
@@ -146,6 +185,8 @@ def verify_payment(transaction_id):
                 return jsonify({'error': err or 'Transaction non reconnue pour cet utilisateur'}), 400
             return jsonify({'status': 'approved', 'plan': current_user.plan,
                             'plan_expiry': current_user.plan_expiry.isoformat()})
+        if status in ('declined', 'canceled'):
+            _marquer_echec(transaction_id, status, user_id=current_user.id)
         return jsonify({'status': status})
     except (requests.exceptions.RequestException, KeyError, ValueError) as e:
         current_app.logger.error(f'Erreur verification paiement FedaPay: {str(e)}')
@@ -174,6 +215,8 @@ def fedapay_webhook():
         tx = res.json()['v1/transaction']
         if tx.get('status') == 'approved':
             _activate_plan(tid, tx)
+        elif tx.get('status') in ('declined', 'canceled'):
+            _marquer_echec(tid, tx.get('status'))
     except Exception as e:
         current_app.logger.error(f'Webhook FedaPay: {str(e)}')
         return '', 500
