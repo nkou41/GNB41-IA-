@@ -502,8 +502,24 @@ def verify_purchase(purchase_id):
                 except Exception:
                     db.session.rollback()
         elif statut_fedapay in ('declined', 'canceled'):
+            deja_echoue = purchase.statut == 'echoue'
             purchase.statut = 'echoue'
             db.session.commit()
+            if not deja_echoue:
+                try:
+                    listing_echec = Listing.query.get(purchase.listing_id)
+                    titre_echec = listing_echec.titre if listing_echec else 'une annonce'
+                    envoyer_notification(
+                        user_id=purchase.acheteur_id,
+                        type='achat',
+                        titre='Paiement non abouti',
+                        message=f"Votre paiement pour « {titre_echec} » n'a pas abouti. Vous pouvez réessayer.",
+                        lien='/marketplace'
+                    )
+                    if statut_fedapay == 'declined':
+                        _notifier_admins('Paiement refusé', f"Achat de « {titre_echec} » : paiement refusé par FedaPay.")
+                except Exception:
+                    db.session.rollback()
 
         return jsonify(purchase.to_dict())
     except Exception as e:
