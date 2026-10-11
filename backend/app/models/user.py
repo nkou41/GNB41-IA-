@@ -27,6 +27,21 @@ class User(UserMixin, db.Model):
     pending_transaction_id = db.Column(db.Integer, nullable=True)
     reminder_sent_for = db.Column(db.DateTime, nullable=True)
     credits = db.Column(db.Integer, default=1)
+    compte_statut = db.Column(db.String(20), default='actif')
+    suspendu_jusqua = db.Column(db.DateTime, nullable=True)
+    motif_suspension = db.Column(db.String(300), nullable=True)
+
+    def compte_actif(self):
+        # False pour un compte suspendu ou bloque. Le proprietaire n'est jamais exclu.
+        from app.utils.rbac import est_proprietaire
+        if est_proprietaire(self):
+            return True
+        statut = self.compte_statut or 'actif'
+        if statut == 'actif':
+            return True
+        if statut == 'suspendu' and self.suspendu_jusqua and self.suspendu_jusqua <= datetime.utcnow():
+            return True
+        return False
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -57,4 +72,7 @@ class User(UserMixin, db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(user_id)
+    user = User.query.get(user_id)
+    if user is not None and not user.compte_actif():
+        return None
+    return user

@@ -119,6 +119,10 @@ def login():
     if not user or not user.check_password(password):
         return jsonify({'error': 'Identifiants invalides'}), 401
 
+    if not user.compte_actif():
+        if (user.compte_statut or 'actif') == 'bloque':
+            return jsonify({'error': 'Ce compte est bloqué. Contactez le support.'}), 403
+        return jsonify({'error': 'Ce compte est suspendu. Contactez le support.'}), 403
     check_and_downgrade_plan(user)
     login_user(user)
     return jsonify(user.to_dict())

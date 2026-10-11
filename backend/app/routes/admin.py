@@ -5,7 +5,9 @@ from app.models.user import User
 from app.models.workspace import Workspace, WorkspaceMember
 from app.models.project import Project
 from app.utils_admin import admin_required, superadmin_required
-from app.utils.rbac import permission_required, ROLES
+from app.utils.rbac import permission_required, ROLES, a_permission, est_proprietaire
+from app.services.notifications import envoyer_notification
+from datetime import datetime, timedelta
 from app.services.audit import audit
 from app.models.audit_log import AuditLog
 from app.services.reqres_client import get_users as reqres_get_users, TEST_MODE
@@ -35,7 +37,7 @@ def list_users():
             )
         )
     users = query.order_by(User.created_at.desc()).all()
-    return jsonify({'users': [u.to_dict() for u in users], 'total': len(users)})
+    return jsonify({'users': [_avec_statut(u) for u in users], 'total': len(users)})
 
 
 @admin_bp.route('/users/<user_id>/role', methods=['PATCH'])
@@ -247,3 +249,104 @@ def list_audit():
         requete = requete.filter(AuditLog.action.like(prefix + '%'))
     lignes = requete.order_by(AuditLog.created_at.desc()).limit(100).all()
     return jsonify({'entries': [dict(l.to_dict(), ip_chaine=l.ip_chaine) for l in lignes]})
+
+
+STATUTS_COMPTE = ('actif', 'suspendu', 'bloque')
+
+
+def _avec_statut(u):
+    d = u.to_dict()
+    d['compte_statut'] = u.compte_statut or 'actif'
+    d['suspendu_jusqua'] = u.suspendu_jusqua.isoformat() if u.suspendu_jusqua else None
+    d['motif_suspension'] = u.motif_suspension
+    return d
+
+
+def _notifier_compte(user, titre, message):
+    try:
+        envoyer_notification(user.id, 'compte', titre[:200], message)
+    except Exception:
+        db.session.rollback()
+
+
+@admin_bp.route('/users/<user_id>/statut', methods=['PATCH'])
+@login_required
+@permission_required('utilisateurs.modifier')
+def update_user_statut(user_id):
+    data = request.get_json(silent=True) or {}
+    statut = data.get('statut')
+    motif = (data.get('motif') or '').strip()[:300]
+    if statut not in STATUTS_COMPTE:
+        return jsonify({'error': 'Statut invalide'}), 400
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'Utilisateur introuvable'}), 404
+    if user.id == current_user.id:
+        return jsonify({'error': 'Vous ne pouvez pas modifier le statut de votre propre compte'}), 403
+    if est_proprietaire(user):
+        return jsonify({'error': 'Ce compte ne peut pas être suspendu'}), 403
+    if (user.role or 'user') in ('admin', 'superadmin') and not a_permission('roles.gerer'):
+        return jsonify({'error': 'Seul un super administrateur peut agir sur ce compte'}), 403
+    if statut != 'actif' and len(motif) < 5:
+        return jsonify({'error': 'Un motif de 5 caractères minimum est requis'}), 400
+    jours = None
+    if statut == 'suspendu' and data.get('jours') not in (None, ''):
+        try:
+            jours = int(data.get('jours'))
+        except (ValueError, TypeError):
+            return jsonify({'error': 'Durée invalide'}), 400
+        if jours < 1 or jours > 365:
+            return jsonify({'error': 'La durée doit être comprise entre 1 et 365 jours'}), 400
+
+    avant = {'statut': user.compte_statut or 'actif',
+             'jusqua': user.suspendu_jusqua.isoformat() if user.suspendu_jusqua else None}
+    try:
+        user.compte_statut = statut
+        user.suspendu_jusqua = datetime.utcnow() + timedelta(days=jours) if jours else None
+        user.motif_suspension = motif if statut != 'actif' else None
+        audit('utilisateur.statut_modifie', 'utilisateur', user.id, avant=avant,
+              apres={'statut': statut, 'jours': jours, 'motif': motif or None, 'email': user.email})
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error': 'Modification impossible. Réessayez.'}), 500
+
+    if statut == 'actif':
+        _notifier_compte(user, 'Compte réactivé', 'Votre compte est de nouveau actif.')
+    elif statut == 'suspendu':
+        _notifier_compte(user, 'Compte suspendu', f'Votre compte a été suspendu. Motif : {motif}')
+    else:
+        _notifier_compte(user, 'Compte bloqué', f'Votre compte a été bloqué. Motif : {motif}')
+    return jsonify({'user': _avec_statut(user)})
+
+
+@admin_bp.route('/users/<user_id>/credits', methods=['POST'])
+@login_required
+@permission_required('utilisateurs.modifier')
+def add_user_credits(user_id):
+    data = request.get_json(silent=True) or {}
+    motif = (data.get('motif') or '').strip()[:300]
+    try:
+        n = int(data.get('credits'))
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Nombre de crédits invalide'}), 400
+    if n < 1 or n > 1000:
+        return jsonify({'error': 'Le nombre de crédits doit être compris entre 1 et 1000'}), 400
+    if len(motif) < 5:
+        return jsonify({'error': 'Un motif de 5 caractères minimum est requis'}), 400
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'Utilisateur introuvable'}), 404
+    if user.id == current_user.id and not est_proprietaire(current_user):
+        return jsonify({'error': 'Vous ne pouvez pas vous ajouter des crédits à vous-même'}), 403
+    avant = user.credits if user.credits is not None else 1
+    try:
+        user.credits = avant + n
+        audit('utilisateur.credits_ajoutes', 'utilisateur', user.id,
+              avant={'credits': avant}, apres={'credits': avant + n, 'motif': motif, 'email': user.email})
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error': 'Ajout impossible. Réessayez.'}), 500
+    _notifier_compte(user, 'Crédits ajoutés', f'{n} crédit(s) ont été ajoutés à votre compte.')
+    return jsonify({'user': _avec_statut(user)})
