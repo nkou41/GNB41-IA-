@@ -1,0 +1,17 @@
+name: Tâche quotidienne
+
+on:
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler la tâche quotidienne
+        run: |
+          curl -sS --fail-with-body --max-time 90 --retry 2 --retry-delay 20 \
+            -X POST https://gnb41-ia.onrender.com/api/billing/cron/daily \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}"
+          echo
