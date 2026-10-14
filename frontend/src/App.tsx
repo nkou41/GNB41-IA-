@@ -139,20 +139,44 @@ const ROLES_ADMIN: [string, string][] = [
   ['admin', 'Administrateur'], ['superadmin', 'Super administrateur'],
 ];
 
-function LigneUtilisateur({ u, moi, date, onChanged }: { u: any; moi: boolean; date: string; onChanged: () => void }) {
-  const [erreur, setErreur] = useState('');
-  const [occupe, setOccupe] = useState(false);
-  const role: string = u.role || 'user';
-  const connu = ROLES_ADMIN.some(([val]) => val === role);
+const STATUTS_COMPTE_LIB: Record<string, string> = { actif: 'Actif', suspendu: 'Suspendu', bloque: 'Bloqué' };
 
-  const changer = async (nouveau: string) => {
-    if (nouveau === role) return;
-    const libelle = (ROLES_ADMIN.find(([val]) => val === nouveau) || [nouveau, nouveau])[1];
-    if ((nouveau === 'admin' || nouveau === 'superadmin') && !window.confirm(`Donner le rôle « ${libelle} » à ${u.email} ? Ce rôle donne un large pouvoir sur la plateforme.`)) return;
+function utcDate(iso: string): Date {
+  return new Date(iso.endsWith('Z') ? iso : iso + 'Z');
+}
+
+function LigneUtilisateur({ u, moiId, permissions, onChanged }: { u: any; moiId: string; permissions: string[]; onChanged: () => void }) {
+  const [erreur, setErreur] = useState('');
+  const [info, setInfo] = useState('');
+  const [occupe, setOccupe] = useState(false);
+  const [ouvert, setOuvert] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
+  const [statut, setStatut] = useState('suspendu');
+  const [jours, setJours] = useState('');
+  const [motifStatut, setMotifStatut] = useState('');
+  const [credits, setCredits] = useState('');
+  const [motifCredits, setMotifCredits] = useState('');
+
+  const moi = u.id === moiId;
+  const role: string = u.role || 'user';
+  const peutModifier = permissions.includes('utilisateurs.modifier');
+  const peutRoles = permissions.includes('roles.gerer');
+  const peutVoirEmail = permissions.includes('utilisateurs.voir_email');
+  const connu = ROLES_ADMIN.some(([val]) => val === role);
+  const libelleRole = (ROLES_ADMIN.find(([val]) => val === role) || [role, role])[1];
+  const brut: string = u.compte_statut || 'actif';
+  const expire = brut === 'suspendu' && !!u.suspendu_jusqua && utcDate(u.suspendu_jusqua).getTime() <= Date.now();
+  const affiche = expire ? 'actif' : brut;
+  const creation = u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR') : '';
+  const jusqua = affiche === 'suspendu' && u.suspendu_jusqua ? utcDate(u.suspendu_jusqua).toLocaleDateString('fr-FR') : '';
+
+  const executer = async (action: () => Promise<any>, message: string) => {
     setOccupe(true);
     setErreur('');
+    setInfo('');
     try {
-      await api.adminUpdateUserRole(u.id, nouveau);
+      await action();
+      setInfo(message);
       onChanged();
     } catch (err: any) {
       setErreur(err.message);
@@ -161,23 +185,167 @@ function LigneUtilisateur({ u, moi, date, onChanged }: { u: any; moi: boolean; d
     }
   };
 
+  const changerRole = (nouveau: string) => {
+    if (nouveau === role) return;
+    const libelle = (ROLES_ADMIN.find(([val]) => val === nouveau) || [nouveau, nouveau])[1];
+    if ((nouveau === 'admin' || nouveau === 'superadmin') && !window.confirm(`Donner le rôle « ${libelle} » à ${u.username} ? Ce rôle donne un large pouvoir sur la plateforme.`)) return;
+    executer(() => api.adminUpdateUserRole(u.id, nouveau), 'Rôle mis à jour.');
+  };
+
+  const appliquerStatut = () => {
+    const motif = motifStatut.trim();
+    if (statut !== 'actif' && motif.length < 5) {
+      setErreur('Un motif de 5 caractères minimum est requis.');
+      return;
+    }
+    let nb: number | undefined;
+    if (statut === 'suspendu' && jours.trim() !== '') {
+      nb = parseInt(jours, 10);
+      if (!(nb >= 1 && nb <= 365)) {
+        setErreur('La durée doit être comprise entre 1 et 365 jours.');
+        return;
+      }
+    }
+    if (!window.confirm(`Passer ${u.username} en « ${STATUTS_COMPTE_LIB[statut]} » ?`)) return;
+    executer(() => api.adminSetStatut(u.id, statut, motif, nb), 'Statut mis à jour.');
+  };
+
+  const ajouterCredits = () => {
+    const n = parseInt(credits, 10);
+    const motif = motifCredits.trim();
+    if (!(n >= 1 && n <= 1000)) {
+      setErreur('Le nombre de crédits doit être compris entre 1 et 1000.');
+      return;
+    }
+    if (motif.length < 5) {
+      setErreur('Un motif de 5 caractères minimum est requis.');
+      return;
+    }
+    if (!window.confirm(`Ajouter ${n} crédit(s) à ${u.username} ?`)) return;
+    executer(async () => {
+      await api.adminAddCredits(u.id, n, motif);
+      setCredits('');
+      setMotifCredits('');
+    }, 'Crédits ajoutés.');
+  };
+
+  const reveler = async () => {
+    setOccupe(true);
+    setErreur('');
+    try {
+      const res: any = await api.adminRevealEmail(u.id);
+      setEmail(res.email);
+    } catch (err: any) {
+      setErreur(err.message);
+    } finally {
+      setOccupe(false);
+    }
+  };
+
   return (
-    <>
-      <div className="admin-sales-row">
-        <span className="admin-sales-titre">{u.username} ({u.email}){moi ? ' · vous' : ''}</span>
-        <span className="admin-sales-date">{date}</span>
-        <select className="role-select" aria-label={`Rôle de ${u.username}`} value={role} disabled={moi || occupe} onChange={(e) => changer(e.target.value)}>
-          {!connu && <option value={role}>{role}</option>}
-          {ROLES_ADMIN.map(([val, label]) => <option key={val} value={val}>{label}</option>)}
-        </select>
+    <article className="mod-card">
+      <div className="usr-top">
+        <span className="usr-name">{u.username}{moi ? ' · vous' : ''}</span>
+        <span className="usr-mail">{email || u.email}</span>
+        <span className="mod-meta">Inscrit le {creation} · plan {u.plan || 'gratuit'} · {u.credits ?? 0} crédit(s)</span>
       </div>
-      {erreur && <p className="role-error" role="alert">{erreur}</p>}
-    </>
+      <div className="usr-badges">
+        <span className={`usr-badge ${affiche === 'actif' ? 'ok' : 'warn'}`}>{STATUTS_COMPTE_LIB[affiche] || affiche}{jusqua ? ` jusqu'au ${jusqua}` : ''}</span>
+        {peutRoles && !moi ? (
+          <select className="usr-select usr-role" aria-label={`Rôle de ${u.username}`} value={role} disabled={occupe} onChange={(e) => changerRole(e.target.value)}>
+            {!connu && <option value={role}>{role}</option>}
+            {ROLES_ADMIN.map(([val, label]) => <option key={val} value={val}>{label}</option>)}
+          </select>
+        ) : (
+          <span className="usr-badge">{libelleRole}</span>
+        )}
+        {!peutVoirEmail && !email && (
+          <button type="button" className="mod-link" disabled={occupe} onClick={reveler}>Révéler l'e-mail</button>
+        )}
+      </div>
+      {u.motif_suspension && affiche !== 'actif' && <p className="mod-meta">Motif : {u.motif_suspension}</p>}
+      {peutModifier && !moi && (
+        <>
+          <div className="mod-actions un">
+            <button type="button" className="usr-toggle" onClick={() => setOuvert(!ouvert)}>{ouvert ? 'Fermer' : 'Gérer ce compte'}</button>
+          </div>
+          {ouvert && (
+            <div className="usr-panel">
+              <h4>Statut du compte</h4>
+              <select className="usr-select" value={statut} onChange={(e) => setStatut(e.target.value)}>
+                <option value="actif">Actif (réactiver)</option>
+                <option value="suspendu">Suspendu</option>
+                <option value="bloque">Bloqué</option>
+              </select>
+              {statut === 'suspendu' && (
+                <input className="usr-input" type="number" min={1} max={365} inputMode="numeric" placeholder="Durée en jours (vide : jusqu'à réactivation)" value={jours} onChange={(e) => setJours(e.target.value)} />
+              )}
+              {statut !== 'actif' && (
+                <textarea className="mod-motif" rows={2} maxLength={300} placeholder="Motif (obligatoire)" value={motifStatut} onChange={(e) => setMotifStatut(e.target.value)} />
+              )}
+              <div className="mod-actions un">
+                <button type="button" className="mod-ok" disabled={occupe} onClick={appliquerStatut}>Appliquer le statut</button>
+              </div>
+              <h4>Ajouter des crédits</h4>
+              <input className="usr-input" type="number" min={1} max={1000} inputMode="numeric" placeholder="Nombre (1 à 1000)" value={credits} onChange={(e) => setCredits(e.target.value)} />
+              <textarea className="mod-motif" rows={2} maxLength={300} placeholder="Motif (obligatoire)" value={motifCredits} onChange={(e) => setMotifCredits(e.target.value)} />
+              <div className="mod-actions un">
+                <button type="button" className="mod-ok" disabled={occupe} onClick={ajouterCredits}>Ajouter les crédits</button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+      {erreur && <p className="mod-error" role="alert">{erreur}</p>}
+      {info && <p className="usr-ok" role="status">{info}</p>}
+    </article>
+  );
+}
+
+function PanneauUtilisateurs({ moiId, permissions }: { moiId: string; permissions: string[] }) {
+  const [q, setQ] = useState('');
+  const [terme, setTerme] = useState('');
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [erreur, setErreur] = useState('');
+  const peutVoirEmail = permissions.includes('utilisateurs.voir_email');
+
+  const charger = (t: string, silencieux = false) => {
+    if (!silencieux) setLoading(true);
+    setErreur('');
+    setTerme(t);
+    api.adminListUsers(t || undefined)
+      .then((res: any) => setUsers(res.users || []))
+      .catch((err: any) => { setUsers([]); setErreur(err.message); })
+      .finally(() => setLoading(false));
+  };
+  useEffect(() => { charger(''); }, []);
+
+  return (
+    <div className="mod-panel">
+      <form className="usr-search" onSubmit={(e) => { e.preventDefault(); charger(q.trim()); }}>
+        <input type="search" value={q} maxLength={100} aria-label="Rechercher un utilisateur" placeholder={peutVoirEmail ? 'Nom ou e-mail' : "Nom d'utilisateur ou e-mail exact"} onChange={(e) => setQ(e.target.value)} />
+        <button type="submit">Chercher</button>
+      </form>
+      {!peutVoirEmail && <p className="mod-meta usr-note">E-mails masqués : pour retrouver un compte, tapez le nom d'utilisateur ou l'adresse exacte.</p>}
+      {erreur && <p className="mod-error" role="alert">{erreur}</p>}
+      {loading ? (
+        <p className="mod-empty">Chargement…</p>
+      ) : users.length === 0 ? (
+        <p className="mod-empty">Aucun utilisateur trouvé.</p>
+      ) : (
+        <div className="mod-list">
+          {users.map((u) => (
+            <LigneUtilisateur key={u.id} u={u} moiId={moiId} permissions={permissions} onChanged={() => charger(terme, true)} />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
 const ONGLETS_ADMIN: [string, string][] = [
-  ['boutique', 'finance.voir'], ['utilisateurs', 'utilisateurs.modifier'], ['workspaces', 'utilisateurs.modifier'],
+  ['boutique', 'finance.voir'], ['utilisateurs', 'utilisateurs.voir'], ['workspaces', 'utilisateurs.modifier'],
   ['evaluation', 'utilisateurs.modifier'], ['moderation', 'moderation.voir'], ['audit', 'audit.voir'],
 ];
 const LIBELLES_ONGLETS: Record<string, string> = {
@@ -284,6 +452,9 @@ const LIBELLES_AUDIT: Record<string, string> = {
   'moderation.retirer': 'Annonce retirée (dossier)',
   'annonce.retrait_office': "Retrait d'office",
   'utilisateur.role_modifie': 'Rôle modifié',
+  'utilisateur.statut_modifie': 'Statut du compte modifié',
+  'utilisateur.credits_ajoutes': 'Crédits ajoutés',
+  'utilisateur.email_revele': 'E-mail consulté',
 };
 const FILTRES_AUDIT: [string, string][] = [['', 'Tout'], ['moderation.', 'Modération'], ['annonce.', 'Annonces'], ['utilisateur.', 'Rôles']];
 
@@ -1529,23 +1700,7 @@ function App() {
         )
         )}
 
-        {adminTab === 'utilisateurs' && (
-          <div style={{ padding: '0 1.5rem 2rem' }}>
-            {adminUsersLoading ? <p>Chargement...</p> : (
-              <div className="admin-sales-table">
-                {adminUsers.map((u: any) => (
-                  <LigneUtilisateur
-                    key={u.id}
-                    u={u}
-                    moi={u.id === user.id}
-                    date={formatDate(u.created_at)}
-                    onChanged={() => api.adminListUsers().then((res) => setAdminUsers(res.users)).catch(() => {})}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        {adminTab === 'utilisateurs' && <PanneauUtilisateurs moiId={user.id} permissions={permissions} />}
 
         {adminTab === 'workspaces' && (
           <div style={{ padding: '0 1.5rem 2rem' }}>

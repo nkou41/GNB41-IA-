@@ -3857,3 +3857,22 @@ body.dark-mode .role-error{background:#3A2415;color:#F5B27A}
 .legal-doc a{color:#5B5BD6;text-decoration:underline}
 .legal-maj{font-size:13px!important;opacity:.7}
 body.dark-mode .legal-doc a{color:#8B8BF2}
+
+/* ===== Administration: utilisateurs ===== */
+.usr-top{display:flex;flex-direction:column;gap:2px}
+.usr-name{font-size:17px;font-weight:600;color:var(--m-ink);overflow-wrap:anywhere}
+.usr-mail{font-size:14px;color:var(--m-muted);overflow-wrap:anywhere}
+.usr-note{margin:0 0 12px}
+.usr-badges{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.usr-badge{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;background:var(--m-info-bg);color:var(--m-info);font-size:13px;font-weight:500}
+.usr-badge.ok{background:var(--m-soft);color:var(--m-ok)}
+.usr-badge.warn{background:var(--m-warn-bg);color:var(--m-warn)}
+.usr-search{display:flex;gap:8px;margin-bottom:12px}
+.usr-search input{flex:1;min-width:0;height:44px;padding:0 14px;border:1px solid var(--m-line);border-radius:14px;background:var(--m-surface);color:var(--m-ink);font:inherit;font-size:16px}
+.usr-search button{flex:none;height:44px;padding:0 16px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--m-primary),var(--m-primary2));color:#fff;font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+.usr-select,.usr-input{width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;border:1px solid var(--m-line);border-radius:12px;background:var(--m-surface);color:var(--m-ink);font:inherit;font-size:16px}
+.usr-select.usr-role{width:auto;max-width:100%}
+.usr-panel{display:grid;gap:8px;padding:12px;border-radius:14px;background:var(--m-bg)}
+.usr-panel h4{margin:6px 0 0;font-size:14px;font-weight:600;color:var(--m-muted)}
+.usr-ok{margin:0;padding:10px 12px;border-radius:12px;background:var(--m-soft);color:var(--m-ok);font-size:14px;line-height:1.4}
+.mod-actions button.usr-toggle{border:1px solid var(--m-line);background:var(--m-surface);color:var(--m-primary)}
