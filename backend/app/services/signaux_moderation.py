@@ -46,6 +46,34 @@ def _raison_lien(hote):
     return None
 
 
+_PLATEFORME = {'gnb-41-ia.vercel.app', 'gnb41-ia.onrender.com', 'localhost', '127.0.0.1'}
+
+_GRANDS_SITES = [
+    'google.com', 'facebook.com', 'instagram.com', 'youtube.com', 'youtu.be',
+    'tiktok.com', 'twitter.com', 'x.com', 'whatsapp.com', 'telegram.org', 't.me',
+    'linkedin.com', 'wikipedia.org', 'amazon.com', 'microsoft.com', 'apple.com',
+    'openai.com', 'chatgpt.com', 'anthropic.com', 'claude.ai', 'github.com',
+    'netflix.com', 'spotify.com',
+]
+
+_PARIS = ['betpawa', '1xbet', 'melbet', '22bet', 'bet365', 'betway', 'sportybet', 'linebet', 'betwinner']
+
+
+def _raison_domaine(hote):
+    # Liens qu'un vendeur ne peut pas posséder : preuve de propriété à demander.
+    if not hote:
+        return None
+    if hote in _PLATEFORME:
+        return 'lien vers GNB41 IA lui-même'
+    for d in _GRANDS_SITES:
+        if hote == d or hote.endswith('.' + d):
+            return f'lien vers un site tiers connu ({d}) : preuve de propriété à vérifier'
+    for b in _PARIS:
+        if b in hote:
+            return 'site de paris en ligne'
+    return None
+
+
 def signaux_suspects(titre, description, tags, lien, source_type, compte_cree_le, nb_ventes):
     # Retourne les signaux qui justifient un examen manuel avant publication.
     signaux = []
@@ -62,4 +90,7 @@ def signaux_suspects(titre, description, tags, lien, source_type, compte_cree_le
         raison = _raison_lien(_hote(lien))
         if raison:
             signaux.append('lien suspect : ' + raison)
+        raison_dom = _raison_domaine(_hote(lien))
+        if raison_dom:
+            signaux.append(raison_dom)
     return signaux

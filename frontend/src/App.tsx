@@ -389,13 +389,15 @@ function PagesLegales({ page }: { page: 'cgv' | 'mentions' | 'confidentialite' |
           <p>Aucun remboursement n'est accordé pour les services déjà consommés, notamment les crédits IA utilisés, les abonnements en cours ou les contenus générés. Un remboursement peut être envisagé uniquement en cas de paiement dupliqué, d'indisponibilité totale prolongée du service sans faute de l'utilisateur, ou d'erreur technique imputable à GNB41 IA. Toute demande doit être envoyée à {mail} avec la preuve de paiement.</p>
           <h3>6. Droits et contenus des vendeurs</h3>
           <p>Avant toute publication, le vendeur certifie détenir les droits sur tous les noms, logos, images, sons, personnages et contenus de son application. Les applications qui reprennent sans autorisation des marques, clubs, joueurs, films, séries, personnages ou œuvres protégés sont interdites.</p>
-          <h3>7. Modération et retrait</h3>
+          <h3>7. Liens externes</h3>
+          <p>Une annonce de type « lien externe » ne peut proposer qu'un site ou une application dont le vendeur est propriétaire, ou pour lesquels il est autorisé à vendre l'accès. Il est interdit de vendre l'accès à un site, un service ou un contenu appartenant à un tiers, notamment lorsqu'il est gratuit ou public. GNB41 IA peut demander une preuve de propriété du lien et retirer l'annonce en cas de doute.</p>
+          <h3>8. Modération et retrait</h3>
           <p>GNB41 IA peut examiner une annonce avant ou après sa mise en ligne, la refuser, la suspendre ou la retirer, notamment en cas de marque protégée détectée, de signalement ou de réclamation d'un titulaire de droits. Le motif de la décision est communiqué au vendeur.</p>
-          <h3>8. Signalement</h3>
+          <h3>9. Signalement</h3>
           <p>Tout utilisateur peut signaler une annonce depuis la Boutique. Les titulaires de droits et les visiteurs sans compte peuvent utiliser la page « Signaler un contenu ».</p>
-          <h3>9. Responsabilité</h3>
+          <h3>10. Responsabilité</h3>
           <p>Le vendeur est seul responsable du contenu, de la qualité et de la légalité de l'application vendue. La plateforme agit en tant qu'intermédiaire technique.</p>
-          <h3>10. Droit applicable et litiges</h3>
+          <h3>11. Droit applicable et litiges</h3>
           <p>Tout litige est d'abord traité à l'amiable par e-mail à {mail}. À défaut, il relève des tribunaux compétents du pays de résidence de l'utilisateur, dans la mesure permise par la loi applicable.</p>
         </>
       )}
