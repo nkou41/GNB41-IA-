@@ -23,7 +23,7 @@ type Kind = 'pending' | 'review' | 'rejected' | 'approved' | 'info';
 
 function kindOf(n: Notification): Kind {
   const s = `${n.type} ${n.titre}`.toLowerCase();
-  if (/refus|rejet/.test(s)) return 'rejected';
+  if (/refus|rejet|retir/.test(s)) return 'rejected';
   if (/accept|approuv|publi|valid/.test(s)) return 'approved';
   if (/examiner/.test(s)) return 'review';
   if (/cours|attente|examen/.test(s)) return 'pending';
