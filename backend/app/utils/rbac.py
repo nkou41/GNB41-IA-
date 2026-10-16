@@ -15,7 +15,7 @@ ROLES = {
 }
 
 PERMISSIONS = (
-    'moderation.voir', 'moderation.decider', 'utilisateurs.voir', 'utilisateurs.modifier',
+    'moderation.voir', 'moderation.decider', 'utilisateurs.voir', 'utilisateurs.voir_email', 'utilisateurs.modifier',
     'finance.voir', 'finance.gerer', 'abonnements.gerer', 'ia.configurer', 'api.gerer',
     'notifications.envoyer', 'logs.voir', 'stats.voir', 'audit.voir',
     'systeme.configurer', 'roles.gerer',

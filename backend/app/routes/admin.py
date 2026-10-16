@@ -21,23 +21,24 @@ admin_bp = Blueprint('admin', __name__)
 
 @admin_bp.route('/users', methods=['GET'])
 @login_required
-@admin_required
+@permission_required('utilisateurs.voir')
 def list_users():
     if TEST_MODE:
         data = reqres_get_users()
         return jsonify({'users': data.get('data', []), 'total': data.get('total', 0), 'test_mode': True})
 
-    search = request.args.get('q', '').strip()
+    voir_email = a_permission('utilisateurs.voir_email')
+    search = request.args.get('q', '').strip()[:100]
     query = User.query
     if search:
-        query = query.filter(
-            db.or_(
-                User.username.ilike(f'%{search}%'),
-                User.email.ilike(f'%{search}%')
-            )
-        )
-    users = query.order_by(User.created_at.desc()).all()
-    return jsonify({'users': [_avec_statut(u) for u in users], 'total': len(users)})
+        if voir_email:
+            motif = db.or_(User.username.ilike(f'%{search}%'), User.email.ilike(f'%{search}%'))
+        else:
+            # Sans droit sur les e-mails : adresse exacte uniquement (pas de sondage lettre par lettre).
+            motif = db.or_(User.username.ilike(f'%{search}%'), db.func.lower(User.email) == search.lower())
+        query = query.filter(motif)
+    users = query.order_by(User.created_at.desc()).limit(200).all()
+    return jsonify({'users': [_vue_utilisateur(u, voir_email) for u in users], 'total': len(users)})
 
 
 @admin_bp.route('/users/<user_id>/role', methods=['PATCH'])
@@ -350,3 +351,43 @@ def add_user_credits(user_id):
         return jsonify({'error': 'Ajout impossible. Réessayez.'}), 500
     _notifier_compte(user, 'Crédits ajoutés', f'{n} crédit(s) ont été ajoutés à votre compte.')
     return jsonify({'user': _avec_statut(user)})
+
+
+def _masquer_email(email):
+    if not email or '@' not in email:
+        return ''
+    local, domaine = email.split('@', 1)
+    return (local[:1] or '*') + '***@' + domaine
+
+
+def _vue_utilisateur(u, voir_email):
+    return {
+        'id': u.id,
+        'username': u.username,
+        'email': u.email if voir_email else _masquer_email(u.email),
+        'created_at': u.created_at.isoformat() if u.created_at else None,
+        'plan': u.plan or 'gratuit',
+        'credits': u.credits if u.credits is not None else 1,
+        'role': u.role or 'user',
+        'compte_statut': u.compte_statut or 'actif',
+        'suspendu_jusqua': u.suspendu_jusqua.isoformat() if u.suspendu_jusqua else None,
+        'motif_suspension': u.motif_suspension,
+    }
+
+
+@admin_bp.route('/users/<user_id>/reveler-email', methods=['POST'])
+@login_required
+@permission_required('utilisateurs.voir')
+def reveler_email(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'Utilisateur introuvable'}), 404
+    if (est_proprietaire(user) or (user.role or 'user') in ('admin', 'superadmin')) and not a_permission('roles.gerer'):
+        return jsonify({'error': 'Seul un super administrateur peut voir cette adresse'}), 403
+    try:
+        audit('utilisateur.email_revele', 'utilisateur', user.id, apres={'champ': 'email'})
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error': 'Action impossible. Réessayez.'}), 500
+    return jsonify({'email': user.email})
