@@ -1139,7 +1139,7 @@ function App() {
         ? await api.login(username, password)
         : await api.register(username, email, password);
       setUser(result);
-      identifyUser(String(result.id), { username: result.username, email: result.email });
+      identifyUser(String(result.id), { plan: result.plan });
       trackEvent(authMode === 'login' ? 'user_logged_in' : 'user_registered');
       if (authMode === 'register') {
         trackEvent('welcome_notification_triggered');
