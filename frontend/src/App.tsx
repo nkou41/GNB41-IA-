@@ -417,7 +417,7 @@ function PagesLegales({ page }: { page: 'cgv' | 'mentions' | 'confidentialite' |
           <h3>Prestataires et transferts</h3>
           <p>Vos données sont traitées par nos prestataires techniques : Vercel, Render, Supabase, FedaPay et un service d'envoi d'e-mails (Brevo). Certains peuvent se trouver hors de votre pays.</p>
           <h3>Mesure d'audience</h3>
-          <p>Aucun outil de mesure d'audience tiers n'est actuellement utilisé.</p>
+          <p>Avec votre accord, nous utilisons PostHog (PostHog Inc.) pour mesurer l'audience : pages consultées, pages quittées et, si vous êtes connecté, l'identifiant de votre compte. Ces données servent uniquement à améliorer le service. Rien n'est collecté tant que vous n'avez pas accepté. Pour retirer votre accord, effacez les données du site dans votre navigateur ou écrivez à {mail}.</p>
           <h3>Durée de conservation</h3>
           <p>Vos données sont conservées tant que votre compte existe, puis supprimées ou anonymisées dans un délai raisonnable. Les journaux de sécurité et de modération sont conservés le temps nécessaire à la sécurité de la plateforme et au respect des obligations légales.</p>
           <h3>Vos droits</h3>

@@ -6,6 +6,7 @@ import App from './App.tsx'
 import ErrorBoundary from './ErrorBoundary.tsx'
 import PushPromptGate from './components/PushPromptGate'
 import ApkBanner from './components/ApkBanner'
+import ConsentBanner from './components/ConsentBanner'
 import './dark.css'
 import WebContainerTest from './WebContainerTest.tsx'
 import { initAnalytics } from './analytics'
@@ -20,7 +21,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <ErrorBoundary>
-        {WEBCONTAINER_TEST_MODE ? <WebContainerTest /> : <><App /><PushPromptGate /><ApkBanner /></>}
+        {WEBCONTAINER_TEST_MODE ? <WebContainerTest /> : <><App /><PushPromptGate /><ApkBanner /><ConsentBanner /></>}
       </ErrorBoundary>
     </BrowserRouter>
   </StrictMode>,
