@@ -391,3 +391,95 @@ def reveler_email(user_id):
         db.session.rollback()
         return jsonify({'error': 'Action impossible. Réessayez.'}), 500
     return jsonify({'email': user.email})
+
+
+def _compter_par(colonne, id_col, defaut):
+    resultat = {}
+    for cle, n in db.session.query(colonne, db.func.count(id_col)).group_by(colonne).all():
+        nom = str(cle) if cle else defaut
+        resultat[nom] = resultat.get(nom, 0) + n
+    return resultat
+
+
+def _serie_par_jour(colonne, id_col, jours):
+    debut = (datetime.utcnow() - timedelta(days=jours - 1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    lignes = (db.session.query(db.func.date(colonne), db.func.count(id_col))
+              .filter(colonne >= debut).group_by(db.func.date(colonne)).all())
+    comptes = {str(j)[:10]: n for j, n in lignes}
+    serie = []
+    for i in range(jours):
+        jour = (debut + timedelta(days=i)).strftime('%Y-%m-%d')
+        serie.append({'jour': jour, 'n': comptes.get(jour, 0)})
+    return serie
+
+
+@admin_bp.route('/overview', methods=['GET'])
+@login_required
+@permission_required('stats.voir')
+def admin_overview():
+    from app.models.listing import Listing
+    from app.models.purchase import Purchase
+    from app.models.payment import Payment
+    from app.models.listing_review import ListingReview
+    from app.models.listing_report import ListingReport
+    from app.models.studio_usage_log import StudioUsageLog
+
+    try:
+        jours = int(request.args.get('jours', 14))
+    except (ValueError, TypeError):
+        jours = 14
+    if jours not in (7, 14, 30, 90):
+        jours = 14
+    maintenant = datetime.utcnow()
+    depuis = lambda n: maintenant - timedelta(days=n)
+
+    suspendus = User.query.filter(db.or_(
+        User.compte_statut == 'bloque',
+        db.and_(User.compte_statut == 'suspendu',
+                db.or_(User.suspendu_jusqua.is_(None), User.suspendu_jusqua > maintenant)))).count()
+    donnees = {
+        'jours': jours,
+        'utilisateurs': {
+            'total': User.query.count(),
+            'nouveaux_7j': User.query.filter(User.created_at >= depuis(7)).count(),
+            'nouveaux_30j': User.query.filter(User.created_at >= depuis(30)).count(),
+            'suspendus': suspendus,
+            'par_plan': _compter_par(User.plan, User.id, 'gratuit'),
+        },
+        'projets': {
+            'total': Project.query.count(),
+            'nouveaux_7j': Project.query.filter(Project.created_at >= depuis(7)).count(),
+            'nouveaux_30j': Project.query.filter(Project.created_at >= depuis(30)).count(),
+            'deployes': Project.query.filter_by(est_deploye=True).count(),
+            'par_statut': _compter_par(Project.statut, Project.id, 'inconnu'),
+            'par_modele': _compter_par(Project.provider, Project.id, 'inconnu'),
+        },
+        'moderation': {
+            'a_examiner': ListingReview.query.filter_by(statut='en_attente').count(),
+            'signalements': ListingReport.query.filter_by(statut='nouveau').count(),
+        },
+        'studio': {
+            'appels_7j': StudioUsageLog.query.filter(StudioUsageLog.created_at >= depuis(7)).count(),
+            'erreurs_7j': StudioUsageLog.query.filter(StudioUsageLog.created_at >= depuis(7),
+                                                      StudioUsageLog.statut_http >= 400).count(),
+        },
+        'boutique': {
+            'annonces': _compter_par(Listing.statut, Listing.id, 'inconnu'),
+            'ventes': Purchase.query.filter_by(statut='complete').count(),
+        },
+        'series': {
+            'inscriptions': _serie_par_jour(User.created_at, User.id, jours),
+            'projets': _serie_par_jour(Project.created_at, Project.id, jours),
+        },
+    }
+    if a_permission('finance.voir'):
+        ca, commission = db.session.query(
+            db.func.coalesce(db.func.sum(Purchase.prix_paye_centimes), 0),
+            db.func.coalesce(db.func.sum(Purchase.commission_centimes), 0)
+        ).filter(Purchase.statut == 'complete').one()
+        donnees['finance'] = {
+            'ca_centimes': int(ca),
+            'commission_centimes': int(commission),
+            'paiements': _compter_par(Payment.status, Payment.id, 'inconnu'),
+        }
+    return jsonify(donnees)
