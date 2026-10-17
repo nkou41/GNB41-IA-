@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6366f1">
+<title>Pas de connexion</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--text:#1c1b2e;--muted:#5d6176;--accent:#6366f1}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1020;--card:#181a2e;--text:#f1f1f8;--muted:#a3a6bd}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;text-align:center}
+.card{width:100%;max-width:380px;padding:32px 24px;border-radius:24px;background:var(--card);box-shadow:0 10px 30px rgba(0,0,0,.12)}
+img{width:84px;height:84px;border-radius:20px;background:#fff;padding:6px}
+h1{margin:18px 0 8px;font-size:22px}
+p{color:var(--muted);line-height:1.5;font-size:15px}
+button{margin-top:22px;width:100%;padding:14px;border:0;border-radius:14px;background:var(--accent);color:#fff;font:inherit;font-size:16px;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="card">
+  <img src="/android-chrome-192x192.png" alt="GNB41 IA">
+  <h1>Pas de connexion</h1>
+  <p>GNB41 IA a besoin d'internet. Vérifiez vos données mobiles ou le Wi-Fi, puis réessayez.</p>
+  <button onclick="location.reload()">Réessayer</button>
+</div>
+<script>window.addEventListener('online',function(){location.reload()})</script>
+</body>
+</html>

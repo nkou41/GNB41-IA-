@@ -13,6 +13,12 @@ import { initAnalytics } from './analytics'
 
 initAnalytics()
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
 // TEMPORAIRE: test isole de WebContainerTest.
 // Mettre WEBCONTAINER_TEST_MODE a false pour revenir a l'app normale.
 const WEBCONTAINER_TEST_MODE = false
