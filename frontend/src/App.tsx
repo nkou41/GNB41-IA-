@@ -345,11 +345,11 @@ function PanneauUtilisateurs({ moiId, permissions }: { moiId: string; permission
 }
 
 const ONGLETS_ADMIN: [string, string][] = [
-  ['boutique', 'finance.voir'], ['utilisateurs', 'utilisateurs.voir'], ['workspaces', 'utilisateurs.modifier'],
+  ['vue', 'stats.voir'], ['boutique', 'finance.voir'], ['utilisateurs', 'utilisateurs.voir'], ['workspaces', 'utilisateurs.modifier'],
   ['evaluation', 'utilisateurs.modifier'], ['moderation', 'moderation.voir'], ['audit', 'audit.voir'],
 ];
 const LIBELLES_ONGLETS: Record<string, string> = {
-  boutique: 'Boutique', utilisateurs: 'Utilisateurs', workspaces: 'Workspaces',
+  vue: "Vue d'ensemble", boutique: 'Boutique', utilisateurs: 'Utilisateurs', workspaces: 'Workspaces',
   evaluation: 'Evaluation IA', moderation: 'Modération', audit: "Journal d'audit",
 };
 
@@ -445,6 +445,121 @@ function PagesLegales({ page }: { page: 'cgv' | 'mentions' | 'confidentialite' |
         </>
       )}
     </article>
+  );
+}
+
+const LIB_ANNONCES: Record<string, string> = { publie: 'Publiées', en_revue: 'En revue', refuse: 'Refusées', retire: 'Retirées', suspendu: 'Suspendues' };
+const LIB_PROJETS: Record<string, string> = { pret: 'Prêts', genere: 'Prêts', erreur: 'En échec', en_generation: 'En cours', en_attente: 'En attente' };
+
+function ListeCompteurs({ donnees, libelles }: { donnees: Record<string, number>; libelles?: Record<string, string> }) {
+  const entrees = Object.entries(donnees || {});
+  if (entrees.length === 0) return <p className="ovw-sub">Aucune donnée</p>;
+  return (
+    <ul className="ovw-list">
+      {entrees.map(([cle, n]) => (
+        <li key={cle}><span>{(libelles && libelles[cle]) || cle}</span><strong>{n}</strong></li>
+      ))}
+    </ul>
+  );
+}
+
+function BarresJours({ titre, serie }: { titre: string; serie: { jour: string; n: number }[] }) {
+  const max = Math.max(1, ...serie.map((p) => p.n));
+  const total = serie.reduce((somme, p) => somme + p.n, 0);
+  return (
+    <section className="ovw-card">
+      <h4>{titre}</h4>
+      <div className="ovw-kpi"><strong>{total}</strong><span>sur la période</span></div>
+      <div className="ovw-bars" role="img" aria-label={`${titre} : ${total} sur la période`}>
+        {serie.map((p) => (
+          <div key={p.jour} className="ovw-bar" title={`${p.jour} : ${p.n}`}>
+            <span style={{ height: p.n > 0 ? `${Math.max(6, (p.n / max) * 100)}%` : '2%' }} />
+          </div>
+        ))}
+      </div>
+      <div className="ovw-axis">
+        <span>{serie.length ? serie[0].jour.slice(5) : ''}</span>
+        <span>{serie.length ? serie[serie.length - 1].jour.slice(5) : ''}</span>
+      </div>
+    </section>
+  );
+}
+
+function PanneauVue() {
+  const [jours, setJours] = useState(14);
+  const [d, setD] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [erreur, setErreur] = useState('');
+
+  useEffect(() => {
+    setLoading(true);
+    setErreur('');
+    api.adminOverview(jours)
+      .then((res: any) => setD(res))
+      .catch((err: any) => { setD(null); setErreur(err.message); })
+      .finally(() => setLoading(false));
+  }, [jours]);
+
+  const eur = (centimes: number) => `${(centimes / 100).toFixed(2)} €`;
+
+  return (
+    <div className="mod-panel">
+      <div className="mod-chips" role="tablist" aria-label="Période des graphiques">
+        {[7, 14, 30, 90].map((n) => (
+          <button key={n} type="button" role="tab" aria-selected={jours === n} className={jours === n ? 'active' : ''} onClick={() => setJours(n)}>{n} jours</button>
+        ))}
+      </div>
+      {erreur && <p className="mod-error" role="alert">{erreur}</p>}
+      {loading && !d ? (
+        <p className="mod-empty">Chargement…</p>
+      ) : !d ? null : (
+        <div className="ovw-grid">
+          <section className="ovw-card">
+            <h4>Utilisateurs</h4>
+            <div className="ovw-kpi"><strong>{d.utilisateurs.total}</strong><span>comptes</span></div>
+            <p className="ovw-sub">+{d.utilisateurs.nouveaux_7j} sur 7 jours · +{d.utilisateurs.nouveaux_30j} sur 30 jours</p>
+            <p className="ovw-sub">{d.utilisateurs.suspendus} suspendu(s) ou bloqué(s)</p>
+            <ListeCompteurs donnees={d.utilisateurs.par_plan} />
+          </section>
+          <section className="ovw-card">
+            <h4>Projets</h4>
+            <div className="ovw-kpi"><strong>{d.projets.total}</strong><span>projets</span></div>
+            <p className="ovw-sub">+{d.projets.nouveaux_7j} sur 7 jours · +{d.projets.nouveaux_30j} sur 30 jours · {d.projets.deployes} publié(s)</p>
+            <ListeCompteurs donnees={d.projets.par_statut} libelles={LIB_PROJETS} />
+            <p className="ovw-sub">Par modèle d'IA</p>
+            <ListeCompteurs donnees={d.projets.par_modele} />
+          </section>
+          <section className="ovw-card">
+            <h4>Modération</h4>
+            <div className="ovw-kpi"><strong>{d.moderation.a_examiner}</strong><span>à examiner</span></div>
+            <p className="ovw-sub">{d.moderation.signalements} signalement(s) ouvert(s)</p>
+          </section>
+          <section className="ovw-card">
+            <h4>API Studio (7 jours)</h4>
+            <div className="ovw-kpi"><strong>{d.studio.appels_7j}</strong><span>appels</span></div>
+            <p className="ovw-sub">{d.studio.erreurs_7j} en erreur</p>
+          </section>
+          <section className="ovw-card">
+            <h4>Boutique</h4>
+            <div className="ovw-kpi"><strong>{d.boutique.ventes}</strong><span>vente(s) complétée(s)</span></div>
+            <ListeCompteurs donnees={d.boutique.annonces} libelles={LIB_ANNONCES} />
+            {d.finance && (
+              <p className="ovw-sub">Chiffre d'affaires {eur(d.finance.ca_centimes)} · commission {eur(d.finance.commission_centimes)}</p>
+            )}
+          </section>
+          {d.finance && (
+            <section className="ovw-card">
+              <h4>Paiements d'abonnement</h4>
+              <ListeCompteurs donnees={d.finance.paiements} />
+              <p className="ovw-sub">Nombre de paiements par statut. Les montants ne sont pas affichés : l'unité n'est pas confirmée.</p>
+            </section>
+          )}
+          <BarresJours titre="Inscriptions" serie={d.series.inscriptions} />
+          <BarresJours titre="Projets créés" serie={d.series.projets} />
+          <p className="ovw-sub ovw-note">Les jours sont comptés en heure UTC.</p>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -718,7 +833,7 @@ function App() {
   const [resetStatus, setResetStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [resetMessage, setResetMessage] = useState('');
   const [adminStats, setAdminStats] = useState<any | null>(null);
-  const [adminTab, setAdminTab] = useState<'boutique' | 'moderation' | 'audit' | 'utilisateurs' | 'workspaces' | 'evaluation'>('boutique');
+  const [adminTab, setAdminTab] = useState<'vue' | 'boutique' | 'moderation' | 'audit' | 'utilisateurs' | 'workspaces' | 'evaluation'>('vue');
   const [adminUsers, setAdminUsers] = useState<any[]>([]);
   const [adminWorkspaces, setAdminWorkspaces] = useState<any[]>([]);
   const [adminUsersLoading, setAdminUsersLoading] = useState(false);
@@ -1649,6 +1764,8 @@ function App() {
         {!ONGLETS_ADMIN.some(([, perm]) => permissions.includes(perm)) && (
           <div className="marketplace-empty"><p>Accès réservé aux administrateurs.</p></div>
         )}
+
+        {adminTab === 'vue' && <PanneauVue />}
 
         {adminTab === 'audit' && <PanneauAudit />}
 

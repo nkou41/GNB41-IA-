@@ -3876,3 +3876,20 @@ body.dark-mode .legal-doc a{color:#8B8BF2}
 .usr-panel h4{margin:6px 0 0;font-size:14px;font-weight:600;color:var(--m-muted)}
 .usr-ok{margin:0;padding:10px 12px;border-radius:12px;background:var(--m-soft);color:var(--m-ok);font-size:14px;line-height:1.4}
 .mod-actions button.usr-toggle{border:1px solid var(--m-line);background:var(--m-surface);color:var(--m-primary)}
+
+/* ===== Administration: vue d'ensemble ===== */
+.ovw-grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:640px){.ovw-grid{grid-template-columns:repeat(2,1fr)}}
+.ovw-card{padding:16px;background:var(--m-surface);border:1px solid var(--m-line);border-radius:18px}
+.ovw-card h4{margin:0 0 8px;font-size:14px;font-weight:600;color:var(--m-muted)}
+.ovw-kpi{display:flex;align-items:baseline;gap:8px}
+.ovw-kpi strong{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:30px;line-height:1.1;color:var(--m-ink)}
+.ovw-kpi span{font-size:14px;color:var(--m-muted)}
+.ovw-sub{margin:4px 0 0;font-size:13px;line-height:1.45;color:var(--m-muted)}
+.ovw-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:4px}
+.ovw-list li{display:flex;justify-content:space-between;gap:10px;font-size:14px;color:var(--m-ink)}
+.ovw-bars{display:flex;align-items:flex-end;gap:2px;height:96px;margin-top:12px}
+.ovw-bar{flex:1;height:100%;display:flex;align-items:flex-end}
+.ovw-bar span{display:block;width:100%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--m-primary2),var(--m-primary))}
+.ovw-axis{display:flex;justify-content:space-between;margin-top:4px;font-size:12px;color:var(--m-muted)}
+.ovw-note{grid-column:1/-1;text-align:center}
