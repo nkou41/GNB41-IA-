@@ -7,17 +7,15 @@ import ErrorBoundary from './ErrorBoundary.tsx'
 import PushPromptGate from './components/PushPromptGate'
 import ApkBanner from './components/ApkBanner'
 import ConsentBanner from './components/ConsentBanner'
+import PwaBanners from './components/PwaBanners'
+import { initPwa } from './pwa'
 import './dark.css'
 import WebContainerTest from './WebContainerTest.tsx'
 import { initAnalytics } from './analytics'
 
 initAnalytics()
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
-}
+initPwa()
 
 // TEMPORAIRE: test isole de WebContainerTest.
 // Mettre WEBCONTAINER_TEST_MODE a false pour revenir a l'app normale.
@@ -27,7 +25,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <ErrorBoundary>
-        {WEBCONTAINER_TEST_MODE ? <WebContainerTest /> : <><App /><PushPromptGate /><ApkBanner /><ConsentBanner /></>}
+        {WEBCONTAINER_TEST_MODE ? <WebContainerTest /> : <><App /><PushPromptGate /><ApkBanner /><ConsentBanner /><PwaBanners /></>}
       </ErrorBoundary>
     </BrowserRouter>
   </StrictMode>,
