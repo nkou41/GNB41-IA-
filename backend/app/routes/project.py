@@ -546,6 +546,9 @@ def duplicate_project(project_id):
     if not _check_edit_access(project.workspace_id):
         return jsonify({'error': 'Non autorisé'}), 403
 
+    if (project.modere_statut or 'actif') == 'suspendu':
+        return jsonify({'error': 'Ce projet est suspendu par la modération et ne peut pas être dupliqué.'}), 403
+
     copy = Project(
         workspace_id=project.workspace_id,
         nom=f"{project.nom} (copie)",
@@ -622,6 +625,8 @@ def deploy_project(project_id):
     project = Project.query.get_or_404(project_id)
     if not _check_access(project.workspace_id):
         return jsonify({'error': 'Non autorisé'}), 403
+    if (project.modere_statut or 'actif') == 'suspendu':
+        return jsonify({'error': 'Ce projet est suspendu par la modération. Contactez le support.'}), 403
     if project.statut != 'pret' or not project.code_genere:
         return jsonify({'error': "Le projet doit etre genere avec succes avant deploiement"}), 400
 
@@ -733,7 +738,7 @@ def _injecter_pwa_dans_html(html, couleur):
 @project_bp.route('/<project_id>/live/<path:chemin>', methods=['GET'])
 def serve_live(project_id, chemin):
     project = Project.query.get_or_404(project_id)
-    if not project.est_deploye or not project.code_genere:
+    if not project.est_deploye or not project.code_genere or (project.modere_statut or 'actif') == 'suspendu':
         return jsonify({'error': "Cette application n'est pas deployee"}), 404
 
     try:

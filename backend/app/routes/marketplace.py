@@ -187,6 +187,8 @@ def create_listing():
         project = Project.query.get(project_id)
         if not project:
             return jsonify({'error': 'Projet introuvable'}), 404
+        if (project.modere_statut or 'actif') == 'suspendu':
+            return jsonify({'error': 'Ce projet est suspendu par la modération : il ne peut pas être mis en vente.'}), 403
 
     elif source_type == 'externe_zip':
         if 'fichier' not in request.files:
@@ -357,6 +359,8 @@ def preview_listing(listing_id):
 
     project = Project.query.get(listing.project_id)
     if not project or not project.code_genere:
+        return jsonify({'error': 'Apercu introuvable'}), 404
+    if (project.modere_statut or 'actif') == 'suspendu' and not moderation:
         return jsonify({'error': 'Apercu introuvable'}), 404
 
     try:

@@ -483,3 +483,116 @@ def admin_overview():
             'paiements': _compter_par(Payment.status, Payment.id, 'inconnu'),
         }
     return jsonify(donnees)
+
+
+FILTRES_PROJETS = ('tous', 'publies', 'suspendus', 'echecs')
+
+
+@admin_bp.route('/projects', methods=['GET'])
+@login_required
+@permission_required('projets.voir')
+def admin_list_projects():
+    voir_email = a_permission('utilisateurs.voir_email')
+    filtre = request.args.get('filtre', 'tous')
+    if filtre not in FILTRES_PROJETS:
+        filtre = 'tous'
+    search = request.args.get('q', '').strip()[:100]
+    requete = (db.session.query(
+        Project.id.label('pid'), Project.nom.label('nom'), Project.statut.label('statut'),
+        Project.provider.label('provider'), Project.est_deploye.label('deploye'),
+        Project.modere_statut.label('modere'), Project.modere_motif.label('motif'),
+        Project.created_at.label('cree'), Project.updated_at.label('maj'),
+        User.id.label('uid'), User.username.label('uname'), User.email.label('umail'))
+        .select_from(Project)
+        .join(Workspace, Project.workspace_id == Workspace.id)
+        .join(User, Workspace.owner_id == User.id))
+    if filtre == 'publies':
+        requete = requete.filter(Project.est_deploye.is_(True))
+    elif filtre == 'suspendus':
+        requete = requete.filter(Project.modere_statut == 'suspendu')
+    elif filtre == 'echecs':
+        requete = requete.filter(Project.statut == 'erreur')
+    if search:
+        criteres = [Project.nom.ilike(f'%{search}%'), User.username.ilike(f'%{search}%')]
+        criteres.append(User.email.ilike(f'%{search}%') if voir_email else db.func.lower(User.email) == search.lower())
+        requete = requete.filter(db.or_(*criteres))
+    lignes = requete.order_by(Project.created_at.desc()).limit(100).all()
+    projets = [{
+        'id': l.pid, 'nom': l.nom, 'statut': l.statut, 'modele': l.provider,
+        'est_deploye': bool(l.deploye), 'modere_statut': l.modere or 'actif', 'modere_motif': l.motif,
+        'created_at': l.cree.isoformat() if l.cree else None,
+        'updated_at': l.maj.isoformat() if l.maj else None,
+        'proprietaire_id': l.uid, 'proprietaire': l.uname,
+        'proprietaire_email': l.umail if voir_email else _masquer_email(l.umail),
+    } for l in lignes]
+    return jsonify({'projects': projets, 'total': len(projets)})
+
+
+@admin_bp.route('/projects/<project_id>/moderation', methods=['PATCH'])
+@login_required
+@permission_required('projets.moderer')
+def moderer_projet(project_id):
+    from app.models.listing import Listing
+    from app.models.listing_review import ListingReview
+    data = request.get_json(silent=True) or {}
+    action = data.get('action')
+    motif = (data.get('motif') or '').strip()[:300]
+    if action not in ('suspendre', 'reactiver'):
+        return jsonify({'error': 'Action invalide'}), 400
+    project = Project.query.get(project_id)
+    if not project:
+        return jsonify({'error': 'Projet introuvable'}), 404
+    workspace = Workspace.query.get(project.workspace_id)
+    proprietaire = User.query.get(workspace.owner_id) if workspace else None
+    if proprietaire is not None:
+        if proprietaire.id == current_user.id:
+            return jsonify({'error': 'Vous ne pouvez pas modérer votre propre projet'}), 403
+        if est_proprietaire(proprietaire):
+            return jsonify({'error': 'Ce projet ne peut pas être suspendu'}), 403
+        if (proprietaire.role or 'user') in ('admin', 'superadmin') and not a_permission('roles.gerer'):
+            return jsonify({'error': 'Seul un super administrateur peut agir sur ce projet'}), 403
+    actuel = project.modere_statut or 'actif'
+    if action == 'suspendre':
+        if actuel == 'suspendu':
+            return jsonify({'error': 'Ce projet est déjà suspendu'}), 409
+        if len(motif) < 5:
+            return jsonify({'error': 'Un motif de 5 caractères minimum est requis'}), 400
+    elif actuel != 'suspendu':
+        return jsonify({'error': "Ce projet n'est pas suspendu"}), 409
+
+    retirees = 0
+    try:
+        avant = {'modere_statut': actuel, 'est_deploye': bool(project.est_deploye)}
+        if action == 'suspendre':
+            maintenant = datetime.utcnow()
+            project.modere_statut = 'suspendu'
+            project.modere_motif = motif
+            project.est_deploye = False
+            for l in Listing.query.filter_by(project_id=project.id).all():
+                if l.statut in ('publie', 'en_revue', 'suspendu'):
+                    for rv in ListingReview.query.filter_by(listing_id=l.id, statut='en_attente').all():
+                        rv.statut = 'retire'
+                        rv.decide_par = current_user.id
+                        rv.decision_motif = motif
+                        rv.decided_at = maintenant
+                    l.statut = 'retire'
+                    retirees += 1
+            audit('projet.suspendu', 'projet', project.id, avant=avant,
+                  apres={'modere_statut': 'suspendu', 'motif': motif, 'annonces_retirees': retirees,
+                         'proprietaire': proprietaire.username if proprietaire else None})
+        else:
+            project.modere_statut = 'actif'
+            project.modere_motif = None
+            audit('projet.reactive', 'projet', project.id, avant=avant,
+                  apres={'modere_statut': 'actif', 'proprietaire': proprietaire.username if proprietaire else None})
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error': 'Modification impossible. Réessayez.'}), 500
+
+    if proprietaire is not None:
+        if action == 'suspendre':
+            _notifier_compte(proprietaire, 'Projet suspendu', f"Votre projet « {project.nom} » a été suspendu. Motif : {motif}")
+        else:
+            _notifier_compte(proprietaire, 'Projet réactivé', f"Votre projet « {project.nom} » a été réactivé. Vous pouvez le republier.")
+    return jsonify({'project': {'id': project.id, 'modere_statut': project.modere_statut, 'annonces_retirees': retirees}})

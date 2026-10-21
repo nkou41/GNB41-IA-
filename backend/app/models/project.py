@@ -16,6 +16,8 @@ class Project(db.Model):
     est_deploye = db.Column(db.Boolean, default=False)
     erreur_message = db.Column(db.Text)
     memoire_projet = db.Column(db.Text)
+    modere_statut = db.Column(db.String(20), default='actif')
+    modere_motif = db.Column(db.String(300), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -31,6 +33,8 @@ class Project(db.Model):
             'est_deploye': self.est_deploye,
             'erreur_message': self.erreur_message,
             'memoire_projet': self.memoire_projet,
+            'modere_statut': self.modere_statut or 'actif',
+            'modere_motif': self.modere_motif,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }

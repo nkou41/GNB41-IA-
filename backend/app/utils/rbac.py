@@ -18,15 +18,15 @@ PERMISSIONS = (
     'moderation.voir', 'moderation.decider', 'utilisateurs.voir', 'utilisateurs.voir_email', 'utilisateurs.modifier',
     'finance.voir', 'finance.gerer', 'abonnements.gerer', 'ia.configurer', 'api.gerer',
     'notifications.envoyer', 'logs.voir', 'stats.voir', 'audit.voir',
-    'systeme.configurer', 'roles.gerer',
+    'systeme.configurer', 'roles.gerer', 'projets.voir', 'projets.moderer',
 )
 _RESERVEES = {'roles.gerer', 'systeme.configurer'}
 
 ROLE_PERMISSIONS = {
     'superadmin': set(PERMISSIONS),
     'admin': set(PERMISSIONS) - _RESERVEES,
-    'moderateur': {'moderation.voir', 'moderation.decider', 'stats.voir'},
-    'support': {'utilisateurs.voir', 'moderation.voir', 'notifications.envoyer'},
+    'moderateur': {'moderation.voir', 'moderation.decider', 'stats.voir', 'projets.voir', 'projets.moderer'},
+    'support': {'utilisateurs.voir', 'moderation.voir', 'notifications.envoyer', 'projets.voir'},
     'finance': {'finance.voir', 'finance.gerer', 'abonnements.gerer', 'stats.voir'},
     'technique': {'logs.voir', 'api.gerer', 'ia.configurer', 'stats.voir'},
     'marketing': {'notifications.envoyer', 'stats.voir'},
