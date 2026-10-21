@@ -6,6 +6,7 @@ import PushToggle from './components/PushToggle';
 import { setSessionActive } from './lib/session';
 import NotificationPrefs from './components/NotificationPrefs';
 import { isDarkNow, setThemePref, useThemePref } from './lib/prefs';
+import { planPrice, useCurrency } from './lib/money';
 import { formatDate, formatDateTime, formatShortDateTime, formatTime, parseServerDate } from './lib/time';
 import PublicNav from './components/PublicNav';
 import Apropos from './pages/Apropos';
@@ -816,6 +817,7 @@ function PanneauModeration() {
 }
 
 function App() {
+  const devise = useCurrency();
   const [user, setUser] = useState<User | null>(null);
   const permissions: string[] = Array.isArray((user as any)?.permissions)
     ? (user as any).permissions
@@ -2601,7 +2603,7 @@ ${jsFile.contenu}
                   {p.populaire && <span className="plan-badge">Populaire</span>}
                   <h3>{p.nom}</h3>
                   <p className="plan-price">
-                    {p.sur_devis ? 'Sur devis' : `${p.prix_usd}$`}
+                    {p.sur_devis ? 'Sur devis' : planPrice(p, devise)}
                     {!p.sur_devis && <span>/mois</span>}
                   </p>
                   {!p.sur_devis && p.credits != null && (
@@ -3294,7 +3296,7 @@ ${jsFile.contenu}
                   {p.populaire && <span className="plan-badge">Populaire</span>}
                   <h3>{p.nom}</h3>
                   <p className="plan-price">
-                    {p.sur_devis ? 'Sur devis' : `${p.prix_usd}$`}
+                    {p.sur_devis ? 'Sur devis' : planPrice(p, devise)}
                     {!p.sur_devis && <span>/mois</span>}
                   </p>
                   {!p.sur_devis && p.credits != null && (
