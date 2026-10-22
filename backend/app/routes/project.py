@@ -631,8 +631,7 @@ def deploy_project(project_id):
         return jsonify({'error': "Le projet doit etre genere avec succes avant deploiement"}), 400
 
     project.est_deploye = True
-    if not project.slug:
-        project.slug = _generer_slug(project)
+    project.slug = _generer_slug(project)
     db.session.commit()
 
     base_url = os.environ.get('API_PUBLIC_URL', 'http://localhost:5001/api')
@@ -737,7 +736,19 @@ def _injecter_pwa_dans_html(html, couleur):
 
 def _generer_slug(project):
     import unicodedata, uuid as _uuid
-    base = unicodedata.normalize('NFKD', project.nom or '').encode('ascii', 'ignore').decode().lower()
+    import html as _html
+    titre = ''
+    try:
+        for f in json.loads(project.code_genere or '{}').get('fichiers', []):
+            if f.get('chemin', '').endswith('.html'):
+                m = re.search(r'<title[^>]*>(.*?)</title>', f.get('contenu', ''), re.S | re.I)
+                if m:
+                    titre = _html.unescape(m.group(1)).strip()
+                    break
+    except Exception:
+        titre = ''
+    source = titre or project.nom or ''
+    base = unicodedata.normalize('NFKD', source).encode('ascii', 'ignore').decode().lower()
     base = re.sub(r'[^a-z0-9]+', '-', base).strip('-')[:50] or 'app'
     if base in ('a', 'live'):
         base += '-app'
