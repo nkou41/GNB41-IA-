@@ -2642,7 +2642,7 @@ ${jsFile.contenu}
                 if (activeProject.est_deploye) {
                   const base = (import.meta as any).env.VITE_API_URL || 'http://localhost:5001/api';
                   const slugProjet = (activeProject as any).slug;
-                  setLiveUrl(slugProjet ? `${base}/projects/a/${slugProjet}/` : `${base}/projects/${activeProject.id}/live/`);
+                  setLiveUrl(slugProjet ? `${base.replace(/\/api\/?$/, '')}/a/${slugProjet}/` : `${base}/projects/${activeProject.id}/live/`);
                   return;
                 }
                 setDeployLoading(true);
