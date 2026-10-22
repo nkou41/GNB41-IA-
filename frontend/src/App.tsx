@@ -2789,28 +2789,61 @@ ${jsFile.contenu}
         )}
 
         {liveUrl && (
-          <div style={{ padding: '0.6rem 1rem', background: '#dcfce7', display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.82rem', color: '#166534' }}>App en ligne :</span>
-            <a href={liveUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.82rem', color: '#166534', fontWeight: 600, wordBreak: 'break-all' }}>{liveUrl}</a>
-            <button
-              type="button"
-              className="marketplace-link-btn"
-              onClick={() => navigator.clipboard.writeText(liveUrl).catch(() => {})}
+          <div style={{ margin: '0.6rem 1rem', padding: '0.8rem 1rem', background: '#10241a', border: '1px solid #1f5133', borderRadius: 14, display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 0 3px rgba(34,197,94,0.25)' }} />
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#bbf7d0' }}>App en ligne</span>
+            </div>
+            <a
+              href={liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={liveUrl}
+              style={{ fontSize: '0.82rem', color: '#e2e8f0', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}
             >
-              Copier
-            </button>
-            <button
-              type="button"
-              className="marketplace-link-btn"
-              onClick={async () => {
-                if (!activeProject) return;
-                await api.undeployProject(activeProject.id);
-                setActiveProject({ ...activeProject, est_deploye: false });
-                setLiveUrl(null);
-              }}
-            >
-              Depublier
-            </button>
+              {liveUrl.replace(/^https?:\/\//, '').replace(/\/api\/projects\/[^/]+\//, '/…/')}
+            </a>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <button type="button" className="marketplace-link-btn" onClick={() => window.open(liveUrl, '_blank', 'noopener')}>
+                Ouvrir
+              </button>
+              <button
+                type="button"
+                className="marketplace-link-btn"
+                onClick={(e) => {
+                  const b = e.currentTarget;
+                  const t = b.textContent;
+                  navigator.clipboard.writeText(liveUrl).then(() => {
+                    b.textContent = 'Copié ✓';
+                    setTimeout(() => { b.textContent = t; }, 1500);
+                  }).catch(() => {});
+                }}
+              >
+                Copier
+              </button>
+              {typeof navigator !== 'undefined' && 'share' in navigator && (
+                <button
+                  type="button"
+                  className="marketplace-link-btn"
+                  onClick={() => navigator.share({ title: activeProject?.nom || 'Mon app', url: liveUrl }).catch(() => {})}
+                >
+                  Partager
+                </button>
+              )}
+              <button
+                type="button"
+                className="marketplace-link-btn"
+                style={{ color: '#fca5a5' }}
+                onClick={async () => {
+                  if (!activeProject) return;
+                  await api.undeployProject(activeProject.id);
+                  setActiveProject({ ...activeProject, est_deploye: false });
+                  setLiveUrl(null);
+                }}
+              >
+                Dépublier
+              </button>
+            </div>
           </div>
         )}
 
