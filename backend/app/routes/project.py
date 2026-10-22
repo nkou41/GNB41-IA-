@@ -635,7 +635,10 @@ def deploy_project(project_id):
     db.session.commit()
 
     base_url = os.environ.get('API_PUBLIC_URL', 'http://localhost:5001/api')
-    live_url = f"{base_url}/projects/a/{project.slug}/"
+    racine = base_url.rstrip('/')
+    if racine.endswith('/api'):
+        racine = racine[:-4]
+    live_url = f"{racine}/a/{project.slug}/"
     return jsonify({'project': project.to_dict(), 'live_url': live_url})
 
 

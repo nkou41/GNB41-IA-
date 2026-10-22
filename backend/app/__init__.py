@@ -129,6 +129,9 @@ def create_app(test_config=None):
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(workspace_bp, url_prefix='/api/workspaces')
     app.register_blueprint(project_bp, url_prefix='/api/projects')
+    from app.routes.project import serve_live_slug as _serve_live_slug
+    app.add_url_rule('/a/<slug>/', endpoint='live_slug_racine', view_func=_serve_live_slug, defaults={'chemin': 'index.html'}, methods=['GET'])
+    app.add_url_rule('/a/<slug>/<path:chemin>', endpoint='live_slug_racine_chemin', view_func=_serve_live_slug, methods=['GET'])
     app.register_blueprint(marketplace_bp, url_prefix='/api/marketplace')
     app.register_blueprint(appdb_bp, url_prefix='/api/appdb')
     app.register_blueprint(templates_bp, url_prefix='/api/templates')
