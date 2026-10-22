@@ -631,10 +631,12 @@ def deploy_project(project_id):
         return jsonify({'error': "Le projet doit etre genere avec succes avant deploiement"}), 400
 
     project.est_deploye = True
+    if not project.slug:
+        project.slug = _generer_slug(project)
     db.session.commit()
 
     base_url = os.environ.get('API_PUBLIC_URL', 'http://localhost:5001/api')
-    live_url = f"{base_url}/projects/{project.id}/live/"
+    live_url = f"{base_url}/projects/a/{project.slug}/"
     return jsonify({'project': project.to_dict(), 'live_url': live_url})
 
 
@@ -733,11 +735,34 @@ def _injecter_pwa_dans_html(html, couleur):
     return balises_pwa + html
 
 
+def _generer_slug(project):
+    import unicodedata, uuid as _uuid
+    base = unicodedata.normalize('NFKD', project.nom or '').encode('ascii', 'ignore').decode().lower()
+    base = re.sub(r'[^a-z0-9]+', '-', base).strip('-')[:50] or 'app'
+    if base in ('a', 'live'):
+        base += '-app'
+    slug = base
+    while Project.query.filter(Project.slug == slug, Project.id != project.id).first():
+        slug = f"{base}-{_uuid.uuid4().hex[:4]}"
+    return slug
+
+
+@project_bp.route('/a/<slug>/', defaults={'chemin': 'index.html'}, methods=['GET'])
+@project_bp.route('/a/<slug>/<path:chemin>', methods=['GET'])
+def serve_live_slug(slug, chemin):
+    project = Project.query.filter_by(slug=slug).first_or_404()
+    return _servir_projet(project, chemin)
+
+
 @project_bp.route('/<project_id>/live/', defaults={'chemin': 'index.html'}, methods=['GET'])
 
 @project_bp.route('/<project_id>/live/<path:chemin>', methods=['GET'])
 def serve_live(project_id, chemin):
     project = Project.query.get_or_404(project_id)
+    return _servir_projet(project, chemin)
+
+
+def _servir_projet(project, chemin):
     if not project.est_deploye or not project.code_genere or (project.modere_statut or 'actif') == 'suspendu':
         return jsonify({'error': "Cette application n'est pas deployee"}), 404
 

@@ -79,7 +79,7 @@ def create_app(test_config=None):
         chemin = request.path
         if not chemin.startswith('/api/'):
             return None
-        if '/live/' in chemin or chemin.startswith('/api/appdb/v1/'):
+        if '/live/' in chemin or chemin.startswith('/api/projects/a/') or chemin.startswith('/api/appdb/v1/'):
             return None
         origine = request.headers.get('Origin', '').rstrip('/')
         if request.headers.get('Sec-Fetch-Site') == 'same-origin' or (origine and origine == request.host_url.rstrip('/')):
@@ -180,6 +180,14 @@ def create_app(test_config=None):
         if not database_url:
             os.makedirs(os.path.join(basedir, 'instance'), exist_ok=True)
         db.create_all()
+        try:
+            from sqlalchemy import inspect as _sa_inspect
+            if 'slug' not in [c['name'] for c in _sa_inspect(db.engine).get_columns('project')]:
+                db.session.execute(db.text('ALTER TABLE project ADD COLUMN slug VARCHAR(80)'))
+            db.session.execute(db.text('CREATE UNIQUE INDEX IF NOT EXISTS ix_project_slug ON project (slug)'))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
         if not database_url:
             db.session.execute(db.text('PRAGMA journal_mode=WAL'))
             db.session.commit()
