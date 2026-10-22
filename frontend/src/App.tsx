@@ -2799,7 +2799,7 @@ ${jsFile.contenu}
               target="_blank"
               rel="noopener noreferrer"
               title={liveUrl}
-              style={{ fontSize: '0.82rem', color: '#e2e8f0', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}
+              style={{ textAlign: 'left', fontSize: '0.82rem', color: '#e2e8f0', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}
             >
               {liveUrl.replace(/^https?:\/\//, '').replace(/\/api\/projects\/[^/]+\//, '/…/')}
             </a>
