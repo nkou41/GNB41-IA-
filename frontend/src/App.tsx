@@ -2641,7 +2641,8 @@ ${jsFile.contenu}
               onClick={async () => {
                 if (activeProject.est_deploye) {
                   const base = (import.meta as any).env.VITE_API_URL || 'http://localhost:5001/api';
-                  setLiveUrl(`${base}/projects/${activeProject.id}/live/`);
+                  const slugProjet = (activeProject as any).slug;
+                  setLiveUrl(slugProjet ? `${base}/projects/a/${slugProjet}/` : `${base}/projects/${activeProject.id}/live/`);
                   return;
                 }
                 setDeployLoading(true);
@@ -2801,7 +2802,7 @@ ${jsFile.contenu}
               title={liveUrl}
               style={{ textAlign: 'left', fontSize: '0.82rem', color: '#e2e8f0', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}
             >
-              {liveUrl.replace(/^https?:\/\//, '').replace(/\/api\/projects\/[^/]+\//, '/…/')}
+              {liveUrl.replace(/^https?:\/\//, '').replace(/\/api\/projects\/a\//, '/a/').replace(/\/api\/projects\/[^/]+\//, '/…/')}
             </a>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button type="button" className="marketplace-link-btn" onClick={() => window.open(liveUrl, '_blank', 'noopener')}>
