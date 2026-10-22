@@ -747,9 +747,13 @@ def _generer_slug(project):
                     break
     except Exception:
         titre = ''
+    if titre:
+        parties = [x.strip() for x in re.split(r'\s[-\u2013\u2014|:]\s', titre) if x.strip()]
+        if len(parties) > 1:
+            titre = parties[-1]
     source = titre or project.nom or ''
     base = unicodedata.normalize('NFKD', source).encode('ascii', 'ignore').decode().lower()
-    base = re.sub(r'[^a-z0-9]+', '-', base).strip('-')[:50] or 'app'
+    base = re.sub(r'[^a-z0-9]+', '-', base).strip('-')[:30].strip('-') or 'app'
     if base in ('a', 'live'):
         base += '-app'
     slug = base
