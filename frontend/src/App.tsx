@@ -347,11 +347,11 @@ function PanneauUtilisateurs({ moiId, permissions }: { moiId: string; permission
 
 const ONGLETS_ADMIN: [string, string][] = [
   ['vue', 'stats.voir'], ['boutique', 'finance.voir'], ['utilisateurs', 'utilisateurs.voir'], ['workspaces', 'utilisateurs.modifier'],
-  ['evaluation', 'utilisateurs.modifier'], ['moderation', 'moderation.voir'], ['audit', 'audit.voir'],
+  ['evaluation', 'utilisateurs.modifier'], ['projets', 'projets.voir'], ['moderation', 'moderation.voir'], ['audit', 'audit.voir'],
 ];
 const LIBELLES_ONGLETS: Record<string, string> = {
   vue: "Vue d'ensemble", boutique: 'Boutique', utilisateurs: 'Utilisateurs', workspaces: 'Workspaces',
-  evaluation: 'Evaluation IA', moderation: 'Modération', audit: "Journal d'audit",
+  evaluation: 'Evaluation IA', projets: 'Projets', moderation: 'Modération', audit: "Journal d'audit",
 };
 
 const CONTACT_EMAIL = 'nkougnarigo226@gmail.com';
@@ -564,6 +564,132 @@ function PanneauVue() {
   );
 }
 
+const FILTRES_PROJETS_ADMIN: [string, string][] = [['tous', 'Tous'], ['publies', 'Publiés'], ['suspendus', 'Suspendus'], ['echecs', 'En échec']];
+const LIB_STATUT_PROJET: Record<string, string> = { pret: 'Prêt', genere: 'Prêt', erreur: 'En échec', en_generation: 'En cours', en_attente: 'En attente' };
+
+function ProjetCarte({ p, peutModerer, onChanged }: { p: any; peutModerer: boolean; onChanged: () => void }) {
+  const [ouvert, setOuvert] = useState(false);
+  const [motif, setMotif] = useState('');
+  const [erreur, setErreur] = useState('');
+  const [info, setInfo] = useState('');
+  const [occupe, setOccupe] = useState(false);
+  const suspendu = p.modere_statut === 'suspendu';
+  const date = p.created_at ? new Date(p.created_at.endsWith('Z') ? p.created_at : p.created_at + 'Z').toLocaleDateString('fr-FR') : '';
+
+  const agir = async (action: 'suspendre' | 'reactiver') => {
+    const m = motif.trim();
+    if (action === 'suspendre' && m.length < 5) {
+      setErreur('Un motif de 5 caractères minimum est requis.');
+      return;
+    }
+    const texte = action === 'suspendre'
+      ? `Suspendre « ${p.nom} » ? Il sera dépublié, ses annonces seront retirées et son propriétaire sera notifié.`
+      : `Réactiver « ${p.nom} » ? Il ne sera pas republié automatiquement.`;
+    if (!window.confirm(texte)) return;
+    setOccupe(true);
+    setErreur('');
+    setInfo('');
+    try {
+      await api.adminModererProjet(p.id, action, m);
+      setInfo(action === 'suspendre' ? 'Projet suspendu.' : 'Projet réactivé.');
+      setMotif('');
+      setOuvert(false);
+      onChanged();
+    } catch (err: any) {
+      setErreur(err.message);
+    } finally {
+      setOccupe(false);
+    }
+  };
+
+  return (
+    <article className="mod-card">
+      <div className="usr-top">
+        <span className="usr-name">{p.nom}</span>
+        <span className="usr-mail">{p.proprietaire} · {p.proprietaire_email}</span>
+        <span className="mod-meta">Créé le {date} · modèle {p.modele || 'inconnu'}</span>
+      </div>
+      <div className="usr-badges">
+        <span className={`usr-badge ${p.statut === 'erreur' ? 'warn' : p.statut === 'pret' || p.statut === 'genere' ? 'ok' : ''}`}>{LIB_STATUT_PROJET[p.statut] || p.statut}</span>
+        {p.est_deploye && <span className="usr-badge ok">En ligne</span>}
+        {suspendu && <span className="usr-badge warn">Suspendu</span>}
+      </div>
+      {suspendu && p.modere_motif && <p className="mod-meta">Motif : {p.modere_motif}</p>}
+      {peutModerer && suspendu && (
+        <div className="mod-actions un">
+          <button type="button" className="mod-ok" disabled={occupe} onClick={() => agir('reactiver')}>Réactiver le projet</button>
+        </div>
+      )}
+      {peutModerer && !suspendu && (
+        <>
+          <div className="mod-actions un">
+            <button type="button" className="usr-toggle" onClick={() => setOuvert(!ouvert)}>{ouvert ? 'Fermer' : 'Suspendre ce projet'}</button>
+          </div>
+          {ouvert && (
+            <div className="usr-panel">
+              <textarea className="mod-motif" rows={2} maxLength={300} placeholder="Motif (obligatoire)" value={motif} onChange={(e) => setMotif(e.target.value)} />
+              <div className="mod-actions un">
+                <button type="button" className="mod-no" disabled={occupe} onClick={() => agir('suspendre')}>Suspendre le projet</button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+      {erreur && <p className="mod-error" role="alert">{erreur}</p>}
+      {info && <p className="usr-ok" role="status">{info}</p>}
+    </article>
+  );
+}
+
+function PanneauProjets({ permissions }: { permissions: string[] }) {
+  const [filtre, setFiltre] = useState('tous');
+  const [q, setQ] = useState('');
+  const [terme, setTerme] = useState('');
+  const [projets, setProjets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [erreur, setErreur] = useState('');
+  const peutModerer = permissions.includes('projets.moderer');
+
+  const charger = (f: string, t: string, silencieux = false) => {
+    if (!silencieux) setLoading(true);
+    setErreur('');
+    api.adminListProjets(f, t)
+      .then((res: any) => setProjets(res.projects || []))
+      .catch((err: any) => { setProjets([]); setErreur(err.message); })
+      .finally(() => setLoading(false));
+  };
+  useEffect(() => { charger(filtre, terme); }, [filtre]);
+
+  return (
+    <div className="mod-panel">
+      <div className="mod-chips" role="tablist" aria-label="Filtre des projets">
+        {FILTRES_PROJETS_ADMIN.map(([val, label]) => (
+          <button key={val} type="button" role="tab" aria-selected={filtre === val} className={filtre === val ? 'active' : ''} onClick={() => setFiltre(val)}>{label}</button>
+        ))}
+      </div>
+      <form className="usr-search" onSubmit={(e) => { e.preventDefault(); setTerme(q.trim()); charger(filtre, q.trim()); }}>
+        <input type="search" value={q} maxLength={100} aria-label="Rechercher un projet" placeholder="Nom du projet ou du propriétaire" onChange={(e) => setQ(e.target.value)} />
+        <button type="submit">Chercher</button>
+      </form>
+      {erreur && <p className="mod-error" role="alert">{erreur}</p>}
+      {loading ? (
+        <p className="mod-empty">Chargement…</p>
+      ) : projets.length === 0 ? (
+        <p className="mod-empty">Aucun projet trouvé.</p>
+      ) : (
+        <>
+          <p className="mod-meta usr-note">{projets.length} projet(s), les 100 plus récents au maximum.</p>
+          <div className="mod-list">
+            {projets.map((p) => (
+              <ProjetCarte key={p.id} p={p} peutModerer={peutModerer} onChanged={() => charger(filtre, terme, true)} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 const LIBELLES_AUDIT: Record<string, string> = {
   'moderation.approuver': 'Annonce approuvée',
   'moderation.refuser': 'Annonce refusée',
@@ -573,6 +699,8 @@ const LIBELLES_AUDIT: Record<string, string> = {
   'utilisateur.statut_modifie': 'Statut du compte modifié',
   'utilisateur.credits_ajoutes': 'Crédits ajoutés',
   'utilisateur.email_revele': 'E-mail consulté',
+  'projet.suspendu': 'Projet suspendu',
+  'projet.reactive': 'Projet réactivé',
 };
 const FILTRES_AUDIT: [string, string][] = [['', 'Tout'], ['moderation.', 'Modération'], ['annonce.', 'Annonces'], ['utilisateur.', 'Rôles']];
 
@@ -835,7 +963,7 @@ function App() {
   const [resetStatus, setResetStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [resetMessage, setResetMessage] = useState('');
   const [adminStats, setAdminStats] = useState<any | null>(null);
-  const [adminTab, setAdminTab] = useState<'vue' | 'boutique' | 'moderation' | 'audit' | 'utilisateurs' | 'workspaces' | 'evaluation'>('vue');
+  const [adminTab, setAdminTab] = useState<'vue' | 'projets' | 'boutique' | 'moderation' | 'audit' | 'utilisateurs' | 'workspaces' | 'evaluation'>('vue');
   const [adminUsers, setAdminUsers] = useState<any[]>([]);
   const [adminWorkspaces, setAdminWorkspaces] = useState<any[]>([]);
   const [adminUsersLoading, setAdminUsersLoading] = useState(false);
@@ -1768,6 +1896,8 @@ function App() {
         )}
 
         {adminTab === 'vue' && <PanneauVue />}
+
+        {adminTab === 'projets' && <PanneauProjets permissions={permissions} />}
 
         {adminTab === 'audit' && <PanneauAudit />}
 

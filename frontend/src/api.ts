@@ -126,6 +126,8 @@ export const api = {
   adminAddCredits: (userId: string, credits: number, motif: string) => request(`/admin/users/${userId}/credits`, { method: 'POST', body: JSON.stringify({ credits, motif }) }),
   adminRevealEmail: (userId: string) => request(`/admin/users/${userId}/reveler-email`, { method: 'POST' }),
   adminOverview: (jours: number) => request(`/admin/overview?jours=${jours}`),
+  adminListProjets: (filtre: string, q: string) => request(`/admin/projects?filtre=${encodeURIComponent(filtre)}${q ? '&q=' + encodeURIComponent(q) : ''}`),
+  adminModererProjet: (projectId: string, action: string, motif: string) => request(`/admin/projects/${projectId}/moderation`, { method: 'PATCH', body: JSON.stringify({ action, motif }) }),
   adminListWorkspaces: () => request('/admin/workspaces'),
   adminDeleteWorkspace: (workspaceId: string) => request(`/admin/workspaces/${workspaceId}`, { method: 'DELETE' }),
   adminRunEvaluation: (provider?: string) => request('/admin/evaluation/run', { method: 'POST', body: JSON.stringify({ provider: provider || 'claude' }) }),
