@@ -784,6 +784,28 @@ def _description_courte(texte, limite=160):
     return court
 
 
+def _generer_og_png(project, parsed):
+    import io
+    from PIL import Image, ImageDraw, ImageFont
+    nom = _titre_app(project, parsed)
+    couleur = _extraire_couleur_primaire(parsed.get('fichiers', [])) or '#4a6bff'
+    img = Image.new('RGB', (1200, 630), couleur)
+    d = ImageDraw.Draw(img)
+    lettre = next((c for c in nom if c.isalnum()), 'A').upper()
+    d.ellipse((450, 90, 750, 390), fill='#ffffff')
+    police_l = ImageFont.load_default(size=200)
+    d.text((600, 240), lettre, font=police_l, fill=couleur, anchor='mm')
+    taille = 110
+    police = ImageFont.load_default(size=taille)
+    while taille > 40 and d.textlength(nom, font=police) > 1050:
+        taille -= 6
+        police = ImageFont.load_default(size=taille)
+    d.text((600, 500), nom, font=police, fill='#ffffff', anchor='mm')
+    buf = io.BytesIO()
+    img.save(buf, 'PNG', optimize=True)
+    return buf.getvalue()
+
+
 def _balises_og(project, parsed):
     import html as _html
     nom = _titre_app(project, parsed)
@@ -800,6 +822,10 @@ def _balises_og(project, parsed):
             + chr(10) + '<meta property="og:title" content="' + e(nom) + '">'
             + chr(10) + '<meta property="og:description" content="' + e(desc) + '">'
             + chr(10) + '<meta property="og:url" content="' + e(url) + '">'
+            + chr(10) + '<meta property="og:image" content="' + e(url + 'og.png') + '">'
+            + chr(10) + '<meta property="og:image:width" content="1200">'
+            + chr(10) + '<meta property="og:image:height" content="630">'
+            + chr(10) + '<meta name="twitter:card" content="summary_large_image">'
             + chr(10) + '<meta name="description" content="' + e(desc) + '">')
 
 
@@ -887,6 +913,11 @@ def _servir_projet(project, chemin):
 
     if chemin == 'manifest.json':
         return jsonify(_generer_manifest_pwa(project, parsed))
+
+    if chemin == 'og.png':
+        resp = Response(_generer_og_png(project, parsed), mimetype='image/png')
+        resp.headers['Cache-Control'] = 'public, max-age=3600'
+        return resp
 
     if chemin == 'icon.svg':
         return Response(_generer_icone_svg(project, parsed), mimetype='image/svg+xml')
