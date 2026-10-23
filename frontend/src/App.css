@@ -1311,7 +1311,7 @@ input:focus, textarea:focus, select:focus {
 
 .plan-card li {
   font-size: 0.85rem;
-  color: #4a4030;
+  color: var(--c-text);
   padding-left: 1.2rem;
   position: relative;
 }

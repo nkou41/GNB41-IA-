@@ -32,8 +32,11 @@ export function formatCentimes(centimes: number, devise: string): string {
   return formatMoney(centimes / 100, devise);
 }
 
-/** Prix d'un abonnement : prix explicite en XOF pour la zone CFA, sinon en dollars */
+/** Prix d'un abonnement : XOF pour la zone CFA quand il est renseigné, sinon dollars */
 export function planPrice(plan: { prix_usd?: number | null; prix_xof?: number | null }, devise: string): string {
-  if (devise === 'XOF' && plan.prix_xof) return formatMoney(plan.prix_xof, 'XOF');
-  return formatMoney(Number(plan.prix_usd ?? 0), 'USD');
+  const xof = Number(plan.prix_xof ?? 0);
+  const usd = Number(plan.prix_usd ?? 0);
+  if (xof === 0 && usd === 0) return formatMoney(0, devise === 'XOF' ? 'XOF' : 'USD');
+  if (devise === 'XOF' && xof > 0) return formatMoney(xof, 'XOF');
+  return formatMoney(usd, 'USD');
 }
