@@ -775,13 +775,33 @@ def _generer_service_worker(project_id):
     return chr(10).join(lignes)
 
 
-def _injecter_pwa_dans_html(html, couleur):
+def _balises_og(project, parsed):
+    import html as _html
+    nom = _titre_app(project, parsed)
+    desc = (parsed.get('description') or project.prompt_initial or nom)[:200]
+    racine = os.environ.get('API_PUBLIC_URL', 'http://localhost:5001/api').rstrip('/')
+    if racine.endswith('/api'):
+        racine = racine[:-4]
+    if project.slug:
+        url = f"{racine}/a/{project.slug}/"
+    else:
+        url = f"{racine}/api/projects/{project.id}/live/"
+    e = lambda v: _html.escape(v, quote=True)
+    return (chr(10) + '<meta property="og:type" content="website">'
+            + chr(10) + '<meta property="og:title" content="' + e(nom) + '">'
+            + chr(10) + '<meta property="og:description" content="' + e(desc) + '">'
+            + chr(10) + '<meta property="og:url" content="' + e(url) + '">'
+            + chr(10) + '<meta name="description" content="' + e(desc) + '">')
+
+
+def _injecter_pwa_dans_html(html, couleur, extra=''):
     balises_pwa = (
         '<link rel="manifest" href="manifest.json">' + chr(10)
         + '<meta name="theme-color" content="' + couleur + '">' + chr(10)
         + '<link rel="icon" href="icon.svg" type="image/svg+xml">' + chr(10)
         + "<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>"
     )
+    balises_pwa += extra
     if '<head>' in html:
         return html.replace('<head>', '<head>' + chr(10) + balises_pwa, 1)
     return balises_pwa + html
@@ -875,6 +895,6 @@ def _servir_projet(project, chemin):
 
     contenu = fichier['contenu']
     if chemin.endswith('.html') or (chemin == 'index.html'):
-        contenu = _injecter_pwa_dans_html(contenu, couleur)
+        contenu = _injecter_pwa_dans_html(contenu, couleur, _balises_og(project, parsed))
 
     return Response(contenu, mimetype=_get_file_mimetype(chemin))
