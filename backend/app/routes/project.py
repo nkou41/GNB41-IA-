@@ -668,10 +668,24 @@ def _extraire_couleur_primaire(fichiers):
     return '#4361ee'
 
 
+def _titre_app(project, parsed):
+    import html as _html
+    for f in parsed.get('fichiers', []):
+        if f.get('chemin', '').endswith('.html'):
+            m = re.search(r'<title[^>]*>(.*?)</title>', f.get('contenu', ''), re.S | re.I)
+            if m:
+                titre = _html.unescape(m.group(1)).strip()
+                parties = [x.strip() for x in re.split(r'\s[-\u2013\u2014|:]\s', titre) if x.strip()]
+                if parties:
+                    return parties[-1][:45]
+                break
+    return project.nom or 'Application'
+
+
 def _generer_manifest_pwa(project, parsed):
     fichiers = parsed.get('fichiers', [])
     couleur = _extraire_couleur_primaire(fichiers)
-    nom = project.nom or 'Application'
+    nom = _titre_app(project, parsed)
     est_jeu = any(('<canvas' in (f.get('contenu') or '')) or ('getContext(' in (f.get('contenu') or '')) for f in fichiers)
     description = parsed.get('description') or project.prompt_initial or nom
     return {
