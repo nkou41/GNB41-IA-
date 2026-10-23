@@ -706,7 +706,10 @@ def _generer_manifest_pwa(project, parsed):
 def _generer_icone_svg(project, parsed):
     fichiers = parsed.get('fichiers', [])
     couleur = _extraire_couleur_primaire(fichiers)
-    lettre = (project.nom or 'A').strip()[:1].upper()
+    import html as _html
+    nom_app = _titre_app(project, parsed)
+    lettre = next((c for c in nom_app if c.isalnum()), 'A').upper()
+    lettre = _html.escape(lettre)
     lignes = [
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">',
         '<rect width="512" height="512" rx="96" fill="' + couleur + '"/>',
