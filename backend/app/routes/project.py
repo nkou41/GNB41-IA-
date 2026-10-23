@@ -367,6 +367,24 @@ def set_nom_app(project_id):
     return jsonify({'project': project.to_dict(), 'live_url': live_url})
 
 
+@project_bp.route('/<project_id>/stats', methods=['GET'])
+@login_required
+def stats_project(project_id):
+    project = Project.query.get_or_404(project_id)
+    if not _check_access(project.workspace_id):
+        return jsonify({'error': 'Non autorisé'}), 403
+    from datetime import date, timedelta
+    from sqlalchemy import func
+    auj = date.today()
+
+    def total(jours):
+        v = db.session.query(func.coalesce(func.sum(Visite.nombre), 0)).filter(
+            Visite.project_id == project.id, Visite.jour > auj - timedelta(days=jours)).scalar()
+        return int(v or 0)
+
+    return jsonify({'visites_7j': total(7), 'visites_30j': total(30)})
+
+
 @project_bp.route('/<project_id>/memoire', methods=['PUT'])
 @login_required
 def update_memoire_projet(project_id):
@@ -899,9 +917,43 @@ def serve_live(project_id, chemin):
     return _servir_projet(project, chemin)
 
 
+from app.models.visite import Visite
+
+
+def _compter_visite(project_id):
+    ua = (request.headers.get('User-Agent') or '').lower()
+    robots = ('bot', 'crawler', 'spider', 'whatsapp', 'facebookexternalhit', 'telegram',
+              'preview', 'slack', 'curl', 'wget')
+    if not ua or any(m in ua for m in robots):
+        return
+    from datetime import date
+    from sqlalchemy.exc import IntegrityError
+    jour = date.today()
+
+    def incrementer():
+        return Visite.query.filter_by(project_id=project_id, jour=jour).update({'nombre': Visite.nombre + 1})
+
+    try:
+        if not incrementer():
+            db.session.add(Visite(project_id=project_id, jour=jour, nombre=1))
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        try:
+            incrementer()
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+    except Exception:
+        db.session.rollback()
+
+
 def _servir_projet(project, chemin):
     if not project.est_deploye or not project.code_genere or (project.modere_statut or 'actif') == 'suspendu':
         return jsonify({'error': "Cette application n'est pas deployee"}), 404
+
+    if chemin == 'index.html':
+        _compter_visite(project.id)
 
     try:
         parsed = json.loads(project.code_genere)
