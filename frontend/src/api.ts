@@ -137,6 +137,7 @@ export const api = {
   updateFile: (projectId: string, chemin: string, contenu: string) =>
     request(`/projects/${projectId}/files`, { method: 'PUT', body: JSON.stringify({ chemin, contenu }) }),
   listAppTables: (projectId: string) => request(`/appdb/${projectId}/tables`),
+  getStats: (projectId: string) => request(`/projects/${projectId}/stats`),
   createAppTable: (projectId: string, nom: string, colonnes: any[]) =>
     request(`/appdb/${projectId}/tables`, { method: 'POST', body: JSON.stringify({ nom, colonnes }) }),
   deleteAppTable: (tableId: string) => request(`/appdb/tables/${tableId}`, { method: 'DELETE' }),

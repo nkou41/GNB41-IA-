@@ -2934,6 +2934,7 @@ ${jsFile.contenu}
             >
               {liveUrl.replace(/^https?:\/\//, '').replace(/\/api\/projects\/a\//, '/a/').replace(/\/api\/projects\/[^/]+\//, '/…/')}
             </a>
+            {activeProject && <StatsVisites projectId={activeProject.id} cle={liveUrl} />}
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button type="button" className="marketplace-link-btn" onClick={() => window.open(liveUrl, '_blank', 'noopener')}>
                 Ouvrir
@@ -3711,3 +3712,20 @@ ${jsFile.contenu}
 }
 
 export default App;
+
+
+function StatsVisites({ projectId, cle }: { projectId: string; cle: string }) {
+  const [stats, setStats] = useState<{ visites_7j: number; visites_30j: number } | null>(null);
+  useEffect(() => {
+    let actif = true;
+    api.getStats(projectId).then((r: any) => { if (actif) setStats(r); }).catch(() => {});
+    return () => { actif = false; };
+  }, [projectId, cle]);
+  if (!stats) return null;
+  const pl = (n: number) => `${n} visite${n > 1 ? 's' : ''}`;
+  return (
+    <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+      {pl(stats.visites_7j)} (7 j) · {stats.visites_30j} (30 j)
+    </div>
+  );
+}
