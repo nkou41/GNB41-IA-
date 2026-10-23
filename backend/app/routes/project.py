@@ -720,7 +720,7 @@ def _generer_manifest_pwa(project, parsed):
     couleur = _extraire_couleur_primaire(fichiers)
     nom = _titre_app(project, parsed)
     est_jeu = any(('<canvas' in (f.get('contenu') or '')) or ('getContext(' in (f.get('contenu') or '')) for f in fichiers)
-    description = parsed.get('description') or project.prompt_initial or nom
+    description = _description_courte(parsed.get('description') or project.prompt_initial or nom)
     return {
         'name': nom,
         'short_name': nom[:12],
@@ -775,10 +775,19 @@ def _generer_service_worker(project_id):
     return chr(10).join(lignes)
 
 
+def _description_courte(texte, limite=160):
+    texte = ' '.join((texte or '').split())
+    m = re.match(r'(.+?[.!?])(\s|$)', texte)
+    court = m.group(1) if m else texte
+    if len(court) > limite:
+        court = court[:limite].rsplit(' ', 1)[0].rstrip(',;:') + '…'
+    return court
+
+
 def _balises_og(project, parsed):
     import html as _html
     nom = _titre_app(project, parsed)
-    desc = (parsed.get('description') or project.prompt_initial or nom)[:200]
+    desc = _description_courte(parsed.get('description') or project.prompt_initial or nom)
     racine = os.environ.get('API_PUBLIC_URL', 'http://localhost:5001/api').rstrip('/')
     if racine.endswith('/api'):
         racine = racine[:-4]
