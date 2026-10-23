@@ -2834,6 +2834,28 @@ ${jsFile.contenu}
               <button
                 type="button"
                 className="marketplace-link-btn"
+                onClick={async () => {
+                  if (!activeProject) return;
+                  const saisie = window.prompt("Nom de l'app (utilisé pour le lien et l'installation)", (activeProject as any).nom_app || '');
+                  if (saisie === null) return;
+                  const nomApp = saisie.trim();
+                  if (!nomApp) return;
+                  if (nomApp.length > 45) { alert('Le nom est trop long (45 caractères maximum).'); return; }
+                  if (activeProject.est_deploye && !window.confirm("Changer le nom change le lien court : l'ancien lien /a/... ne fonctionnera plus. Continuer ?")) return;
+                  try {
+                    const res: any = await api.setNomApp(activeProject.id, nomApp);
+                    setActiveProject({ ...activeProject, ...res.project });
+                    if (res.live_url) setLiveUrl(res.live_url);
+                  } catch (err: any) {
+                    alert(`Erreur: ${err.message}`);
+                  }
+                }}
+              >
+                Nommer
+              </button>
+              <button
+                type="button"
+                className="marketplace-link-btn"
                 style={{ color: '#fca5a5' }}
                 onClick={async () => {
                   if (!activeProject) return;

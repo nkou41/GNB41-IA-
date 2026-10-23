@@ -100,6 +100,7 @@ export const api = {
   updateMemoireProjet: (projectId: string, memoire_projet: string) => request(`/projects/${projectId}/memoire`, { method: 'PUT', body: JSON.stringify({ memoire_projet }) }),
   deleteProject: (projectId: string) => request(`/projects/${projectId}`, { method: 'DELETE' }),
   renameProject: (projectId: string, nom: string) => request(`/projects/${projectId}`, { method: 'PUT', body: JSON.stringify({ nom }) }),
+  setNomApp: (projectId: string, nomApp: string) => request(`/projects/${projectId}/nom-app`, { method: 'PUT', body: JSON.stringify({ nom_app: nomApp }) }),
   exportProjectUrl: (projectId: string) => `${API_BASE}/projects/${projectId}/export`,
   duplicateProject: (projectId: string) => request(`/projects/${projectId}/duplicate`, { method: 'POST' }),
   listMessages: (projectId: string) => request(`/projects/${projectId}/messages`),
