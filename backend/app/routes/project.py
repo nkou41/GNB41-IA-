@@ -677,7 +677,7 @@ def _titre_app(project, parsed):
                 titre = _html.unescape(m.group(1)).strip()
                 parties = [x.strip() for x in re.split(r'\s[-\u2013\u2014|:]\s', titre) if x.strip()]
                 if parties:
-                    return parties[-1][:45]
+                    return _choisir_partie(parties)[:45]
                 break
     return project.nom or 'Application'
 
@@ -754,6 +754,20 @@ def _injecter_pwa_dans_html(html, couleur):
     return balises_pwa + html
 
 
+GENERIQUES_TITRE = {'accueil', 'home', 'bienvenue', 'index', 'welcome', 'tableau de bord',
+                    'dashboard', 'catalogue', 'boutique', 'contact', 'a propos', 'page'}
+
+
+def _choisir_partie(parties):
+    import unicodedata
+    def norm(x):
+        return unicodedata.normalize('NFKD', x).encode('ascii', 'ignore').decode().lower().strip()
+    for x in parties:
+        if norm(x) not in GENERIQUES_TITRE:
+            return x
+    return parties[-1]
+
+
 def _generer_slug(project):
     import unicodedata, uuid as _uuid
     import html as _html
@@ -770,7 +784,7 @@ def _generer_slug(project):
     if titre:
         parties = [x.strip() for x in re.split(r'\s[-\u2013\u2014|:]\s', titre) if x.strip()]
         if len(parties) > 1:
-            titre = parties[-1]
+            titre = _choisir_partie(parties)
     source = titre or project.nom or ''
     base = unicodedata.normalize('NFKD', source).encode('ascii', 'ignore').decode().lower()
     base = re.sub(r'[^a-z0-9]+', '-', base).strip('-')[:30].strip('-') or 'app'
