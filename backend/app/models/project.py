@@ -15,6 +15,7 @@ class Project(db.Model):
     code_genere = db.Column(db.Text)
     est_deploye = db.Column(db.Boolean, default=False)
     slug = db.Column(db.String(80), unique=True, nullable=True)
+    nom_app = db.Column(db.String(80), nullable=True)
     erreur_message = db.Column(db.Text)
     memoire_projet = db.Column(db.Text)
     modere_statut = db.Column(db.String(20), default='actif')
@@ -33,6 +34,7 @@ class Project(db.Model):
             'code_genere': self.code_genere,
             'est_deploye': self.est_deploye,
             'slug': self.slug,
+            'nom_app': self.nom_app,
             'erreur_message': self.erreur_message,
             'memoire_projet': self.memoire_projet,
             'modere_statut': self.modere_statut or 'actif',

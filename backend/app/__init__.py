@@ -187,6 +187,8 @@ def create_app(test_config=None):
             from sqlalchemy import inspect as _sa_inspect
             if 'slug' not in [c['name'] for c in _sa_inspect(db.engine).get_columns('project')]:
                 db.session.execute(db.text('ALTER TABLE project ADD COLUMN slug VARCHAR(80)'))
+            if 'nom_app' not in [c['name'] for c in _sa_inspect(db.engine).get_columns('project')]:
+                db.session.execute(db.text('ALTER TABLE project ADD COLUMN nom_app VARCHAR(80)'))
             db.session.execute(db.text('CREATE UNIQUE INDEX IF NOT EXISTS ix_project_slug ON project (slug)'))
             db.session.commit()
         except Exception:

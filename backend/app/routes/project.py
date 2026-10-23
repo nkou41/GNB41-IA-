@@ -336,6 +336,37 @@ def rename_project(project_id):
     return jsonify(project.to_dict())
 
 
+@project_bp.route('/<project_id>/nom-app', methods=['PUT'])
+@login_required
+def set_nom_app(project_id):
+    project = Project.query.get_or_404(project_id)
+    if not _check_edit_access(project.workspace_id):
+        return jsonify({'error': 'Non autorisé'}), 403
+    data = request.get_json(silent=True) or {}
+    nom = (data.get('nom_app') or '').strip()
+    if not nom:
+        return jsonify({'error': "Le nom de l'app ne peut pas être vide"}), 400
+    if len(nom) > 45:
+        return jsonify({'error': 'Le nom est trop long (45 caractères maximum)'}), 400
+    from flask import current_app
+    try:
+        project.nom_app = nom
+        if project.est_deploye:
+            project.slug = _generer_slug(project)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.exception('Nom app du projet %s impossible: %s', project_id, e)
+        return jsonify({'error': 'Enregistrement impossible. Réessayez.'}), 500
+    live_url = None
+    if project.est_deploye and project.slug:
+        racine = os.environ.get('API_PUBLIC_URL', 'http://localhost:5001/api').rstrip('/')
+        if racine.endswith('/api'):
+            racine = racine[:-4]
+        live_url = f"{racine}/a/{project.slug}/"
+    return jsonify({'project': project.to_dict(), 'live_url': live_url})
+
+
 @project_bp.route('/<project_id>/memoire', methods=['PUT'])
 @login_required
 def update_memoire_projet(project_id):
@@ -670,6 +701,8 @@ def _extraire_couleur_primaire(fichiers):
 
 def _titre_app(project, parsed):
     import html as _html
+    if getattr(project, 'nom_app', None):
+        return project.nom_app.strip()[:45]
     for f in parsed.get('fichiers', []):
         if f.get('chemin', '').endswith('.html'):
             m = re.search(r'<title[^>]*>(.*?)</title>', f.get('contenu', ''), re.S | re.I)
@@ -785,7 +818,7 @@ def _generer_slug(project):
         parties = [x.strip() for x in re.split(r'\s[-\u2013\u2014|:]\s', titre) if x.strip()]
         if len(parties) > 1:
             titre = _choisir_partie(parties)
-    source = titre or project.nom or ''
+    source = (getattr(project, 'nom_app', None) or '').strip() or titre or project.nom or ''
     base = unicodedata.normalize('NFKD', source).encode('ascii', 'ignore').decode().lower()
     base = re.sub(r'[^a-z0-9]+', '-', base).strip('-')[:30].strip('-') or 'app'
     if base in ('a', 'live'):
