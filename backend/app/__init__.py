@@ -15,7 +15,11 @@ import logging
 
 db = SQLAlchemy()
 login_manager = LoginManager()
-limiter = Limiter(key_func=get_remote_address, default_limits=['2000 per hour'])
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=['2000 per hour'],
+    storage_uri=os.environ.get('RATELIMIT_STORAGE_URI') or 'memory://',
+)
 mail = Mail()
 csrf = CSRFProtect()
 from flask_socketio import SocketIO
