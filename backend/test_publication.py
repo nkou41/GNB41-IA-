@@ -94,3 +94,15 @@ def test_visites_ignorent_les_robots(client):
     client.get(f'/a/{p.slug}/manifest.json', headers={'User-Agent': 'Mozilla/5.0 Chrome'})
     total = sum(v.nombre for v in Visite.query.filter_by(project_id=p.id).all())
     assert total == 1
+
+
+def test_app_sans_couleur_dans_le_css(client):
+    p = creer_projet()
+    code = json.loads(p.code_genere)
+    code['fichiers'] = [f for f in code['fichiers'] if not f['chemin'].endswith('.css')]
+    p.code_genere = json.dumps(code)
+    db.session.commit()
+    assert client.get(f'/a/{p.slug}/').status_code == 200
+    assert client.get(f'/a/{p.slug}/manifest.json').get_json()['theme_color'] == '#4361ee'
+    assert client.get(f'/a/{p.slug}/icon.svg').status_code == 200
+    assert client.get(f'/a/{p.slug}/og.png').status_code == 200
