@@ -135,3 +135,17 @@ def test_liste_repare_les_projets_bloques(app):
     for x in projets:
         _reparer_si_bloque(x)
     assert Project.query.get(p.id).statut == 'erreur'
+
+
+def test_service_worker_versionne_et_hors_ligne(client):
+    p = creer_projet()
+    r = client.get(f'/a/{p.slug}/sw.js')
+    assert r.status_code == 200
+    sw1 = r.get_data(as_text=True)
+    assert "caches.match('./index.html')" in sw1
+    code = json.loads(p.code_genere)
+    code['fichiers'][0]['contenu'] += '<!-- v2 -->'
+    p.code_genere = json.dumps(code)
+    db.session.commit()
+    sw2 = client.get(f'/a/{p.slug}/sw.js').get_data(as_text=True)
+    assert sw1 != sw2

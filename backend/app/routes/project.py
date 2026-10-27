@@ -782,22 +782,38 @@ def _generer_icone_svg(project, parsed):
     return chr(10).join(lignes)
 
 
-def _generer_service_worker(project_id):
+def _version_cache(project):
+    import hashlib
+    return hashlib.md5((project.code_genere or '').encode('utf-8')).hexdigest()[:8]
+
+
+def _generer_service_worker(project_id, version='1'):
     lignes = [
-        "const CACHE_NAME = 'gnb41-pwa-" + project_id + "-v1';",
-        "self.addEventListener('install', function(event) { self.skipWaiting(); });",
-        "self.addEventListener('activate', function(event) { event.waitUntil(self.clients.claim()); });",
+        "const CACHE_NAME = 'gnb41-pwa-" + project_id + "-" + version + "';",
+        "self.addEventListener('install', function(event) {",
+        "  event.waitUntil(caches.open(CACHE_NAME).then(function(c) { return c.add('./index.html').catch(function() {}); }));",
+        "  self.skipWaiting();",
+        "});",
+        "self.addEventListener('activate', function(event) {",
+        "  event.waitUntil(caches.keys().then(function(noms) {",
+        "    return Promise.all(noms.filter(function(n) { return n.indexOf('gnb41-pwa-" + project_id + "-') === 0 && n !== CACHE_NAME; })",
+        "      .map(function(n) { return caches.delete(n); }));",
+        "  }).then(function() { return self.clients.claim(); }));",
+        "});",
         "self.addEventListener('fetch', function(event) {",
         "  if (event.request.method !== 'GET') return;",
+        "  if (new URL(event.request.url).origin !== self.location.origin) return;",
         "  event.respondWith(",
-        "    caches.match(event.request).then(function(reponse) {",
-        "      if (reponse) return reponse;",
-        "      return fetch(event.request).then(function(reseauReponse) {",
-        "        return caches.open(CACHE_NAME).then(function(cache) {",
-        "          try { cache.put(event.request, reseauReponse.clone()); } catch (e) {}",
-        "          return reseauReponse;",
-        "        });",
-        "      }).catch(function() { return reponse; });",
+        "    fetch(event.request).then(function(rep) {",
+        "      if (rep && rep.ok) {",
+        "        var copie = rep.clone();",
+        "        caches.open(CACHE_NAME).then(function(c) { c.put(event.request, copie); }).catch(function() {});",
+        "      }",
+        "      return rep;",
+        "    }).catch(function() {",
+        "      return caches.match(event.request).then(function(r) {",
+        "        return r || caches.match('./index.html') || Response.error();",
+        "      });",
         "    })",
         "  );",
         "});"
@@ -987,7 +1003,7 @@ def _servir_projet(project, chemin):
         return Response(_generer_icone_svg(project, parsed), mimetype='image/svg+xml')
 
     if chemin == 'sw.js':
-        return Response(_generer_service_worker(project.id), mimetype='application/javascript')
+        return Response(_generer_service_worker(project.id, _version_cache(project)), mimetype='application/javascript')
 
     fichier = next((f for f in fichiers if f['chemin'] == chemin), None)
 
