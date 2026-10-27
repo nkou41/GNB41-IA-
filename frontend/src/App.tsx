@@ -2740,7 +2740,7 @@ ${jsFile.contenu}
           <div className="upgrade-modal" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setShowUpgradeModal(false)}>×</button>
             <h2>Choisissez votre plan</h2>
-            <p className="modal-subtitle">Le paiement n'est pas encore disponible — ceci est un aperçu des offres à venir.</p>
+            <p className="modal-subtitle">Choisissez l'offre qui vous convient.</p>
             <div className="plans-grid">
               {plansList.map((p: any) => (
                 <div key={p.id} className={`plan-card ${p.populaire ? 'plan-card-highlight' : ''}`}>
@@ -3490,7 +3490,7 @@ ${jsFile.contenu}
           <div className="upgrade-modal" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setShowUpgradeModal(false)}>×</button>
             <h2>Choisissez votre plan</h2>
-            <p className="modal-subtitle">Le paiement n'est pas encore disponible — ceci est un aperçu des offres à venir.</p>
+            <p className="modal-subtitle">Choisissez l'offre qui vous convient.</p>
             <div className="plans-grid">
               {plansList.map((p: any) => (
                 <div key={p.id} className={`plan-card ${p.populaire ? 'plan-card-highlight' : ''}`}>
