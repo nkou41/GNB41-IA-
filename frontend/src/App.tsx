@@ -2751,7 +2751,7 @@ ${jsFile.contenu}
                     {!p.sur_devis && <span>/mois</span>}
                   </p>
                   {!p.sur_devis && p.credits != null && (
-                    <p className="plan-credits">{p.credits} crédits de génération</p>
+                    <p className="plan-credits">{p.credits} crédit{p.credits > 1 ? 's' : ''} de génération</p>
                   )}
                   <ul>
                     {(p.features || []).map((f: string, i: number) => (
@@ -3501,7 +3501,7 @@ ${jsFile.contenu}
                     {!p.sur_devis && <span>/mois</span>}
                   </p>
                   {!p.sur_devis && p.credits != null && (
-                    <p className="plan-credits">{p.credits} crédits de génération</p>
+                    <p className="plan-credits">{p.credits} crédit{p.credits > 1 ? 's' : ''} de génération</p>
                   )}
                   <ul>
                     {(p.features || []).map((f: string, i: number) => (
