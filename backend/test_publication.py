@@ -149,3 +149,31 @@ def test_service_worker_versionne_et_hors_ligne(client):
     db.session.commit()
     sw2 = client.get(f'/a/{p.slug}/sw.js').get_data(as_text=True)
     assert sw1 != sw2
+
+
+def test_generation_en_fond_termine_le_projet(app, monkeypatch):
+    import app.routes.project as rp
+    p = creer_projet(deploye=False)
+    code = p.code_genere
+    pid = p.id
+    p.statut = 'en_generation'
+    db.session.commit()
+    monkeypatch.setattr(rp, 'generate_project_code', lambda *a, **k: {'statut': 'pret', 'code': code})
+    rp._generer_en_fond(app, pid, 'prompt', 'mistral', None)
+    db.session.expire_all()
+    assert Project.query.get(pid).statut == 'pret'
+
+
+def test_generation_en_fond_qui_plante_passe_en_erreur(app, monkeypatch):
+    import app.routes.project as rp
+    p = creer_projet(deploye=False)
+    pid = p.id
+    p.statut = 'en_generation'
+    db.session.commit()
+
+    def boom(*a, **k):
+        raise RuntimeError('panne')
+    monkeypatch.setattr(rp, 'generate_project_code', boom)
+    rp._generer_en_fond(app, pid, 'prompt', 'mistral', None)
+    db.session.expire_all()
+    assert Project.query.get(pid).statut == 'erreur'

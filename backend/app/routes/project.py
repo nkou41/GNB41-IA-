@@ -232,6 +232,34 @@ def list_projects(workspace_id):
     return jsonify([p.to_dict() for p in projects])
 
 
+def _generer_en_fond(app, project_id, prompt, provider, mode):
+    with app.app_context():
+        try:
+            project = Project.query.get(project_id)
+            if project:
+                _run_generation(project, prompt, provider, mode=mode)
+        except Exception as e:
+            db.session.rollback()
+            app.logger.exception('Génération en fond impossible pour %s: %s', project_id, e)
+            try:
+                project = Project.query.get(project_id)
+                if project:
+                    project.statut = 'erreur'
+                    project.erreur_message = "La génération a échoué. Relancez-la."
+                    db.session.commit()
+            except Exception:
+                db.session.rollback()
+        finally:
+            db.session.remove()
+
+
+def _lancer_en_fond(project_id, prompt, provider, mode):
+    import threading
+    from flask import current_app
+    app = current_app._get_current_object()
+    threading.Thread(target=_generer_en_fond, args=(app, project_id, prompt, provider, mode), daemon=True).start()
+
+
 @project_bp.route('/workspace/<workspace_id>', methods=['POST'])
 @login_required
 @limiter.limit('20 per hour')
@@ -262,6 +290,12 @@ def create_project(workspace_id):
     project = Project(workspace_id=workspace_id, nom=nom, prompt_initial=prompt_initial, statut='en_generation')
     db.session.add(project)
     db.session.commit()
+
+    if data.get('async'):
+        log_activity(workspace_id, current_user.id, 'project_created', nom)
+        db.session.commit()
+        _lancer_en_fond(project.id, prompt_initial, provider, mode)
+        return jsonify(project.to_dict()), 202
 
     project = _run_generation(project, prompt_initial, provider, mode=mode)
     log_activity(workspace_id, current_user.id, 'project_created', nom)
