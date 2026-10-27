@@ -92,6 +92,8 @@ export const api = {
   createProject: (workspaceId: string, nom: string, prompt_initial: string, provider: string = 'claude', mode?: string) =>
     request(`/projects/workspace/${workspaceId}`, { method: 'POST', body: JSON.stringify({ nom, prompt_initial, provider, mode }) }),
   getProject: (projectId: string) => request(`/projects/${projectId}`),
+  createProjectAsync: (workspaceId: string, promptInitial: string, provider: string, mode?: string) =>
+    request(`/projects/workspace/${workspaceId}`, { method: 'POST', body: JSON.stringify({ nom: '', prompt_initial: promptInitial, provider, mode, async: true }) }),
   regenerateProject: (projectId: string, prompt: string, provider?: string, mode?: string) =>
     request(`/projects/${projectId}/regenerate`, { method: 'POST', body: JSON.stringify({ prompt, provider, mode }) }),
   listVersions: (projectId: string) => request(`/projects/${projectId}/versions`),

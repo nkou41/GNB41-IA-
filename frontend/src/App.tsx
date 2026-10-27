@@ -1351,11 +1351,25 @@ function App() {
         targetWorkspace = await api.createWorkspace('Mes projets');
         setWorkspaces([targetWorkspace]);
       }
-      const project = await api.createProject(targetWorkspace.id, '', quickPrompt, quickProvider, agentMode === 'auto' ? undefined : agentMode);
+      const project: any = await api.createProjectAsync(targetWorkspace.id, quickPrompt, quickProvider, agentMode === 'auto' ? undefined : agentMode);
       trackEvent('project_created', { provider: quickProvider });
       setQuickPrompt('');
       setActiveWorkspace(targetWorkspace);
       setActiveProject(project);
+      if (project.statut === 'en_generation') {
+        (async () => {
+          for (let i = 0; i < 525; i++) {
+            await new Promise((r) => setTimeout(r, 4000));
+            try {
+              const maj: any = await api.getProject(project.id);
+              if (maj.statut !== 'en_generation') {
+                setActiveProject((cur: any) => (cur && cur.id === project.id ? maj : cur));
+                break;
+              }
+            } catch {}
+          }
+        })();
+      }
     } catch (err: any) {
       alert(`Erreur: ${err.message}`);
     } finally {
