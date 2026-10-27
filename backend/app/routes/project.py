@@ -227,6 +227,8 @@ def list_projects(workspace_id):
     if not _check_access(workspace_id):
         return jsonify({'error': 'Non autorisé'}), 403
     projects = Project.query.filter_by(workspace_id=workspace_id).all()
+    for p in projects:
+        _reparer_si_bloque(p)
     return jsonify([p.to_dict() for p in projects])
 
 

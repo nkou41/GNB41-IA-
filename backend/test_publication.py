@@ -122,3 +122,16 @@ def test_projet_bloque_en_generation_passe_en_erreur(app):
     db.session.commit()
     _reparer_si_bloque(recent)
     assert recent.statut == 'en_generation'
+
+
+def test_liste_repare_les_projets_bloques(app):
+    from datetime import datetime, timedelta
+    from app.routes.project import _reparer_si_bloque
+    p = creer_projet(deploye=False)
+    p.statut = 'en_generation'
+    p.updated_at = datetime.utcnow() - timedelta(minutes=30)
+    db.session.commit()
+    projets = Project.query.filter_by(workspace_id=p.workspace_id).all()
+    for x in projets:
+        _reparer_si_bloque(x)
+    assert Project.query.get(p.id).statut == 'erreur'
