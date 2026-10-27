@@ -267,12 +267,22 @@ def create_project(workspace_id):
     return jsonify(project.to_dict()), 201
 
 
+def _reparer_si_bloque(project):
+    from datetime import datetime, timedelta
+    if (project.statut == 'en_generation' and project.updated_at
+            and datetime.utcnow() - project.updated_at > timedelta(minutes=10)):
+        project.statut = 'erreur'
+        project.erreur_message = "La génération a été interrompue (connexion coupée ou serveur redémarré). Relancez-la."
+        db.session.commit()
+
+
 @project_bp.route('/<project_id>', methods=['GET'])
 @login_required
 def get_project(project_id):
     project = Project.query.get_or_404(project_id)
     if not _check_access(project.workspace_id):
         return jsonify({'error': 'Non autorisé'}), 403
+    _reparer_si_bloque(project)
     return jsonify(project.to_dict())
 
 

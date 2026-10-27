@@ -106,3 +106,19 @@ def test_app_sans_couleur_dans_le_css(client):
     assert client.get(f'/a/{p.slug}/manifest.json').get_json()['theme_color'] == '#4361ee'
     assert client.get(f'/a/{p.slug}/icon.svg').status_code == 200
     assert client.get(f'/a/{p.slug}/og.png').status_code == 200
+
+
+def test_projet_bloque_en_generation_passe_en_erreur(app):
+    from datetime import datetime, timedelta
+    from app.routes.project import _reparer_si_bloque
+    p = creer_projet(deploye=False)
+    p.statut = 'en_generation'
+    p.updated_at = datetime.utcnow() - timedelta(minutes=30)
+    db.session.commit()
+    _reparer_si_bloque(p)
+    assert p.statut == 'erreur'
+    recent = creer_projet(deploye=False)
+    recent.statut = 'en_generation'
+    db.session.commit()
+    _reparer_si_bloque(recent)
+    assert recent.statut == 'en_generation'
